@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<strings>
+    <string id="30000">OK</string>
+    <string id="30001">Přihlášení proběhlo v pořádku</string>
+    <string id="30002">Začátek zápasu v</string>
+    <string id="30003">Stav</string>
+    <string id="30004">INFO</string>
+    <string id="30005">Žádné streamy nejsou dostupné</string>
+
+    <string id="31000">Tipsport Účet</string>
+    <string id="31001">Uživatelské jméno</string>
+    <string id="31002">Heslo</string>
+    <string id="31003">Ověřit přihlášení</string>
+    <string id="31004">Chybové hlášky</string>
+    <string id="31005">Odesílat anonymní chybové hlášení</string>
+
+    <string id="32000">Chyba</string>
+    <string id="32001">Zkontrolujte internetové připojení</string>
+    <string id="32002">Přihlášení selhalo. Zkontrolujte uživatelské jméno/heslo v nastavení</string>
+    <string id="32003">Nepovedlo se získat informace o videu</string>
+    <string id="32004">Nepovedlo se zpracovat informace o videu</string>
+    <string id="32005">Nepodporované informace o videu</string>
+    <string id="32006">Nepovedlo se získat scriptSessionId</string>
+    <string id="32007">Nepovedlo se získat StreamNumber</string>
+    <string id="32008">Neznámá chyba, prosíme o zaslání chybového hlášení</string>
+    <string id="32009">Anonymní chybové hlášení bylo odesláno</string>
+</strings>

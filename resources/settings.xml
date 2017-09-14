@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings>
+    <category  label="31000">
+        <setting id="username" type="text" label="31001" default=""/>
+	    <setting id="password" type="text" option="hidden" label="31002" default=""/>
+        <setting type="sep"/>
+        <setting id="check_login" type="action" label="31003" action="RunPlugin(plugin://plugin.video.tipsport.elh/?mode=check_login)" option="close"/>
+    </category >
+    <category label="31004">
+        <setting id="send_crash_reports" type="bool" label="31005" default="true"/>
+    </category>
+</settings>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<strings>
+	<string id="30000">OK</string>
+    <string id="30001">Login successful</string>
+    <string id="30002">Match start at</string>
+    <string id="30003">Score</string>
+    <string id="30004">INFO</string>
+    <string id="30005">No streams are available</string>
+
+    <string id="31000">Tipsport Account</string>
+    <string id="31001">Username</string>
+    <string id="31002">Password</string>
+    <string id="31003">Check login</string>
+    <string id="31004">Crash reports</string>
+    <string id="31005">Send anonymous crash logs</string>
+
+    <string id="32000">Error</string>
+    <string id="32001">Check internet connection</string>
+    <string id="32002">Login failed. Check username/password in settings</string>
+    <string id="32003">Unable to get stream metadata</string>
+    <string id="32004">Unable to parse stream metadata</string>
+    <string id="32005">Unsupported format of stream metadata</string>
+    <string id="32006">Unable to detect scriptSessionId</string>
+    <string id="32007">Unable to get StreamNumber</string>
+    <string id="32008">Unknown error, please send us crash log</string>
+    <string id="32009">Anonymous crash log was send</string>
+</strings>
