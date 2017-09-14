@@ -54,7 +54,10 @@ class Tipsport:
                    'fPrint': generate_random_number(10),
                    'userName': self.username,
                    'password': self.password}
-        self.session.post('https://www.tipsport.cz/LoginAction.do', payload)  # actual login
+        try:
+            self.session.post('https://www.tipsport.cz/LoginAction.do', payload)  # actual login
+        except Exception as e:
+            raise e.__class__   # remove tipsport account credentials from traceback
         self.check_login()
 
     def check_login(self):
