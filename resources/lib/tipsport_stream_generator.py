@@ -142,8 +142,7 @@ scoreOffer=\"(?P<score>.*?)\".*', response.content.decode('unicode-escape'))
                 if re.search('value:"?(.*?)"?}', response.content.decode('unicode-escape')).group(1).lower() == 'null':
                     raise UnableGetStreamMetadataException()
                 url = re.search('(rtmp.*?)"',
-                                response.content.decode('unicode-escape')).group(1).replace('\\u003d', '=')
-                # TODO: change to r'\u003d' ?
+                                response.content.decode('unicode-escape')).group(1).replace(r'\u003d', '=')
                 return parse_stream_dwr_response('"RTMP_URL":"{url}"'.format(url=url))
             else:
                 response_url = re.search('value:"(.*?)\"', response.text)
