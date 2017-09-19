@@ -88,14 +88,14 @@ class Tipsport:
             response = self.session.post(dwr_script, payload)
             response.encoding = 'utf-8'
             matches_iter = re.finditer('.*\
-abbrName=\"(?P<name>.*?)\".*\
-competition=\"(?P<competition>.*?)\".*\
-dateStartAsHHMM=\"(?P<start_time>.*?)\".*\
+abbrName="(?P<name>.*?)".*\
+competition="(?P<competition>.*?)".*\
+dateStartAsHHMM="(?P<start_time>.*?)".*\
 notStarted=(?P<not_started>.*?);.*\
-sport=\"(?P<sport>.*?)\".*\
-status=\"(?P<status>.*?)\".*\
-url=\"(?P<url>.*?)\".*\n.*\
-scoreOffer=\"(?P<score>.*?)\".*', response.content.decode('unicode-escape'))
+sport="(?P<sport>.*?)".*\
+status="(?P<status>.*?)".*\
+url="(?P<url>.*?)".*\n.*\
+scoreOffer="(?P<score>.*?)".*', response.content.decode('unicode-escape'))
             matches = [Match(match.group('name'),
                              match.group('competition'),
                              match.group('sport'),
@@ -145,7 +145,7 @@ scoreOffer=\"(?P<score>.*?)\".*', response.content.decode('unicode-escape'))
                                 response.content.decode('unicode-escape')).group(1).replace(r'\u003d', '=')
                 return parse_stream_dwr_response('"RTMP_URL":"{url}"'.format(url=url))
             else:
-                response_url = re.search('value:"(.*?)\"', response.text)
+                response_url = re.search('value:"(.*?)"', response.text)
                 url = response_url.group(1)
                 response = self.session.get(url)
                 stream = parse_stream_dwr_response(response.text)
@@ -165,17 +165,17 @@ def parse_stream_dwr_response(response_text):
     response_text = str(urllib.unquote(response_text))
     if '<smil>' in response_text:
         try:
-            url = (re.search('meta base=\"(.*?)\"', response_text)).group(1)
-            playpath = (re.search('video src=\"(.*?)\"', response_text)).group(1)
+            url = (re.search('meta base="(.*?)"', response_text)).group(1)
+            playpath = (re.search('video src="(.*?)"', response_text)).group(1)
             app = (url.split(':80/'))[1]
         except (AttributeError, IndexError):
             raise UnableParseStreamMetadataException()
     elif '<data>' in response_text:
         try:
             response_text = response_text.replace('&amp;', '&')
-            url = (re.search('url=\"(.*?)\"', response_text)).group(1)
-            auth = (re.search('auth=\"(.*)\"', response_text)).group(1)
-            stream = (re.search('stream=\"(.*)\"', response_text)).group(1)
+            url = (re.search('url="(.*?)"', response_text)).group(1)
+            auth = (re.search('auth="(.*)"', response_text)).group(1)
+            stream = (re.search('stream="(.*)"', response_text)).group(1)
             app = url.split('/')[1]
             url = 'rtmp://' + url
             playpath = '{app}/{stream}?auth={auth}'.format(app=app, stream=stream, auth=auth)
@@ -193,7 +193,7 @@ def parse_stream_dwr_response(response_text):
             raise UnableParseStreamMetadataException()
     elif 'rtmpUrl' in response_text:
         try:
-            url = (re.search('\"rtmpUrl\":\"(.*?)\"', response_text)).group(1)
+            url = (re.search('"rtmpUrl":"(.*?)"', response_text)).group(1)
             app = (url.split('/'))[3]
             playpath = app + '/' + (url.split(app + '/'))[1]
             url = (url.split(app + '/'))[0] + app
@@ -201,7 +201,7 @@ def parse_stream_dwr_response(response_text):
             raise UnableParseStreamMetadataException()
     elif 'RTMP_URL' in response_text:
         try:
-            url = (re.search('\"RTMP_URL\":\"(.*?)\"', response_text)).group(1)
+            url = (re.search('"RTMP_URL":"(.*?)"', response_text)).group(1)
             playpath = (url.split('/'))[-1]
             url = url.replace('/' + playpath, '')
             tokens = url.split('/')
