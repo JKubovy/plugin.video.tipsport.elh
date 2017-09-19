@@ -2,6 +2,7 @@ import re
 import random
 import requests
 import urllib
+from datetime import datetime, timedelta
 from tipsport_exceptions import *
 
 
@@ -17,6 +18,13 @@ class Match:
         self.status = status
         self.started = True if not_started == 'false' else False
         self.score = score
+
+    def is_stream_enabled(self):
+        hours_before_start = 1
+        now = datetime.now()
+        match_time = datetime.strptime(self.start_time, '%H:%M')
+        time_to_start = match_time - now
+        return time_to_start.seconds < timedelta(hours=hours_before_start).seconds
 
 
 class Stream:

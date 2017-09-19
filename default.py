@@ -39,11 +39,16 @@ def play_video(title, icon, link, media_type='Video'):
     xbmc.Player().play(item=link, listitem=list_item)
 
 
+def show_notification(heading_string,  message_string, icon):
+    """Show Kodi notification with given strings"""
+    xbmcgui.Dialog().notification(heading_string, message_string, icon)
+
+
 def show_localized_notification(kodi_helper, heading_string_id, message_string_id, icon=xbmcgui.NOTIFICATION_ERROR):
     """Show Kodi notification with given string ids"""
-    xbmcgui.Dialog().notification(kodi_helper.get_local_string(heading_string_id),
-                                  kodi_helper.get_local_string(message_string_id),
-                                  icon)
+    show_notification(kodi_helper.get_local_string(heading_string_id),
+                      kodi_helper.get_local_string(message_string_id),
+                      icon)
 
 
 def show_available_elh_matches(kodi_helper, tipsport):
@@ -53,10 +58,15 @@ def show_available_elh_matches(kodi_helper, tipsport):
     if len(matches) == 0:
         show_localized_notification(kodi_helper, 30004, 30005, xbmcgui.NOTIFICATION_INFO)
     for match in matches:
-        url = kodi_helper.build_url({'mode': 'play',
-                                     'url': match.url,
-                                     'name': match.name.encode('utf-8'),
-                                     'start_time': match.start_time})
+        if match.is_stream_enabled():
+            url = kodi_helper.build_url({'mode': 'play',
+                                         'url': match.url,
+                                         'name': match.name.encode('utf-8'),
+                                         'start_time': match.start_time})
+        else:
+            url = kodi_helper.build_url({'mode': 'notification',
+                                         'title': match.name.encode('utf-8'),
+                                         'message': kodi_helper.get_local_string(30008)})
         if match.started:
             plot = '\n{text}: {score:<20}{status}'.format(text=kodi_helper.get_local_string(30003),
                                                           score=match.score,
@@ -83,6 +93,8 @@ def main():
             stream = tipsport.get_stream(kodi_helper.get_arg('url'))
             title = '{name} ({time})'.format(name=kodi_helper.get_arg('name'), time=kodi_helper.get_arg('start_time'))
             play_video(title, kodi_helper.icon, stream.get_rtmp_link())
+        elif mode == 'notification':
+            show_notification(kodi_helper.get_arg('title'), kodi_helper.get_arg('message'), xbmcgui.NOTIFICATION_INFO)
         elif mode == 'check_login':
             tipsport.login()
             show_localized_notification(kodi_helper, 30000, 30001, xbmcgui.NOTIFICATION_INFO)
