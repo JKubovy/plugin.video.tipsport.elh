@@ -129,6 +129,8 @@ def main():
         show_localized_notification(kodi_helper, 32000, 32006)
     except UnableGetStreamNumberException:
         show_localized_notification(kodi_helper, 32000, 32007)
+    except StreamHasNotStarted:
+        show_localized_notification(kodi_helper, 30004, 30008, xbmcgui.NOTIFICATION_INFO)
     except Exception as e:
         if send_crash_report(kodi_helper, e):
             show_localized_notification(kodi_helper, 32000, 32009)

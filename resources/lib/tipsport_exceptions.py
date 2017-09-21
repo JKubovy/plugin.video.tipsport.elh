@@ -36,3 +36,8 @@ class UnableDetectScriptSessionIdException(TpgException):
 class UnableGetStreamNumberException(TpgException):
     def __init__(self, message='Unable to get StreamNumber'):
         super(UnableGetStreamNumberException, self).__init__(message)
+
+
+class StreamHasNotStarted(TpgException):
+    def __init__(self, message='Stream has not been started yet'):
+        super(StreamHasNotStarted, self).__init__(message)

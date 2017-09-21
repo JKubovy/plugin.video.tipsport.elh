@@ -32,9 +32,13 @@ class Match:
             match_time = datetime.strptime(self.start_time, '%H:%M')
         except TypeError:
             match_time = datetime(*(time.strptime(self.start_time, '%H:%M')[0:6]))
+        match_time = datetime.now().replace(hour=match_time.hour, minute=match_time.minute, second=0, microsecond=0)
         # Bug in Python 2.7 ( https://bugs.python.org/issue27400 ) -> workaround
         time_to_start = match_time - now
-        return time_to_start.seconds < timedelta(minutes=self.minutes_enable_before_start).seconds
+        if time_to_start.days < 0:
+            return True
+        else:
+            return time_to_start.seconds < timedelta(minutes=self.minutes_enable_before_start).seconds
 
 
 class RTMPStream:
@@ -129,7 +133,7 @@ scoreOffer="(?P<score>.*?)".*', response.content.decode('unicode-escape'))
                 minutes_enable_before_start = 60
             elif competition_name == 'SK_TIPSPORT':
                 icon_name = 'sk_tipsport_logo.png'
-                minutes_enable_before_start = 60
+                minutes_enable_before_start = 15
             else:
                 icon_name = None
                 minutes_enable_before_start = 60
@@ -158,6 +162,8 @@ scoreOffer="(?P<score>.*?)".*', response.content.decode('unicode-escape'))
             raise UnableGetStreamMetadataException()
         next_hop = next_hop.group(1)
         next_page = self.session.get(next_hop)
+        if 'm3u8' not in next_page.text:
+            raise StreamHasNotStarted()
         playlists = [playlist for playlist in next_page.text.split('\n') if not playlist.startswith('#')]
         playlists = [playlist for playlist in playlists if playlist != '']
         best_playlist_relative_link = playlists[-1]
