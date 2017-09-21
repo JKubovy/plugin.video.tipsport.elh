@@ -12,6 +12,7 @@ class KodiHelper:
         self.args = urlparse.parse_qs(args)
         self.base_url = base_url
         self.plugin_name = 'plugin.video.tipsport.elh'
+        self.media_path = xbmc.translatePath('special://home/addons/{0}/resources/media/'.format(self.plugin_name))
         self.version = addon.getAddonInfo('version')
         self.username = addon.getSetting('username')
         self.password = addon.getSetting('password')
@@ -35,3 +36,6 @@ class KodiHelper:
         if isinstance(localized_string, unicode):
             localized_string = localized_string.encode('utf-8')
         return localized_string
+
+    def get_media(self, name):
+        return self.media_path + name

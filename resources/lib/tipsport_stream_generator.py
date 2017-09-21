@@ -2,14 +2,19 @@ import re
 import random
 import requests
 import urllib
+import time
 from datetime import datetime, timedelta
 from tipsport_exceptions import *
+
+COMPETITIONS = {'CZ_TIPSPORT': [u'Tipsport extraliga', u'CZ Tipsport extraliga'],
+                'SK_TIPSPORT': [u'Slovensk\u00E1 Tipsport liga', u'Tipsport Liga']}
 
 
 class Match:
     """Class represents one match with additional information"""
 
-    def __init__(self, name, competition, sport, url, start_time, status, not_started, score):
+    def __init__(self, name, competition, sport, url, start_time, status, not_started, score, icon_name,
+                 minutes_enable_before_start):
         self.name = name
         self.competition = competition
         self.sport = sport
@@ -18,17 +23,22 @@ class Match:
         self.status = status
         self.started = True if not_started == 'false' else False
         self.score = score
+        self.icon_name = icon_name
+        self.minutes_enable_before_start = minutes_enable_before_start
 
     def is_stream_enabled(self):
-        hours_before_start = 1
         now = datetime.now()
-        match_time = datetime.strptime(self.start_time, '%H:%M')
+        try:
+            match_time = datetime.strptime(self.start_time, '%H:%M')
+        except TypeError:
+            match_time = datetime(*(time.strptime(self.start_time, '%H:%M')[0:6]))
+        # Bug in Python 2.7 ( https://bugs.python.org/issue27400 ) -> workaround
         time_to_start = match_time - now
-        return time_to_start.seconds < timedelta(hours=hours_before_start).seconds
+        return time_to_start.seconds < timedelta(minutes=self.minutes_enable_before_start).seconds
 
 
-class Stream:
-    """Class represent one stream and store metadata used to generate stream link"""
+class RTMPStream:
+    """Class represent one stream and store metadata used to generate rtmp stream link"""
 
     def __init__(self, rtmp_url, playpath, app, live_stream):
         self.rtmp_url = rtmp_url
@@ -36,11 +46,21 @@ class Stream:
         self.app = app
         self.live_stream = live_stream
 
-    def get_rtmp_link(self):
+    def get_link(self):
         return '{rtmp_url} playpath={playpath} app={app}{live}'.format(rtmp_url=self.rtmp_url,
                                                                        playpath=self.playpath,
                                                                        app=self.app,
                                                                        live=' live=true' if self.live_stream else '')
+
+
+class HLSStream:
+    """Class represent one stream and store metadata used to generate hls stream link"""
+
+    def __init__(self, url):
+        self.url = url.strip()
+
+    def get_link(self):
+        return self.url
 
 
 class Tipsport:
@@ -75,7 +95,7 @@ class Tipsport:
             raise LoginFailedException()
         self.logged_in = True
 
-    def get_list_elh_matches(self):
+    def get_list_elh_matches(self, competition_name):
         """Get list of all available ELH matches on https://www.tipsport.cz/tv"""
         try:
             page = self.session.get('https://www.tipsport.cz/tv')
@@ -96,7 +116,7 @@ class Tipsport:
             response = self.session.post(dwr_script, payload)
             response.encoding = 'utf-8'
             matches_iter = re.finditer('.*\
-abbrName="(?P<name>.*?)".*\
+abbrName="(?P<name>.*?) ?".*\
 competition="(?P<competition>.*?)".*\
 dateStartAsHHMM="(?P<start_time>.*?)".*\
 notStarted=(?P<not_started>.*?);.*\
@@ -104,24 +124,48 @@ sport="(?P<sport>.*?)".*\
 status="(?P<status>.*?)".*\
 url="(?P<url>.*?)".*\n.*\
 scoreOffer="(?P<score>.*?)".*', response.content.decode('unicode-escape'))
-            matches = [Match(match.group('name'),
-                             match.group('competition'),
-                             match.group('sport'),
-                             match.group('url'),
-                             match.group('start_time'),
-                             match.group('status'),
-                             match.group('not_started'),
-                             match.group('score'))
-                       for match in matches_iter if match.group(2) in ['Tipsport extraliga', 'CZ Tipsport extraliga']]
+            if competition_name == 'CZ_TIPSPORT':
+                icon_name = 'cz_tipsport_logo.png'
+                minutes_enable_before_start = 60
+            elif competition_name == 'SK_TIPSPORT':
+                icon_name = 'sk_tipsport_logo.png'
+                minutes_enable_before_start = 60
+            else:
+                icon_name = None
+                minutes_enable_before_start = 60
+            matches = [Match(name=match.group('name'),
+                             competition=match.group('competition'),
+                             sport=match.group('sport'),
+                             url=match.group('url'),
+                             start_time=match.group('start_time'),
+                             status=match.group('status'),
+                             not_started=match.group('not_started'),
+                             score=match.group('score'),
+                             icon_name=icon_name,
+                             minutes_enable_before_start=minutes_enable_before_start)
+                       for match in matches_iter if match.group(2) in COMPETITIONS[competition_name]]
             return matches
         except requests.exceptions.ConnectionError:
             raise NoInternetConnectionsException()
 
-    def get_stream(self, relative_url):
-        """Get instance of Stream class from given relative link"""
+    def get_hls_stream(self, page):
+        next_hop = re.search('<iframe src="(.*?embed.*?)"', page)
+        if not next_hop:
+            raise UnableGetStreamMetadataException()
+        page = self.session.get(next_hop.group(1))
+        next_hop = re.search('"hls": "(.*?)"', page.text)
+        if not next_hop:
+            raise UnableGetStreamMetadataException()
+        next_hop = next_hop.group(1)
+        next_page = self.session.get(next_hop)
+        playlists = [playlist for playlist in next_page.text.split('\n') if not playlist.startswith('#')]
+        playlists = [playlist for playlist in playlists if playlist != '']
+        best_playlist_relative_link = playlists[-1]
+        best_playlist = next_hop.replace('playlist.m3u8', best_playlist_relative_link)
+        return HLSStream(best_playlist)
+
+    def get_rtmp_stream(self, relative_url):
         try:
-            if not self.logged_in:
-                self.login()
             stream_url = 'https://www.tipsport.cz/live' + relative_url
             page = self.session.get(stream_url)
             token = get_token(page.text)
@@ -139,11 +183,13 @@ scoreOffer="(?P<score>.*?)".*', response.content.decode('unicode-escape'))
                        'c0-param1': 'string:SMIL',
                        'batchId': 9}
             response = self.session.post(dwr_script, payload)
-            response_type = re.search('type:"(.*?)"', response.text).group(1)
+            search_type = re.search('type:"(.*?)"', response.text)
+            response_type = search_type.group(1) if search_type else 'ERROR'
             if response_type == 'ERROR':  # use 'string:RTMP' instead of 'string:SMIL'
                 payload['c0-param1'] = 'string:RTMP'
                 response = self.session.post(dwr_script, payload)
-            response_type = re.search('type:"(.*?)"', response.text).group(1)
+            search_type = re.search('type:"(.*?)"', response.text)
+            response_type = search_type.group(1) if search_type else 'ERROR'
             if response_type == 'ERROR':  # StreamDWR.getStream.dwr not working on this specific stream
                 raise UnableGetStreamMetadataException()
             if response_type == 'RTMP_URL':
@@ -158,6 +204,27 @@ scoreOffer="(?P<score>.*?)".*', response.content.decode('unicode-escape'))
                 response = self.session.get(url)
                 stream = parse_stream_dwr_response(response.text)
                 return stream
+        except requests.exceptions.ConnectionError:
+            raise NoInternetConnectionsException()
+
+    def get_stream(self, relative_url):
+        """Get instance of Stream class from given relative link"""
+        try:
+            if not self.logged_in:
+                self.login()
+            stream_url = 'https://www.tipsport.cz/live' + relative_url
+            page = self.session.get(stream_url)
+            stream_type = re.search('<div id="contentStream" class="(.*?)".*?>', page.text)
+            if stream_type:
+                stream_type = stream_type.group(1)
+                if stream_type == 'LIVEBOX_ELH':
+                    return self.get_rtmp_stream(relative_url)
+                elif stream_type == 'MANUAL':
+                    return self.get_hls_stream(page.text)
+                else:
+                    raise UnableGetStreamMetadataException()
+            else:
+                raise UnableGetStreamMetadataException()
         except requests.exceptions.ConnectionError:
             raise NoInternetConnectionsException()
 
@@ -218,7 +285,7 @@ def parse_stream_dwr_response(response_text):
             raise UnableParseStreamMetadataException()
     else:
         raise UnsupportedFormatStreamMetadataException()
-    return Stream(url, playpath, app, True)
+    return RTMPStream(url, playpath, app, True)
 
 
 def get_token(page):

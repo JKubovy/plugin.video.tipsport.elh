@@ -51,10 +51,10 @@ def show_localized_notification(kodi_helper, heading_string_id, message_string_i
                       icon)
 
 
-def show_available_elh_matches(kodi_helper, tipsport):
+def show_available_elh_matches(kodi_helper, tipsport, competitions):
     """Generate list of available elh matches in Kodi"""
     xbmcplugin.setContent(kodi_helper.plugin_handle, 'movies')
-    matches = tipsport.get_list_elh_matches()
+    matches = tipsport.get_list_elh_matches(competitions)
     if len(matches) == 0:
         show_localized_notification(kodi_helper, 30004, 30005, xbmcgui.NOTIFICATION_INFO)
     for match in matches:
@@ -74,9 +74,24 @@ def show_available_elh_matches(kodi_helper, tipsport):
                                                           if xbmc.getLanguage(xbmc.ISO_639_1) == 'cs' else '')
         else:
             plot = '{text} {time}'.format(text=kodi_helper.get_local_string(30002), time=match.start_time)
-        list_item = xbmcgui.ListItem(match.name, iconImage=kodi_helper.icon)
+        list_item = xbmcgui.ListItem(match.name,
+                                     iconImage=kodi_helper.icon if not match.icon_name
+                                     else kodi_helper.get_media(match.icon_name))
         list_item.setInfo(type='Video', infoLabels={'Plot': plot})
         xbmcplugin.addDirectoryItem(handle=kodi_helper.plugin_handle, url=url, listitem=list_item)
+    xbmcplugin.endOfDirectory(kodi_helper.plugin_handle)
+
+
+def show_available_competitions(kodi_helper):
+    xbmcplugin.setContent(kodi_helper.plugin_handle, 'movies')
+    list_item = xbmcgui.ListItem('CZ Tipsport Extraliga', iconImage=kodi_helper.get_media('cz_tipsport_logo.png'))
+    list_item.setInfo(type='Video', infoLabels={'Plot': kodi_helper.get_local_string(30006)})
+    url = kodi_helper.build_url({'mode': 'folder', 'foldername': 'CZ_TIPSPORT'})
+    xbmcplugin.addDirectoryItem(handle=kodi_helper.plugin_handle, url=url, listitem=list_item, isFolder=True)
+    list_item = xbmcgui.ListItem('SK Tipsport Liga', iconImage=kodi_helper.get_media('sk_tipsport_logo.png'))
+    list_item.setInfo(type='Video', infoLabels={'Plot': kodi_helper.get_local_string(30007)})
+    url = kodi_helper.build_url({'mode': 'folder', 'foldername': 'SK_TIPSPORT'})
+    xbmcplugin.addDirectoryItem(handle=kodi_helper.plugin_handle, url=url, listitem=list_item, isFolder=True)
     xbmcplugin.endOfDirectory(kodi_helper.plugin_handle)
 
 
@@ -88,11 +103,13 @@ def main():
     mode = kodi_helper.get_arg('mode')
     try:
         if mode is None:
-            show_available_elh_matches(kodi_helper, tipsport)
+            show_available_competitions(kodi_helper)
+        elif mode == 'folder':
+            show_available_elh_matches(kodi_helper, tipsport, kodi_helper.get_arg('foldername'))
         elif mode == 'play':
             stream = tipsport.get_stream(kodi_helper.get_arg('url'))
             title = '{name} ({time})'.format(name=kodi_helper.get_arg('name'), time=kodi_helper.get_arg('start_time'))
-            play_video(title, kodi_helper.icon, stream.get_rtmp_link())
+            play_video(title, kodi_helper.icon, stream.get_link())
         elif mode == 'notification':
             show_notification(kodi_helper.get_arg('title'), kodi_helper.get_arg('message'), xbmcgui.NOTIFICATION_INFO)
         elif mode == 'check_login':
