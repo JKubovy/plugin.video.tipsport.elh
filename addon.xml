@@ -13,8 +13,8 @@
         <platform>all</platform>
         <summary lang="en">Tipsport ELH</summary>
         <summary lang="cs">Tipsport ELH</summary>
-        <description lang="en">Watch ELH streams from Tipsport.cz. It is necessary to fill account in setting.</description>
-        <description lang="cs">Sledujte ELH zápasy ze stránky Tipsport.cz. Pro správné fungování je třeba přidat účet v nastavení.</description>
+        <description lang="en">Watch ELH streams from Tipsport.cz. It is necessary to fill account in setting. If you like this addon and want to thank me, you can donate on paypal.me/JanKubovy</description>
+        <description lang="cs">Sledujte ELH zápasy ze stránky Tipsport.cz. Pro správné fungování je třeba přidat účet v nastavení. V případě, že se vám addon líbí a chcete mi nějak poděkovat, můžete mi poslat libovolnou částku na paypal.me/JanKubovy</description>
         <disclaimer lang="en">Addon were made for study purposes only and author does not guide anyone to disrespect Tipsport.cz site rules</disclaimer>
         <disclaimer lang="cs">Addon byl vytvořen pro studijní účely a autor nenabáda nikoho k nerespektování pravidel stránky Tipsport.cz</disclaimer>
         <assets>
