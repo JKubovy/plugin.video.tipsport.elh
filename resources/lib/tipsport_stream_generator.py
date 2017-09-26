@@ -30,10 +30,9 @@ class Match:
         now = datetime.now()
         try:
             match_time = datetime.strptime(self.start_time, '%H:%M')
-        except TypeError:
+        except TypeError:   # Bug in Python 2.7 ( https://bugs.python.org/issue27400 ) -> workaround
             match_time = datetime(*(time.strptime(self.start_time, '%H:%M')[0:6]))
         match_time = datetime.now().replace(hour=match_time.hour, minute=match_time.minute, second=0, microsecond=0)
-        # Bug in Python 2.7 ( https://bugs.python.org/issue27400 ) -> workaround
         time_to_start = match_time - now
         if time_to_start.days < 0:
             return True
@@ -80,7 +79,10 @@ class Tipsport:
         """Login to https://www.tipsport.cz site with given credentials"""
         agent = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 " \
                 "Safari/537.36 OPR/42.0.2393.137 "
-        self.session.get('https://www.tipsport.cz/')  # load cookies
+        try:
+            self.session.get('https://www.tipsport.cz/')  # load cookies
+        except requests.ConnectionError, requests.ConnectTimeout:
+            raise NoInternetConnectionsException()
         payload = {'agent': agent,
                    'requestURI': '/',
                    'fPrint': generate_random_number(10),
@@ -94,7 +96,10 @@ class Tipsport:
 
     def check_login(self):
         """Check if login to https://www.tipsport.cz was successful"""
-        page = self.session.get('https://www.tipsport.cz/')
+        try:
+            page = self.session.get('https://www.tipsport.cz/')
+        except requests.ConnectionError, requests.ConnectTimeout:
+            raise NoInternetConnectionsException()
         if 'LogoutAction.do' not in page.text:
             raise LoginFailedException()
         self.logged_in = True
@@ -149,26 +154,29 @@ scoreOffer="(?P<score>.*?)".*', response.content.decode('unicode-escape'))
                              minutes_enable_before_start=minutes_enable_before_start)
                        for match in matches_iter if match.group(2) in COMPETITIONS[competition_name]]
             return matches
-        except requests.exceptions.ConnectionError:
+        except requests.ConnectionError, requests.ConnectTimeout:
             raise NoInternetConnectionsException()
 
     def get_hls_stream(self, page):
-        next_hop = re.search('<iframe src="(.*?embed.*?)"', page)
-        if not next_hop:
-            raise UnableGetStreamMetadataException()
-        page = self.session.get(next_hop.group(1))
-        next_hop = re.search('"hls": "(.*?)"', page.text)
-        if not next_hop:
-            raise UnableGetStreamMetadataException()
-        next_hop = next_hop.group(1)
-        next_page = self.session.get(next_hop)
-        if 'm3u8' not in next_page.text:
-            raise StreamHasNotStarted()
-        playlists = [playlist for playlist in next_page.text.split('\n') if not playlist.startswith('#')]
-        playlists = [playlist for playlist in playlists if playlist != '']
-        best_playlist_relative_link = playlists[-1]
-        best_playlist = next_hop.replace('playlist.m3u8', best_playlist_relative_link)
-        return HLSStream(best_playlist)
+        try:
+            next_hop = re.search('<iframe src="(.*?embed.*?)"', page)
+            if not next_hop:
+                raise UnableGetStreamMetadataException()
+            page = self.session.get(next_hop.group(1))
+            next_hop = re.search('"hls": "(.*?)"', page.text)
+            if not next_hop:
+                raise UnableGetStreamMetadataException()
+            next_hop = next_hop.group(1)
+            next_page = self.session.get(next_hop)
+            if 'm3u8' not in next_page.text:
+                raise StreamHasNotStarted()
+            playlists = [playlist for playlist in next_page.text.split('\n') if not playlist.startswith('#')]
+            playlists = [playlist for playlist in playlists if playlist != '']
+            best_playlist_relative_link = playlists[-1]
+            best_playlist = next_hop.replace('playlist.m3u8', best_playlist_relative_link)
+            return HLSStream(best_playlist)
+        except requests.ConnectTimeout, requests.ConnectionError:
+            raise NoInternetConnectionsException()
 
     def get_rtmp_stream(self, relative_url):
         try:
@@ -210,7 +218,7 @@ scoreOffer="(?P<score>.*?)".*', response.content.decode('unicode-escape'))
                 response = self.session.get(url)
                 stream = parse_stream_dwr_response(response.text)
                 return stream
-        except requests.exceptions.ConnectionError:
+        except requests.ConnectionError, requests.ConnectTimeout:
             raise NoInternetConnectionsException()
 
     def get_stream(self, relative_url):
@@ -231,7 +239,7 @@ scoreOffer="(?P<score>.*?)".*', response.content.decode('unicode-escape'))
                     raise UnableGetStreamMetadataException()
             else:
                 raise UnableGetStreamMetadataException()
-        except requests.exceptions.ConnectionError:
+        except requests.ConnectionError, requests.ConnectTimeout:
             raise NoInternetConnectionsException()
 
 
