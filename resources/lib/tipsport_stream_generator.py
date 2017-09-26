@@ -1,3 +1,4 @@
+# coding=utf-8
 import re
 import random
 import requests
@@ -8,6 +9,8 @@ from tipsport_exceptions import *
 
 COMPETITIONS = {'CZ_TIPSPORT': [u'Tipsport extraliga', u'CZ Tipsport extraliga'],
                 'SK_TIPSPORT': [u'Slovensk\u00E1 Tipsport liga', u'Tipsport Liga']}
+FULL_NAMES = {u'H.Králové': u'Hradec Králové',
+              u'M.Boleslav': u'Mladá Boleslav'}
 
 
 class Match:
@@ -15,7 +18,7 @@ class Match:
 
     def __init__(self, name, competition, sport, url, start_time, status, not_started, score, icon_name,
                  minutes_enable_before_start):
-        self.name = name
+        self.name = self.parse_name(name)
         self.competition = competition
         self.sport = sport
         self.url = url
@@ -35,6 +38,23 @@ class Match:
             return True
         else:
             return time_to_start.seconds < timedelta(minutes=self.minutes_enable_before_start).seconds
+
+    @staticmethod
+    def get_full_name_if_possible(name):
+        if name in FULL_NAMES:
+            return FULL_NAMES[name]
+        else:
+            return name
+
+    @staticmethod
+    def parse_name(name):
+        try:
+            (first_team, second_team) = name.split('-')
+            first_team = Match.get_full_name_if_possible(first_team)
+            second_team = Match.get_full_name_if_possible(second_team)
+            return '{first_team} - {second_team}'.format(first_team=first_team, second_team=second_team)
+        except ValueError:
+            return name
 
 
 class RTMPStream:
