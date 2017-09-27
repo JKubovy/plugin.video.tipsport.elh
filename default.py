@@ -74,9 +74,9 @@ def show_available_elh_matches(kodi_helper, tipsport, competitions):
                                                           if xbmc.getLanguage(xbmc.ISO_639_1) == 'cs' else '')
         else:
             plot = '{text} {time}'.format(text=kodi_helper.get_local_string(30002), time=match.start_time)
-        list_item = xbmcgui.ListItem(match.name,
-                                     iconImage=kodi_helper.icon if not match.icon_name
-                                     else kodi_helper.get_media(match.icon_name))
+        icon = kodi_helper.get_media(match.icon_name) if match.icon_name else kodi_helper.icon
+        list_item = xbmcgui.ListItem(match.name, iconImage=icon)
+        list_item.setThumbnailImage(icon)
         list_item.setInfo(type='Video', infoLabels={'Plot': plot})
         xbmcplugin.addDirectoryItem(handle=kodi_helper.plugin_handle, url=url, listitem=list_item)
     xbmcplugin.endOfDirectory(kodi_helper.plugin_handle)
@@ -84,11 +84,15 @@ def show_available_elh_matches(kodi_helper, tipsport, competitions):
 
 def show_available_competitions(kodi_helper):
     xbmcplugin.setContent(kodi_helper.plugin_handle, 'movies')
-    list_item = xbmcgui.ListItem('CZ Tipsport Extraliga', iconImage=kodi_helper.get_media('cz_tipsport_logo.png'))
+    icon = kodi_helper.get_media('cz_tipsport_logo.png')
+    list_item = xbmcgui.ListItem('CZ Tipsport Extraliga', iconImage=icon)
+    list_item.setThumbnailImage(icon)
     list_item.setInfo(type='Video', infoLabels={'Plot': kodi_helper.get_local_string(30006)})
     url = kodi_helper.build_url({'mode': 'folder', 'foldername': 'CZ_TIPSPORT'})
     xbmcplugin.addDirectoryItem(handle=kodi_helper.plugin_handle, url=url, listitem=list_item, isFolder=True)
-    list_item = xbmcgui.ListItem('SK Tipsport Liga', iconImage=kodi_helper.get_media('sk_tipsport_logo.png'))
+    icon = kodi_helper.get_media('sk_tipsport_logo.png')
+    list_item = xbmcgui.ListItem('SK Tipsport Liga', iconImage=icon)
+    list_item.setThumbnailImage(icon)
     list_item.setInfo(type='Video', infoLabels={'Plot': kodi_helper.get_local_string(30007)})
     url = kodi_helper.build_url({'mode': 'folder', 'foldername': 'SK_TIPSPORT'})
     xbmcplugin.addDirectoryItem(handle=kodi_helper.plugin_handle, url=url, listitem=list_item, isFolder=True)
