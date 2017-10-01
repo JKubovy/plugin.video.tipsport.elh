@@ -135,6 +135,8 @@ def main():
         show_localized_notification(kodi_helper, 32000, 32007)
     except StreamHasNotStarted:
         show_localized_notification(kodi_helper, 30004, 30008, xbmcgui.NOTIFICATION_INFO)
+    except TipsportMsg as e:
+        xbmcgui.Dialog().ok(kodi_helper.get_local_string(32000), e.message)
     except Exception as e:
         if send_crash_report(kodi_helper, e):
             show_localized_notification(kodi_helper, 32000, 32009)

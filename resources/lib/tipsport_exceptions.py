@@ -41,3 +41,8 @@ class UnableGetStreamNumberException(TpgException):
 class StreamHasNotStarted(TpgException):
     def __init__(self, message='Stream has not been started yet'):
         super(StreamHasNotStarted, self).__init__(message)
+
+
+class TipsportMsg(TpgException):
+    def __init__(self, message="Try stream on Tipsport page for further details"):
+        super(TipsportMsg, self).__init__(message)

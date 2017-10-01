@@ -28,10 +28,7 @@ class Match:
 
     def is_stream_enabled(self):
         now = datetime.now()
-        try:
-            match_time = datetime.strptime(self.start_time, '%H:%M')
-        except TypeError:   # Bug in Python 2.7 ( https://bugs.python.org/issue27400 ) -> workaround
-            match_time = datetime(*(time.strptime(self.start_time, '%H:%M')[0:6]))
+        match_time = datetime(*(time.strptime(self.start_time, '%H:%M')[0:6]))
         match_time = datetime.now().replace(hour=match_time.hour, minute=match_time.minute, second=0, microsecond=0)
         time_to_start = match_time - now
         if time_to_start.days < 0:
@@ -228,12 +225,17 @@ scoreOffer="(?P<score>.*?)".*', response.content.decode('unicode-escape'))
                 self.login()
             stream_url = 'https://www.tipsport.cz/live' + relative_url
             page = self.session.get(stream_url)
-            stream_type = re.search('<div id="contentStream" class="(.*?)".*?>', page.text)
-            if stream_type:
-                stream_type = stream_type.group(1)
-                if stream_type == 'LIVEBOX_ELH':
+            stream_content = re.search(
+                '<div id="contentStream" class="(?P<class>.*?)" data-stream="(?P<stream_type>.*?)">', page.text)
+            if stream_content:
+                stream_type = stream_content.group('stream_type')
+                stream_class = stream_content.group('class')
+                if stream_class != stream_type:
+                    message = re.search('<div class="msg"><p>(.*?)</p>', page.text)
+                    raise TipsportMsg(message.group(1)) if message else TipsportMsg()
+                if stream_class == 'LIVEBOX_ELH':
                     return self.get_rtmp_stream(relative_url)
-                elif stream_type == 'MANUAL':
+                elif stream_class == 'MANUAL':
                     return self.get_hls_stream(page.text)
                 else:
                     raise UnableGetStreamMetadataException()
@@ -241,6 +243,8 @@ scoreOffer="(?P<score>.*?)".*', response.content.decode('unicode-escape'))
                 raise UnableGetStreamMetadataException()
         except requests.ConnectionError, requests.ConnectTimeout:
             raise NoInternetConnectionsException()
+        except AttributeError:
+            raise UnableGetStreamMetadataException()
 
 
 def generate_random_number(length):
