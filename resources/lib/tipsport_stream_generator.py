@@ -226,16 +226,16 @@ scoreOffer="(?P<score>.*?)".*', response.content.decode('unicode-escape'))
             stream_url = 'https://www.tipsport.cz/live' + relative_url
             page = self.session.get(stream_url)
             stream_content = re.search(
-                '<div id="contentStream" class="(?P<class>.*?)" data-stream="(?P<stream_type>.*?)">', page.text)
+                '<div id="contentStream" class="(?P<stream_class>.*?)" data-stream="(?P<stream_type>.*?)">', page.text)
             if stream_content:
                 stream_type = stream_content.group('stream_type')
-                stream_class = stream_content.group('class')
+                stream_class = stream_content.group('stream_class')
                 if stream_class != stream_type:
-                    message = re.search('<div class="msg"><p>(.*?)</p>', page.text)
-                    raise TipsportMsg(message.group(1)) if message else TipsportMsg()
-                if stream_class == 'LIVEBOX_ELH':
+                    message = self.get_alert_message(page.text)
+                    raise TipsportMsg(message) if message else TipsportMsg()
+                if stream_type == 'LIVEBOX_ELH':
                     return self.get_rtmp_stream(relative_url)
-                elif stream_class == 'MANUAL':
+                elif stream_type == 'MANUAL':
                     return self.get_hls_stream(page.text)
                 else:
                     raise UnableGetStreamMetadataException()
@@ -243,8 +243,14 @@ scoreOffer="(?P<score>.*?)".*', response.content.decode('unicode-escape'))
                 raise UnableGetStreamMetadataException()
         except requests.ConnectionError, requests.ConnectTimeout:
             raise NoInternetConnectionsException()
-        except AttributeError:
-            raise UnableGetStreamMetadataException()
+
+    @staticmethod
+    def get_alert_message(page_text):
+        section = re.findall('<div id="contentStream.*?</div>', page_text, re.DOTALL)
+        if len(section) == 0:
+            return None
+        alert_message = re.search('<div class="msg">(<p>)?(?P<msg>.*?)(</p>)?</div>', section[0])
+        return alert_message.group('msg') if alert_message else None
 
 
 def generate_random_number(length):
