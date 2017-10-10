@@ -10,7 +10,8 @@ from tipsport_exceptions import *
 COMPETITIONS = {'CZ_TIPSPORT': [u'Tipsport extraliga', u'CZ Tipsport extraliga'],
                 'SK_TIPSPORT': [u'Slovensk\u00E1 Tipsport liga', u'Tipsport Liga']}
 FULL_NAMES = {u'H.Králové': u'Hradec Králové',
-              u'M.Boleslav': u'Mladá Boleslav'}
+              u'M.Boleslav': u'Mladá Boleslav',
+              u'SR 20': u'Slovensko 20'}
 
 
 class Match:
@@ -52,7 +53,7 @@ class Match:
             (first_team, second_team) = name.split('-')
             first_team = Match.get_full_name_if_possible(first_team)
             second_team = Match.get_full_name_if_possible(second_team)
-            return '{first_team} - {second_team}'.format(first_team=first_team, second_team=second_team)
+            return u'{first_team} - {second_team}'.format(first_team=first_team, second_team=second_team)
         except ValueError:
             return name
 
