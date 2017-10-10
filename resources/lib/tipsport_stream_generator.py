@@ -4,6 +4,7 @@ import requests
 import urllib
 import time
 from datetime import datetime, timedelta
+import _strptime
 from tipsport_exceptions import *
 
 COMPETITIONS = {'CZ_TIPSPORT': [u'Tipsport extraliga', u'CZ Tipsport extraliga'],
