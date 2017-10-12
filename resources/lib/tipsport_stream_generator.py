@@ -5,6 +5,7 @@ import requests
 import urllib
 import time
 from datetime import datetime, timedelta
+import _strptime
 from tipsport_exceptions import *
 
 COMPETITIONS = {'CZ_TIPSPORT': [u'Tipsport extraliga', u'CZ Tipsport extraliga'],
@@ -138,7 +139,6 @@ class Tipsport:
                        'c0-param0': 'number:0',
                        'c0-param1': 'number:0',
                        'c0-param2': 'boolean:true',
-                       'c0-param3': 'string:COMPETITION_SPORT',
                        'batchId': 2}
             response = self.session.post(dwr_script, payload)
             response.encoding = 'utf-8'
