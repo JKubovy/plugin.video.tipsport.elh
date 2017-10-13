@@ -12,7 +12,10 @@ COMPETITIONS = {'CZ_TIPSPORT': [u'Tipsport extraliga', u'CZ Tipsport extraliga']
                 'SK_TIPSPORT': [u'Slovensk\u00E1 Tipsport liga', u'Tipsport Liga']}
 FULL_NAMES = {u'H.Králové': u'Hradec Králové',
               u'M.Boleslav': u'Mladá Boleslav',
-              u'SR 20': u'Slovensko 20'}
+              u'SR 20': u'Slovensko 20',
+              u'L.Mikuláš': u'Liptovský Mikuláš',
+              u'N.Zámky': u'Nové Zámky',
+              u'HK Poprad': u'Poprad'}
 
 
 class Match:
