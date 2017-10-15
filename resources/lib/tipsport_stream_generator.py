@@ -127,8 +127,8 @@ class Tipsport:
             raise LoginFailedException()
         self.logged_in = True
 
-    def get_list_elh_matches(self, competition_name):
-        """Get list of all available ELH matches on https://www.tipsport.cz/tv"""
+    def get_matches_both_menu_response(self):
+        """Get dwr respond with all matches today"""
         try:
             page = self.session.get('https://www.tipsport.cz/tv')
             token = get_token(page.text)
@@ -146,7 +146,14 @@ class Tipsport:
                        'batchId': 2}
             response = self.session.post(dwr_script, payload)
             response.encoding = 'utf-8'
-            matches_iter = re.finditer('.*\
+            return response
+        except requests.ConnectionError, requests.ConnectTimeout:
+            raise NoInternetConnectionsException()
+
+    def get_list_elh_matches(self, competition_name):
+        """Get list of all available ELH matches on https://www.tipsport.cz/tv"""
+        response = self.get_matches_both_menu_response()
+        matches_iter = re.finditer('.*\
 abbrName="(?P<name>.*?) ?".*\
 competition="(?P<competition>.*?)".*\
 dateStartAsHHMM="(?P<start_time>.*?)".*\
@@ -155,29 +162,27 @@ sport="(?P<sport>.*?)".*\
 status="(?P<status>.*?)".*\
 url="(?P<url>.*?)".*\n.*\
 scoreOffer="(?P<score>.*?)".*', response.content.decode('unicode-escape'))
-            if competition_name == 'CZ_TIPSPORT':
-                icon_name = 'cz_tipsport_logo.png'
-                minutes_enable_before_start = 60
-            elif competition_name == 'SK_TIPSPORT':
-                icon_name = 'sk_tipsport_logo.png'
-                minutes_enable_before_start = 15
-            else:
-                icon_name = None
-                minutes_enable_before_start = 60
-            matches = [Match(name=match.group('name'),
-                             competition=match.group('competition'),
-                             sport=match.group('sport'),
-                             url=match.group('url'),
-                             start_time=match.group('start_time'),
-                             status=match.group('status'),
-                             not_started=match.group('not_started'),
-                             score=match.group('score'),
-                             icon_name=icon_name,
-                             minutes_enable_before_start=minutes_enable_before_start)
-                       for match in matches_iter if match.group(2) in COMPETITIONS[competition_name]]
-            return matches
-        except requests.ConnectionError, requests.ConnectTimeout:
-            raise NoInternetConnectionsException()
+        if competition_name == 'CZ_TIPSPORT':
+            icon_name = 'cz_tipsport_logo.png'
+            minutes_enable_before_start = 60
+        elif competition_name == 'SK_TIPSPORT':
+            icon_name = 'sk_tipsport_logo.png'
+            minutes_enable_before_start = 15
+        else:
+            icon_name = None
+            minutes_enable_before_start = 60
+        matches = [Match(name=match.group('name'),
+                         competition=match.group('competition'),
+                         sport=match.group('sport'),
+                         url=match.group('url'),
+                         start_time=match.group('start_time'),
+                         status=match.group('status'),
+                         not_started=match.group('not_started'),
+                         score=match.group('score'),
+                         icon_name=icon_name,
+                         minutes_enable_before_start=minutes_enable_before_start)
+                   for match in matches_iter if match.group(2) in COMPETITIONS[competition_name]]
+        return matches
 
     def get_hls_stream(self, page):
         try:
