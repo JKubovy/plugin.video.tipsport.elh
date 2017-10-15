@@ -184,7 +184,36 @@ scoreOffer="(?P<score>.*?)".*', response.content.decode('unicode-escape'))
                    for match in matches_iter if match.group(2) in COMPETITIONS[competition_name]]
         return matches
 
-    def get_hls_stream(self, page):
+    def get_response_dwr_get_stream(self, relative_url, c0_param1):
+        try:
+            stream_url = 'https://www.tipsport.cz/live' + relative_url
+            page = self.session.get(stream_url)
+            token = get_token(page.text)
+            relative_url = relative_url.split('#')[0]
+            dwr_script = 'https://www.tipsport.cz/dwr/call/plaincall/StreamDWR.getStream.dwr'
+            payload = {'callCount': 1,
+                       'page': relative_url,
+                       'httpSessionId': '',
+                       'scriptSessionId': token,
+                       'c0-scriptName': 'StreamDWR',
+                       'c0-methodName': 'getStream',
+                       'c0-id': 0,
+                       'c0-param0': 'number:{0}'.format(get_stream_number(relative_url)),
+                       'c0-param1': 'string:{0}'.format(c0_param1),
+                       'batchId': 9}
+            response = self.session.post(dwr_script, payload)
+            return response
+        except requests.ConnectTimeout, requests.ConnectionError:
+            raise NoInternetConnectionsException()
+
+    def get_hls_stream_from_dwr(self, relative_url):
+        response = self.get_response_dwr_get_stream(relative_url, 'HLS')
+        url = re.search('value:"(.*?)"', response.text)
+        if not url:
+            raise UnableGetStreamMetadataException()
+        return self.get_hls_stream(url.group(1))
+
+    def get_hls_stream_from_page(self, page):
         try:
             next_hop = re.search('<iframe src="(.*?embed.*?)"', page)
             if not next_hop:
@@ -193,42 +222,30 @@ scoreOffer="(?P<score>.*?)".*', response.content.decode('unicode-escape'))
             next_hop = re.search('"hls": "(.*?)"', page.text)
             if not next_hop:
                 raise UnableGetStreamMetadataException()
-            next_hop = next_hop.group(1)
-            next_page = self.session.get(next_hop)
+            return self.get_hls_stream(next_hop.group(1))
+        except requests.ConnectTimeout, requests.ConnectionError:
+            raise NoInternetConnectionsException()
+
+    def get_hls_stream(self, url):
+        try:
+            next_page = self.session.get(url)
             if 'm3u8' not in next_page.text:
                 raise StreamHasNotStarted()
             playlists = [playlist for playlist in next_page.text.split('\n') if not playlist.startswith('#')]
             playlists = [playlist for playlist in playlists if playlist != '']
             best_playlist_relative_link = playlists[-1]
-            best_playlist = next_hop.replace('playlist.m3u8', best_playlist_relative_link)
+            best_playlist = url.replace('playlist.m3u8', best_playlist_relative_link)
             return HLSStream(best_playlist)
         except requests.ConnectTimeout, requests.ConnectionError:
             raise NoInternetConnectionsException()
 
     def get_rtmp_stream(self, relative_url):
         try:
-            stream_url = 'https://www.tipsport.cz/live' + relative_url
-            page = self.session.get(stream_url)
-            token = get_token(page.text)
-            relative_url = relative_url.split('#')[0]
-            dwr_script = 'https://www.tipsport.cz/dwr/call/plaincall/StreamDWR.getStream.dwr'
-            number = 'number:' + get_stream_number(relative_url)
-            payload = {'callCount': 1,
-                       'page': relative_url,
-                       'httpSessionId': '',
-                       'scriptSessionId': token,
-                       'c0-scriptName': 'StreamDWR',
-                       'c0-methodName': 'getStream',
-                       'c0-id': 0,
-                       'c0-param0': number,
-                       'c0-param1': 'string:SMIL',
-                       'batchId': 9}
-            response = self.session.post(dwr_script, payload)
+            response = self.get_response_dwr_get_stream(relative_url, 'SMIL')
             search_type = re.search('type:"(.*?)"', response.text)
             response_type = search_type.group(1) if search_type else 'ERROR'
             if response_type == 'ERROR':  # use 'string:RTMP' instead of 'string:SMIL'
-                payload['c0-param1'] = 'string:RTMP'
-                response = self.session.post(dwr_script, payload)
+                response = self.get_response_dwr_get_stream(relative_url, 'RTMP')
             search_type = re.search('type:"(.*?)"', response.text)
             response_type = search_type.group(1) if search_type else 'ERROR'
             if response_type == 'ERROR':  # StreamDWR.getStream.dwr not working on this specific stream
@@ -266,7 +283,9 @@ scoreOffer="(?P<score>.*?)".*', response.content.decode('unicode-escape'))
                 if stream_type == 'LIVEBOX_ELH':
                     return self.get_rtmp_stream(relative_url)
                 elif stream_type == 'MANUAL':
-                    return self.get_hls_stream(page.text)
+                    return self.get_hls_stream_from_page(page.text)
+                elif stream_type == 'HUSTE':
+                    return self.get_hls_stream_from_dwr(relative_url)
                 else:
                     raise UnableGetStreamMetadataException()
             else:
