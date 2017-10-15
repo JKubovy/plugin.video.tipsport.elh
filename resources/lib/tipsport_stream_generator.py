@@ -15,7 +15,8 @@ FULL_NAMES = {u'H.Králové': u'Hradec Králové',
               u'SR 20': u'Slovensko 20',
               u'L.Mikuláš': u'Liptovský Mikuláš',
               u'N.Zámky': u'Nové Zámky',
-              u'HK Poprad': u'Poprad'}
+              u'HK Poprad': u'Poprad',
+              u'B.Bystrica': u'Banská Bystrica'}
 
 
 class Match:
