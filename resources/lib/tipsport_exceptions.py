@@ -43,6 +43,11 @@ class StreamHasNotStarted(TpgException):
         super(StreamHasNotStarted, self).__init__(message)
 
 
+class UnknownException(TpgException):
+    def __init__(self, message='Unknown Exception'):
+        super(UnknownException, self).__init__(message)
+
+
 class TipsportMsg(TpgException):
     def __init__(self, message="Try stream on Tipsport page for further details"):
         super(TipsportMsg, self).__init__(message)
