@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<strings>
+    <string id="30000">אישור</string>
+    <string id="30001">התחברות מוצלחת</string>
+    <string id="30002">תחילת המשחק ב-</string>
+    <string id="30003">ציון</string>
+    <string id="30004">מידע</string>
+    <string id="30005">היום אין הזרמה זמינה</string>
+    <string id="30006">Czech Extraliga היא הליגה הגבוהה ביותר בהוקי קרח בצ\'כיה.</string>
+    <string id="30007">Slovak Extraliga היא הליגה ברמה הגבוהה ביותר של הוקי קרח בסלובקיה.</string>
+    <string id="30008">ההזרמה עדיין לא התחילה</string>
+
+    <string id="31000">חשבון Tipsport</string>
+    <string id="31001">שם משתמש</string>
+    <string id="31002">סיסמה</string>
+    <string id="31003">בדוק כניסה</string>
+    <string id="31004">דוחות קריסה</string>
+    <string id="31005">שלח יומני קריסה אנונימיים</string>
+
+    <string id="32000">שגיאה</string>
+    <string id="32001">בדוק את חיבור האינטרנט</string>
+    <string id="32002">ההתחברות נכשלה. בדוק שם משתמש / סיסמה בהגדרות</string>
+    <string id="32003">לא ניתן לקבל מידע-מטא של ההזרמה</string>
+    <string id="32004">לא ניתן לנתח את מידע-מטא של ההזרמה</string>
+    <string id="32005">פורמט לא נתמך של מידע-מטא של ההזרמה</string>
+    <string id="32006">לא ניתן לזהות script Session Id</string>
+    <string id="32007">לא ניתן לקבל את Stream Number</string>
+    <string id="32008">שגיאה לא ידועה, שלח לנו יומן קריסה</string>
+    <string id="32009">יומן קריסה אנונימי נשלח</string>
+</strings>
