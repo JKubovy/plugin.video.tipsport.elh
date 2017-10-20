@@ -2,6 +2,7 @@ import urllib
 import urlparse
 import xbmc
 import xbmcaddon
+from tipsport_stream_generator import Quality
 
 
 class KodiHelper:
@@ -16,8 +17,13 @@ class KodiHelper:
         self.version = addon.getAddonInfo('version')
         self.username = addon.getSetting('username')
         self.password = addon.getSetting('password')
+        self.quality = self.__get_quality(addon)
         self.send_crash_reports = True if addon.getSetting('send_crash_reports') == 'true' else False
         self.icon = addon.getAddonInfo('icon')
+
+    @staticmethod
+    def __get_quality(addon):
+        return Quality.parse(addon.getSetting('quality'))
 
     @staticmethod
     def get_addon():

@@ -1,13 +1,13 @@
 import unittest
 import sys
 import os
-sys.path.append(os.path.join(sys.path[0], 'plugin.video.tipsport.elh', 'resources', 'lib'))
+sys.path.append(os.path.join(sys.path[0], '..', 'resources', 'lib'))
 import tipsport_stream_generator as tpg
 
 
 class TestTipsportStreamGenerator(unittest.TestCase):
     def test_get_matches_both_menu_response(self):
-        client = tpg.Tipsport('none', 'none')
+        client = tpg.Tipsport('none', 'none', 0)
         response = client.get_matches_both_menu_response()
         content = response.content.decode('unicode-escape')
         self.assertFalse('_remoteHandleException' in content)
@@ -16,4 +16,4 @@ class TestTipsportStreamGenerator(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(verbosity=2)

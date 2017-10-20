@@ -19,6 +19,22 @@ FULL_NAMES = {u'H.Králové': u'Hradec Králové',
               u'B.Bystrica': u'Banská Bystrica'}
 
 
+class Quality(object):
+    @staticmethod
+    def parse(str_quality):
+        if str_quality == '0':
+            return Quality.LOW
+        elif str_quality == '1':
+            return Quality.MID
+        elif str_quality == '2':
+            return Quality.HIGH
+        else:
+            raise UnknownException('Unknown quality')
+    LOW = 0
+    MID = 1
+    HIGH = 2
+
+
 class Match:
     """Class represents one match with additional information"""
 
@@ -92,11 +108,12 @@ class HLSStream:
 class Tipsport:
     """Class providing communication with Tipsport.cz site"""
 
-    def __init__(self, username, password):
+    def __init__(self, username, password, quality):
         self.session = requests.session()
         self.logged_in = False
         self.username = username
         self.password = password
+        self.quality = quality
 
     def login(self):
         """Login to https://www.tipsport.cz site with given credentials"""
@@ -226,6 +243,18 @@ scoreOffer="(?P<score>.*?)".*', response.content.decode('unicode-escape'))
         except requests.ConnectTimeout, requests.ConnectionError:
             raise NoInternetConnectionsException()
 
+    def __select_stream_by_quality(self, list_of_streams):
+        """List is ordered from the lowest to the best quality"""
+        if len(list_of_streams) <= 0:
+            raise UnableGetStreamMetadataException('List of streams by quality is empty')
+        if len(list_of_streams) <= self.quality:
+            return list_of_streams[self.quality]
+        else:
+            if self.quality in [Quality.LOW, Quality.MID]:
+                return list_of_streams[0]
+            else:
+                return list_of_streams[-1]
+
     def get_hls_stream(self, url):
         try:
             next_page = self.session.get(url)
@@ -233,9 +262,9 @@ scoreOffer="(?P<score>.*?)".*', response.content.decode('unicode-escape'))
                 raise StreamHasNotStarted()
             playlists = [playlist for playlist in next_page.text.split('\n') if not playlist.startswith('#')]
             playlists = [playlist for playlist in playlists if playlist != '']
-            best_playlist_relative_link = playlists[-1]
-            best_playlist = url.replace('playlist.m3u8', best_playlist_relative_link)
-            return HLSStream(best_playlist)
+            playlist_relative_link = self.__select_stream_by_quality(playlists)
+            playlist = url.replace('playlist.m3u8', playlist_relative_link)
+            return HLSStream(playlist)
         except requests.ConnectTimeout, requests.ConnectionError:
             raise NoInternetConnectionsException()
 
@@ -253,8 +282,11 @@ scoreOffer="(?P<score>.*?)".*', response.content.decode('unicode-escape'))
             if response_type == 'RTMP_URL':
                 if re.search('value:"?(.*?)"?}', response.content.decode('unicode-escape')).group(1).lower() == 'null':
                     raise UnableGetStreamMetadataException()
-                url = re.search('(rtmp.*?)"',
-                                response.content.decode('unicode-escape')).group(1).replace(r'\u003d', '=')
+                urls = re.findall('(rtmp.*?)"',
+                                  response.content.decode('unicode-escape'))
+                urls.reverse()
+                urls = [url.replace(r'\u003d', '=') for url in urls]
+                url = self.__select_stream_by_quality(urls)
                 return parse_stream_dwr_response('"RTMP_URL":"{url}"'.format(url=url))
             else:
                 response_url = re.search('value:"(.*?)"', response.text)
