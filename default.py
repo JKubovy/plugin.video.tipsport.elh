@@ -5,7 +5,7 @@ import xbmcgui
 import xbmcplugin
 import traceback
 import requests
-from resources.lib.tipsport_stream_generator import Tipsport, Quality
+from resources.lib.tipsport_stream_generator import Tipsport
 from resources.lib.tipsport_exceptions import *
 from resources.lib.kodi_helper import KodiHelper
 
