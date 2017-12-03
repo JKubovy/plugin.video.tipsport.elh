@@ -247,7 +247,7 @@ scoreOffer="(?P<score>.*?)".*', response.content.decode('unicode-escape'))
         """List is ordered from the lowest to the best quality"""
         if len(list_of_streams) <= 0:
             raise UnableGetStreamMetadataException('List of streams by quality is empty')
-        if len(list_of_streams) <= self.quality:
+        if len(list_of_streams) < self.quality:
             return list_of_streams[self.quality]
         else:
             if self.quality in [Quality.LOW, Quality.MID]:
