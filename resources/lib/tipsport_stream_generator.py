@@ -129,9 +129,12 @@ class Tipsport:
                    'userName': self.username,
                    'password': self.password}
         try:
-            self.session.post('https://www.tipsport.cz/LoginAction.do', payload)  # actual login
-        except Exception as e:
-            raise e.__class__   # remove tipsport account credentials from traceback
+            try:
+                self.session.post('https://www.tipsport.cz/LoginAction.do', payload)  # actual login
+            except Exception as e:
+                raise e.__class__   # remove tipsport account credentials from traceback
+        except requests.ConnectionError, requests.ConnectTimeout:
+            raise NoInternetConnectionsException()
         self.check_login()
 
     def check_login(self):
