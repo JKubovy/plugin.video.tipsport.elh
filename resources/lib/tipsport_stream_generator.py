@@ -133,7 +133,7 @@ class Tipsport:
                 self.session.post('https://www.tipsport.cz/LoginAction.do', payload)  # actual login
             except Exception as e:
                 raise e.__class__   # remove tipsport account credentials from traceback
-        except requests.ConnectionError, requests.ConnectTimeout:
+        except requests.ConnectionError, requests.Timeout:
             raise NoInternetConnectionsException()
         self.check_login()
 
