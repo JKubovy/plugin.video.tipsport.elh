@@ -1,6 +1,7 @@
 # coding=utf-8
 import re
 import random
+import json
 import requests
 import urllib
 import time
@@ -135,6 +136,9 @@ class Tipsport:
                 raise e.__class__   # remove tipsport account credentials from traceback
         except requests.ConnectionError, requests.Timeout:
             raise NoInternetConnectionsException()
+        self.session.headers['User-Agent'] = agent
+        token = self.session.cookies.get('JSESSIONID', 'value', domain='www.tipsport.cz')
+        self.session.headers['X-Auth-Token'] = token
         self.check_login()
 
     def check_login(self):
@@ -305,36 +309,55 @@ scoreOffer="(?P<score>.*?)".*', response.content.decode('unicode-escape'))
         try:
             if not self.logged_in:
                 self.login()
-            stream_url = 'https://www.tipsport.cz/live' + relative_url
-            page = self.session.get(stream_url)
-            stream_content = re.search(
-                '<div id="contentStream" class="(?P<stream_class>.*?)" data-stream="(?P<stream_type>.*?)">', page.text)
-            if stream_content:
-                stream_type = stream_content.group('stream_type')
-                stream_class = stream_content.group('stream_class')
-                if stream_class != stream_type:
-                    message = self.get_alert_message(page.text)
-                    raise TipsportMsg(message) if message else TipsportMsg()
-                if stream_type == 'LIVEBOX_ELH':
-                    return self.get_rtmp_stream(relative_url)
-                elif stream_type == 'MANUAL':
-                    return self.get_hls_stream_from_page(page.text)
-                elif stream_type == 'HUSTE':
-                    return self.get_hls_stream_from_dwr(relative_url)
-                else:
-                    raise UnableGetStreamMetadataException()
+            alert_text = self.get_alert_message()
+            if alert_text:
+                raise TipsportMsg(alert_text)
+            stream_source, stream_type = self.get_stream_source_and_type(relative_url)
+            if stream_source == 'LIVEBOX_ELH':
+                return self.get_rtmp_stream(relative_url)
+            elif stream_source == 'MANUAL':
+                stream_url = 'https://www.tipsport.cz/live' + relative_url
+                page = self.session.get(stream_url)
+                return self.get_hls_stream_from_page(page.text)
+            elif stream_source == 'HUSTE':
+                return self.get_hls_stream_from_dwr(relative_url)
             else:
                 raise UnableGetStreamMetadataException()
         except requests.ConnectionError, requests.ConnectTimeout:
             raise NoInternetConnectionsException()
 
-    @staticmethod
-    def get_alert_message(page_text):
-        section = re.findall('<div id="contentStream.*?</div>', page_text, re.DOTALL)
-        if len(section) == 0:
-            return None
-        alert_message = re.search('<div class="msg">(<p>)?(?P<msg>.*?)(</p>)?</div>', section[0])
-        return alert_message.group('msg') if alert_message else None
+    def get_alert_message(self):
+        """
+        Return any alert message from Tipsport (like bet request)
+        Return None if everything is OK
+        """
+        page = self.session.get('https://m.tipsport.cz/rest/articles/v1/tv/info')
+        try:
+            data = json.loads(page.text)
+            text = data['buttonDescription']
+            if text is None:
+                return None
+            else:
+                return text.split('.')[0] + '.'
+        except TypeError:
+            raise UnableGetStreamMetadataException()
+
+    def get_stream_source_and_type(self, relative_url):
+        """Get source and type of stream"""
+        stream_number = get_stream_number(relative_url)
+        page = self.session.get('https://m.tipsport.cz/rest/ver1/sports/matches/{stream_number}/stream'
+                                .format(stream_number=stream_number))
+        try:
+            data = json.loads(page.text)
+            if data['returnCode']['name'] == 'NOT_STARTED':
+                raise StreamHasNotStarted()
+            stream_source = data['source']
+            stream_type = data['type']
+            if stream_source is None or stream_type is None:
+                raise UnableGetStreamMetadataException()
+            return stream_source, stream_type
+        except (TypeError, KeyError):
+            raise UnableGetStreamMetadataException()
 
 
 def generate_random_number(length):

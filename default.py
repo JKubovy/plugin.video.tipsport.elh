@@ -103,7 +103,7 @@ def main():
     kodi_helper = KodiHelper(plugin_handle=int(sys.argv[1]),
                              args=sys.argv[2][1:],
                              base_url=sys.argv[0])
-    tipsport = Tipsport(kodi_helper.username, kodi_helper.password,kodi_helper.quality)
+    tipsport = Tipsport(kodi_helper.username, kodi_helper.password, kodi_helper.quality)
     mode = kodi_helper.get_arg('mode')
     try:
         if mode is None:
