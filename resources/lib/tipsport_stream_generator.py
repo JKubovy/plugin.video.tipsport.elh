@@ -434,8 +434,9 @@ def get_stream_number(relative_url):
     Example:
         /tenis-marterer-maximilian-petrovic-danilo/2768186 -> 2768186
     """
-    tokens = relative_url.split('/')
-    number = tokens[2]
+    base_url = relative_url.split('#')[0]
+    tokens = base_url.split('/')
+    number = tokens[-1]
     try:
         int(number)
     except ValueError:
