@@ -264,6 +264,7 @@ scoreOffer="(?P<score>.*?)".*', response.content.decode('unicode-escape'))
 
     def get_hls_stream(self, url):
         try:
+            url = url.replace('\\', '')
             next_page = self.session.get(url)
             if 'm3u8' not in next_page.text:
                 raise StreamHasNotStarted()
@@ -293,11 +294,13 @@ scoreOffer="(?P<score>.*?)".*', response.content.decode('unicode-escape'))
                                   response.content.decode('unicode-escape'))
                 urls.reverse()
                 urls = [url.replace(r'\u003d', '=') for url in urls]
+                urls = [url.replace('\\', '') for url in urls]
                 url = self.__select_stream_by_quality(urls)
                 return parse_stream_dwr_response('"RTMP_URL":"{url}"'.format(url=url))
             else:
                 response_url = re.search('value:"(.*?)"', response.text)
                 url = response_url.group(1)
+                url = url.replace('\\', '')
                 response = self.session.get(url)
                 stream = parse_stream_dwr_response(response.text)
                 return stream
