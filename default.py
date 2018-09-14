@@ -109,6 +109,7 @@ def main():
         if mode is None:
             show_available_competitions(kodi_helper)
         elif mode == 'folder':
+            tipsport.login()
             show_available_elh_matches(kodi_helper, tipsport, kodi_helper.get_arg('foldername'))
         elif mode == 'play':
             stream = tipsport.get_stream(kodi_helper.get_arg('url'))

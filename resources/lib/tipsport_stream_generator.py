@@ -9,8 +9,8 @@ from datetime import datetime, timedelta
 import _strptime
 from tipsport_exceptions import *
 
-COMPETITIONS = {'CZ_TIPSPORT': [u'Tipsport extraliga', u'CZ Tipsport extraliga'],
-                'SK_TIPSPORT': [u'Slovensk\u00E1 Tipsport liga', u'Tipsport Liga']}
+COMPETITIONS = {'CZ_TIPSPORT': [u'Česká Tipsport extraliga', u'Tipsport extraliga', u'CZ Tipsport extraliga'],
+                'SK_TIPSPORT': [u'Slovenská Tipsport liga', u'Slovensk\u00E1 Tipsport liga', u'Tipsport Liga']}
 FULL_NAMES = {u'H.Králové': u'Hradec Králové',
               u'M.Boleslav': u'Mladá Boleslav',
               u'SR 20': u'Slovensko 20',
@@ -154,21 +154,7 @@ class Tipsport:
     def get_matches_both_menu_response(self):
         """Get dwr respond with all matches today"""
         try:
-            page = self.session.get('https://www.tipsport.cz/tv')
-            token = get_token(page.text)
-            dwr_script = 'https://www.tipsport.cz/dwr/call/plaincall/LiveOdds2DWR.getMatchesBothMenu.dwr'
-            payload = {'callCount': 1,
-                       'page': '/tv',
-                       'httpSessionId': '',
-                       'scriptSessionId': token,
-                       'c0-scriptName': 'LiveOdds2DWR',
-                       'c0-methodName': 'getMatchesBothMenu',
-                       'c0-id': 0,
-                       'c0-param0': 'number:0',
-                       'c0-param1': 'number:0',
-                       'c0-param2': 'boolean:true',
-                       'batchId': 2}
-            response = self.session.post(dwr_script, payload)
+            response = self.session.get('https://m.tipsport.cz/rest/articles/v1/tv/program?day=0&articleId=')
             response.encoding = 'utf-8'
             return response
         except requests.ConnectionError, requests.ConnectTimeout:
@@ -177,15 +163,7 @@ class Tipsport:
     def get_list_elh_matches(self, competition_name):
         """Get list of all available ELH matches on https://www.tipsport.cz/tv"""
         response = self.get_matches_both_menu_response()
-        matches_iter = re.finditer('.*\
-abbrName="(?P<name>.*?) ?".*\
-competition="(?P<competition>.*?)".*\
-dateStartAsHHMM="(?P<start_time>.*?)".*\
-notStarted=(?P<not_started>.*?);.*\
-sport="(?P<sport>.*?)".*\
-status="(?P<status>.*?)".*\
-url="(?P<url>.*?)".*\n.*\
-scoreOffer="(?P<score>.*?)".*', response.content.decode('unicode-escape'))
+        data = json.loads(response.text)
         if competition_name == 'CZ_TIPSPORT':
             icon_name = 'cz_tipsport_logo.png'
             minutes_enable_before_start = 60
@@ -195,17 +173,22 @@ scoreOffer="(?P<score>.*?)".*', response.content.decode('unicode-escape'))
         else:
             icon_name = None
             minutes_enable_before_start = 60
-        matches = [Match(name=match.group('name'),
-                         competition=match.group('competition'),
-                         sport=match.group('sport'),
-                         url=match.group('url'),
-                         start_time=match.group('start_time'),
-                         status=match.group('status'),
-                         not_started=match.group('not_started'),
-                         score=match.group('score'),
-                         icon_name=icon_name,
-                         minutes_enable_before_start=minutes_enable_before_start)
-                   for match in matches_iter if match.group(2) in COMPETITIONS[competition_name]]
+        matches = []
+        for sport in data['program']:
+            if sport['id'] == 23:
+                for part in sport['matchesByTimespans']:
+                    for match in part:
+                        if match['competition'] in COMPETITIONS[competition_name]:
+                            matches.append(Match(name=match['name'],
+											     competition=match['competition'],
+											     sport=match['sport'],
+											     url=match['url'],
+											     start_time=match['matchStartTime'],
+											     status=match['score']['statusOffer'],
+											     not_started=not match['live'],
+											     score=match['score']['scoreOffer'],
+											     icon_name=icon_name,
+											     minutes_enable_before_start=minutes_enable_before_start))
         return matches
 
     def get_response_dwr_get_stream(self, relative_url, c0_param1):
