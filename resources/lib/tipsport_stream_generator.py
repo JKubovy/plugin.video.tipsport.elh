@@ -47,7 +47,7 @@ class Match:
         self.url = url
         self.start_time = start_time
         self.status = status
-        self.started = True if not_started == 'false' else False
+        self.started = True if not_started in ['false', False] else False
         self.score = score
         self.icon_name = icon_name
         self.minutes_enable_before_start = minutes_enable_before_start
@@ -290,6 +290,13 @@ class Tipsport:
         except requests.ConnectionError, requests.ConnectTimeout:
             raise NoInternetConnectionsException()
 
+    def decode_rtmp_url(self, url):
+        playpath = (url.split('/'))[-1]
+        url = url.replace('/' + playpath, '')
+        tokens = url.split('/')
+        app = '/'.join([tokens[-2], tokens[-1]])
+        return RTMPStream(url, playpath, app, True)
+
     def get_stream(self, relative_url):
         """Get instance of Stream class from given relative link"""
         try:
@@ -298,9 +305,9 @@ class Tipsport:
             alert_text = self.get_alert_message()
             if alert_text:
                 raise TipsportMsg(alert_text)
-            stream_source, stream_type = self.get_stream_source_and_type(relative_url)
+            stream_source, stream_type, url = self.get_stream_source_type_and_data(relative_url)
             if stream_source == 'LIVEBOX_ELH':
-                return self.get_rtmp_stream(relative_url)
+                return self.decode_rtmp_url(url)
             elif stream_source == 'MANUAL':
                 stream_url = 'https://www.tipsport.cz/live' + relative_url
                 page = self.session.get(stream_url)
@@ -328,20 +335,24 @@ class Tipsport:
         except TypeError:
             raise UnableGetStreamMetadataException()
 
-    def get_stream_source_and_type(self, relative_url):
+    def get_stream_source_type_and_data(self, relative_url):
         """Get source and type of stream"""
         stream_number = get_stream_number(relative_url)
-        page = self.session.get('https://m.tipsport.cz/rest/ver1/sports/matches/{stream_number}/stream'
-                                .format(stream_number=stream_number))
+        response = self.session.get('https://m.tipsport.cz/rest/offer/v2/live/matches/{stream_number}/stream?deviceType=DESKTOP&format=RTMP'
+                                     .format(stream_number=stream_number))
+        #page = self.session.get('https://m.tipsport.cz/rest/ver1/sports/matches/{stream_number}/stream'
+        #                        .format(stream_number=stream_number))
         try:
-            data = json.loads(page.text)
-            if data['returnCode']['name'] == 'NOT_STARTED':
-                raise StreamHasNotStarted()
+            data = json.loads(response.text)
+            if data['displayRules'] == None:
+                raise(TipsportMsg(data['data']))
+            #if data['returnCode']['name'] == 'NOT_STARTED':
+            #    raise StreamHasNotStarted()
             stream_source = data['source']
             stream_type = data['type']
             if stream_source is None or stream_type is None:
                 raise UnableGetStreamMetadataException()
-            return stream_source, stream_type
+            return stream_source, stream_type, data['data']
         except (TypeError, KeyError):
             raise UnableGetStreamMetadataException()
 
