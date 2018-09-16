@@ -313,7 +313,7 @@ class Tipsport:
                 page = self.session.get(stream_url)
                 return self.get_hls_stream_from_page(page.text)
             elif stream_source == 'HUSTE':
-                return self.get_hls_stream_from_dwr(relative_url)
+                return self.get_hls_stream(url)
             else:
                 raise UnableGetStreamMetadataException()
         except requests.ConnectionError, requests.ConnectTimeout:
