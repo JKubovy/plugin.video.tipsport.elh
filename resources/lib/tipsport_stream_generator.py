@@ -298,11 +298,14 @@ class Tipsport:
             raise NoInternetConnectionsException()
 
     def decode_rtmp_url(self, url):
-        playpath = (url.split('/'))[-1]
-        url = url.replace('/' + playpath, '')
-        tokens = url.split('/')
-        app = '/'.join([tokens[-2], tokens[-1]])
-        return RTMPStream(url, playpath, app, True)
+        try:
+            playpath = (url.split('/'))[-1]
+            url = url.replace('/' + playpath, '')
+            tokens = url.split('/')
+            app = '/'.join([tokens[-2], tokens[-1]])
+            return RTMPStream(url, playpath, app, True)
+        except IndexError:
+            raise UnableParseStreamMetadataException()
 
     def get_stream(self, relative_url):
         """Get instance of Stream class from given relative link"""
