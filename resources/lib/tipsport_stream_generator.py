@@ -317,7 +317,12 @@ class Tipsport:
                 raise TipsportMsg(alert_text)
             stream_source, stream_type, url = self.get_stream_source_type_and_data(relative_url)
             if stream_source == 'LIVEBOX_ELH':
-                return self.get_hls_stream(url, True)
+                if stream_type == 'RTMP':
+                    return self.decode_rtmp_url(url)
+                elif stream_type == 'HLS':
+                    return self.get_hls_stream(url, True)
+                else:
+                    raise UnableGetStreamMetadataException()
             elif stream_source == 'MANUAL':
                 stream_url = 'https://www.tipsport.cz/live' + relative_url
                 page = self.session.get(stream_url)
@@ -344,23 +349,34 @@ class Tipsport:
                 return text.split('.')[0] + '.'
         except TypeError:
             raise UnableGetStreamMetadataException()
+    
+    @staticmethod
+    def _parse_stream_info_response(response):
+        data = json.loads(response.text)
+        if data['displayRules'] == None:
+            raise(TipsportMsg(data['data']))
+        #if data['returnCode']['name'] == 'NOT_STARTED':
+        #    raise StreamHasNotStarted()
+        stream_source = data['source']
+        stream_type = data['type']
+        if stream_source is None or stream_type is None:
+            raise UnableGetStreamMetadataException()
+        return stream_source, stream_type, data['data']
 
     def get_stream_source_type_and_data(self, relative_url):
         """Get source and type of stream"""
         stream_number = get_stream_number(relative_url)
-        response = self.session.get('https://m.tipsport.cz/rest/offer/v2/live/matches/{stream_number}/stream?deviceType=DESKTOP&format=HLS'
-                                     .format(stream_number=stream_number))
+        foramt = 'HLS'
+        base_url = 'https://m.tipsport.cz/rest/offer/v2/live/matches/{stream_number}/stream?deviceType=DESKTOP'.format(stream_number=stream_number)
+        url = base_url + '&format=HLS'
+        response = self.session.get(url)
         try:
-            data = json.loads(response.text)
-            if data['displayRules'] == None:
-                raise(TipsportMsg(data['data']))
-            #if data['returnCode']['name'] == 'NOT_STARTED':
-            #    raise StreamHasNotStarted()
-            stream_source = data['source']
-            stream_type = data['type']
-            if stream_source is None or stream_type is None:
-                raise UnableGetStreamMetadataException()
-            return stream_source, stream_type, data['data']
+            stream_source, stream_type, data = self._parse_stream_info_response(response)
+            if not 'auth=' in data:
+                url = base_url + '&format=RTMP'
+                response = self.session.get(url)
+                stream_source, stream_type, data = self._parse_stream_info_response(response)
+            return stream_source, stream_type, data
         except (TypeError, KeyError):
             raise UnableGetStreamMetadataException()
 
