@@ -51,12 +51,16 @@ class Match:
         self.score = score
         self.icon_name = icon_name
         self.minutes_enable_before_start = minutes_enable_before_start
-
-    def is_stream_enabled(self):
+        self.match_time = self.get_match_time()
+    
+    def get_match_time(self):
         now = datetime.now()
         match_time = datetime(*(time.strptime(self.start_time, '%H:%M')[0:6]))
         match_time = datetime.now().replace(hour=match_time.hour, minute=match_time.minute, second=0, microsecond=0)
-        time_to_start = match_time - now
+        return match_time
+
+    def is_stream_enabled(self):
+        time_to_start = self.match_time - datetime.now()
         if time_to_start.days < 0:
             return True
         else:
@@ -189,6 +193,7 @@ class Tipsport:
 											     score=match['score']['scoreOffer'],
 											     icon_name=icon_name,
 											     minutes_enable_before_start=minutes_enable_before_start))
+        matches.sort(key=lambda match: match.match_time)
         return matches
 
     def get_response_dwr_get_stream(self, relative_url, c0_param1):
@@ -245,14 +250,16 @@ class Tipsport:
             else:
                 return list_of_streams[-1]
 
-    def get_hls_stream(self, url):
+    def get_hls_stream(self, url, reverse_order=False):
         try:
             url = url.replace('\\', '')
-            next_page = self.session.get(url)
-            if 'm3u8' not in next_page.text:
+            response = self.session.get(url)
+            if 'm3u8' not in response.text:
                 raise StreamHasNotStarted()
-            playlists = [playlist for playlist in next_page.text.split('\n') if not playlist.startswith('#')]
+            playlists = [playlist for playlist in response.text.split('\n') if not playlist.startswith('#')]
             playlists = [playlist for playlist in playlists if playlist != '']
+            if reverse_order:
+                playlists.reverse()
             playlist_relative_link = self.__select_stream_by_quality(playlists)
             playlist = url.replace('playlist.m3u8', playlist_relative_link)
             return HLSStream(playlist)
@@ -307,7 +314,7 @@ class Tipsport:
                 raise TipsportMsg(alert_text)
             stream_source, stream_type, url = self.get_stream_source_type_and_data(relative_url)
             if stream_source == 'LIVEBOX_ELH':
-                return self.decode_rtmp_url(url)
+                return self.get_hls_stream(url, True)
             elif stream_source == 'MANUAL':
                 stream_url = 'https://www.tipsport.cz/live' + relative_url
                 page = self.session.get(stream_url)
@@ -338,10 +345,8 @@ class Tipsport:
     def get_stream_source_type_and_data(self, relative_url):
         """Get source and type of stream"""
         stream_number = get_stream_number(relative_url)
-        response = self.session.get('https://m.tipsport.cz/rest/offer/v2/live/matches/{stream_number}/stream?deviceType=DESKTOP&format=RTMP'
+        response = self.session.get('https://m.tipsport.cz/rest/offer/v2/live/matches/{stream_number}/stream?deviceType=DESKTOP&format=HLS'
                                      .format(stream_number=stream_number))
-        #page = self.session.get('https://m.tipsport.cz/rest/ver1/sports/matches/{stream_number}/stream'
-        #                        .format(stream_number=stream_number))
         try:
             data = json.loads(response.text)
             if data['displayRules'] == None:
