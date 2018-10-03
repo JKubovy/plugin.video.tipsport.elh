@@ -331,7 +331,7 @@ class Tipsport:
                 return self.get_hls_stream(url)
             else:
                 raise UnableGetStreamMetadataException()
-        except (requests.ConnectionError, requests.ConnectTimeout, requests.ChunkedEncodingError):
+        except (requests.ConnectionError, requests.ConnectTimeout):
             raise NoInternetConnectionsException()
 
     def get_alert_message(self):
