@@ -331,7 +331,7 @@ class Tipsport:
                 return self.get_hls_stream(url)
             else:
                 raise UnableGetStreamMetadataException()
-        except (requests.ConnectionError, requests.ConnectTimeout):
+        except (requests.ConnectionError, requests.ConnectTimeout, requests.exceptions.ChunkedEncodingError):
             raise NoInternetConnectionsException()
 
     def get_alert_message(self):
@@ -342,6 +342,8 @@ class Tipsport:
         page = self.session.get('https://m.tipsport.cz/rest/articles/v1/tv/info')
         try:
             data = json.loads(page.text)
+            if not 'buttonDescription' in data:
+                raise TipsportMsg()
             text = data['buttonDescription']
             if text is None:
                 return None
