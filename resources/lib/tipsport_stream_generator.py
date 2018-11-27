@@ -340,11 +340,12 @@ class Tipsport:
         Return None if everything is OK
         """
         page = self.session.get('https://m.tipsport.cz/rest/articles/v1/tv/info')
+        name = 'buttonDescription'
         try:
             data = json.loads(page.text)
-            if not 'buttonDescription' in data:
+            if not name in data:
                 raise TipsportMsg()
-            text = data['buttonDescription']
+            text = data[name]
             if text is None:
                 return None
             else:
