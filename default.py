@@ -134,6 +134,8 @@ def main():
         show_localized_notification(kodi_helper, 32000, 32006)
     except UnableGetStreamNumberException:
         show_localized_notification(kodi_helper, 32000, 32007)
+    except UnableGetStreamListException:
+        show_localized_notification(kodi_helper, 32000, 32010)
     except StreamHasNotStarted:
         show_localized_notification(kodi_helper, 30004, 30008, xbmcgui.NOTIFICATION_INFO)
     except TipsportMsg as e:

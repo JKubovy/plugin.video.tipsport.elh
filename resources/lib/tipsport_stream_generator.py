@@ -130,7 +130,7 @@ class Tipsport:
             raise NoInternetConnectionsException()
         payload = {'agent': agent,
                    'requestURI': '/',
-                   'fPrint': generate_random_number(10),
+                   'fPrint': generate_random_number(),
                    'userName': self.username,
                    'password': self.password}
         try:
@@ -151,16 +151,20 @@ class Tipsport:
             page = self.session.get('https://www.tipsport.cz/')
         except requests.ConnectionError, requests.ConnectTimeout:
             raise NoInternetConnectionsException()
-        if 'LogoutAction.do' not in page.text:
+        if '["bobcmn"]' not in page.text:
             raise LoginFailedException()
         self.logged_in = True
 
     def get_matches_both_menu_response(self):
         """Get dwr respond with all matches today"""
         try:
-            response = self.session.get('https://m.tipsport.cz/rest/articles/v1/tv/program?day=0&articleId=')
-            response.encoding = 'utf-8'
-            return response
+            for _ in range(8):
+                response = self.session.get('https://m.tipsport.cz/rest/articles/v1/tv/program?day=0&articleId=')
+                response.encoding = 'utf-8'
+                if ('days' in response.text):
+                    return response
+                time.sleep(1)
+            raise UnableGetStreamListException()
         except requests.ConnectionError, requests.ConnectTimeout:
             raise NoInternetConnectionsException()
 
@@ -384,9 +388,10 @@ class Tipsport:
             raise UnableGetStreamMetadataException()
 
 
-def generate_random_number(length):
+def generate_random_number():
     """Generate string with given length that contains random numbers"""
-    result = ''.join(random.SystemRandom().choice('0123456789') for _ in range(length))
+    result = ''.join(random.SystemRandom().choice('0123456789') for _ in range(10))
+    result = result + '-' + ''.join(random.SystemRandom().choice('0123456789abcdef') for _ in range(32))
     return result
 
 

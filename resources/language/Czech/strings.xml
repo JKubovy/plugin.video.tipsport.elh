@@ -31,4 +31,5 @@
     <string id="32007">Nepovedlo se získat StreamNumber</string>
     <string id="32008">Neznámá chyba, prosíme o zaslání chybového hlášení</string>
     <string id="32009">Anonymní chybové hlášení bylo odesláno</string>
+    <string id="32010">Nepodařilo se získat seznam přenosů. Opakujte akci</string>
 </strings>

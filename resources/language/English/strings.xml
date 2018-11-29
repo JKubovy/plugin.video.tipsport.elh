@@ -31,4 +31,5 @@
     <string id="32007">Unable to get StreamNumber</string>
     <string id="32008">Unknown error, please send us crash log</string>
     <string id="32009">Anonymous crash log was send</string>
+    <string id="32010">Unable to get list of streams. Please repeate request</string>
 </strings>

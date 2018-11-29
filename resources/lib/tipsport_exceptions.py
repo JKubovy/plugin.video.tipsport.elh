@@ -42,6 +42,10 @@ class StreamHasNotStarted(TpgException):
     def __init__(self, message='Stream has not been started yet'):
         super(StreamHasNotStarted, self).__init__(message)
 
+class UnableGetStreamListException(TpgException):
+    def __init__(self, message='Unable to get list of available streams'):
+        super(UnableGetStreamListException, self).__init__(message)
+
 
 class UnknownException(TpgException):
     def __init__(self, message='Unknown Exception'):
