@@ -13,6 +13,7 @@ COMPETITIONS = {'CZ_TIPSPORT': [u'Česká Tipsport extraliga', u'Tipsport extral
                 'SK_TIPSPORT': [u'Slovenská Tipsport liga', u'Slovensk\u00E1 Tipsport liga', u'Tipsport Liga']}
 FULL_NAMES = {u'H.Králové': u'Hradec Králové',
               u'M.Boleslav': u'Mladá Boleslav',
+              u'K.Vary': u'Karlovy Vary',
               u'SR 20': u'Slovensko 20',
               u'L.Mikuláš': u'Liptovský Mikuláš',
               u'N.Zámky': u'Nové Zámky',
@@ -122,49 +123,50 @@ class Tipsport:
 
     def login(self):
         """Login to https://www.tipsport.cz site with given credentials"""
-        agent = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 " \
-                "Safari/537.36 OPR/42.0.2393.137 "
         try:
-            self.session.get('https://www.tipsport.cz/')  # load cookies
+            page = self.session.get('https://m.tipsport.cz')  # load cookies
+            id = re.search('__SESSID = \'(.*?)\';', page.text)
+            if (id):
+                token = id.group(1)
+                self.session.headers.update({'X-Auth-Token': token})
+            else:
+                raise LoginFailedException()
         except requests.ConnectionError, requests.ConnectTimeout:
             raise NoInternetConnectionsException()
-        payload = {'agent': agent,
-                   'requestURI': '/',
-                   'fPrint': generate_random_number(),
-                   'userName': self.username,
-                   'password': self.password}
+        payload = {'username': self.username,
+			        'password': self.password,
+			        'redirect': '/',
+			        'token': token}
         try:
             try:
-                self.session.post('https://www.tipsport.cz/LoginAction.do', payload)  # actual login
+                self.session.post('https://m.tipsport.cz/rest/client/v1/session', payload)  # actual login
             except Exception as e:
                 raise e.__class__   # remove tipsport account credentials from traceback
         except requests.ConnectionError, requests.Timeout:
             raise NoInternetConnectionsException()
-        self.session.headers['User-Agent'] = agent
-        token = self.session.cookies.get('JSESSIONID', 'value', domain='www.tipsport.cz')
-        self.session.headers['X-Auth-Token'] = token
         self.check_login()
 
     def check_login(self):
         """Check if login to https://www.tipsport.cz was successful"""
         try:
-            page = self.session.get('https://www.tipsport.cz/')
+            page = self.session.get('https://m.tipsport.cz')
+            success = re.search('\'logged\': \'(.*?)\'', page.text)
+            if (success):
+                self.logged_in = success.group(1) == 'true'
         except requests.ConnectionError, requests.ConnectTimeout:
             raise NoInternetConnectionsException()
-        if '["bobcmn"]' not in page.text:
+        if (not self.logged_in):
             raise LoginFailedException()
-        self.logged_in = True
 
     def get_matches_both_menu_response(self):
         """Get dwr respond with all matches today"""
         try:
-            for _ in range(8):
-                response = self.session.get('https://m.tipsport.cz/rest/articles/v1/tv/program?day=0&articleId=')
-                response.encoding = 'utf-8'
-                if ('days' in response.text):
-                    return response
-                time.sleep(1)
-            raise UnableGetStreamListException()
+            response = self.session.get('https://m.tipsport.cz/rest/articles/v1/tv/program?day=0&articleId=')
+            response.encoding = 'utf-8'
+            if ('days' not in response.text):
+                raise UnableGetStreamListException()
+            else:
+                return response
         except requests.ConnectionError, requests.ConnectTimeout:
             raise NoInternetConnectionsException()
 
