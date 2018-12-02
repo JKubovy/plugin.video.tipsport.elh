@@ -120,7 +120,7 @@ def main():
         elif mode == 'check_login':
             tipsport.login()
             show_localized_notification(kodi_helper, 30000, 30001, xbmcgui.NOTIFICATION_INFO)
-    except NoInternetConnectionsException:
+    except (NoInternetConnectionsException, requests.ConnectionError, requests.ConnectTimeout, requests.exceptions.ChunkedEncodingError):
         show_localized_notification(kodi_helper, 32000, 32001)
     except LoginFailedException:
         show_localized_notification(kodi_helper, 32000, 32002)

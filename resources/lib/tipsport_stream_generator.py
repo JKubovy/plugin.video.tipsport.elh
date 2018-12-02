@@ -122,53 +122,41 @@ class Tipsport:
         self.quality = quality
 
     def login(self):
-        """Login to https://www.tipsport.cz site with given credentials"""
-        try:
-            page = self.session.get('https://m.tipsport.cz')  # load cookies
-            id = re.search('__SESSID = \'(.*?)\';', page.text)
-            if (id):
-                token = id.group(1)
-                self.session.headers.update({'X-Auth-Token': token})
-            else:
-                raise LoginFailedException()
-        except requests.ConnectionError, requests.ConnectTimeout:
-            raise NoInternetConnectionsException()
+        """Login to https://m.tipsport.cz site with given credentials"""
+        page = self.session.get('https://m.tipsport.cz')  # load cookies
+        id = re.search('__SESSID = \'(.*?)\';', page.text)
+        if (id):
+            token = id.group(1)
+            self.session.headers.update({'X-Auth-Token': token})
+        else:
+            raise LoginFailedException()
         payload = {'username': self.username,
 			        'password': self.password,
 			        'redirect': '/',
 			        'token': token}
         try:
-            try:
-                self.session.post('https://m.tipsport.cz/rest/client/v1/session', payload)  # actual login
-            except Exception as e:
-                raise e.__class__   # remove tipsport account credentials from traceback
-        except requests.ConnectionError, requests.Timeout:
-            raise NoInternetConnectionsException()
+            self.session.post('https://m.tipsport.cz/rest/client/v1/session', payload)  # actual login
+        except Exception as e:
+            raise e.__class__   # remove tipsport account credentials from traceback
         self.check_login()
 
     def check_login(self):
-        """Check if login to https://www.tipsport.cz was successful"""
-        try:
-            page = self.session.get('https://m.tipsport.cz')
-            success = re.search('\'logged\': \'(.*?)\'', page.text)
-            if (success):
-                self.logged_in = success.group(1) == 'true'
-        except requests.ConnectionError, requests.ConnectTimeout:
-            raise NoInternetConnectionsException()
+        """Check if login to https://m.tipsport.cz was successful"""
+        page = self.session.get('https://m.tipsport.cz')
+        success = re.search('\'logged\': \'(.*?)\'', page.text)
+        if (success):
+            self.logged_in = success.group(1) == 'true'
         if (not self.logged_in):
             raise LoginFailedException()
 
     def get_matches_both_menu_response(self):
         """Get dwr respond with all matches today"""
-        try:
-            response = self.session.get('https://m.tipsport.cz/rest/articles/v1/tv/program?day=0&articleId=')
-            response.encoding = 'utf-8'
-            if ('days' not in response.text):
-                raise UnableGetStreamListException()
-            else:
-                return response
-        except requests.ConnectionError, requests.ConnectTimeout:
-            raise NoInternetConnectionsException()
+        response = self.session.get('https://m.tipsport.cz/rest/articles/v1/tv/program?day=0&articleId=')
+        response.encoding = 'utf-8'
+        if ('days' not in response.text):
+            raise UnableGetStreamListException()
+        else:
+            return response
 
     def get_list_elh_matches(self, competition_name):
         """Get list of all available ELH matches on https://www.tipsport.cz/tv"""
@@ -203,26 +191,23 @@ class Tipsport:
         return matches
 
     def get_response_dwr_get_stream(self, relative_url, c0_param1):
-        try:
-            stream_url = 'https://www.tipsport.cz/live' + relative_url
-            page = self.session.get(stream_url)
-            token = get_token(page.text)
-            relative_url = relative_url.split('#')[0]
-            dwr_script = 'https://www.tipsport.cz/dwr/call/plaincall/StreamDWR.getStream.dwr'
-            payload = {'callCount': 1,
-                       'page': relative_url,
-                       'httpSessionId': '',
-                       'scriptSessionId': token,
-                       'c0-scriptName': 'StreamDWR',
-                       'c0-methodName': 'getStream',
-                       'c0-id': 0,
-                       'c0-param0': 'number:{0}'.format(get_stream_number(relative_url)),
-                       'c0-param1': 'string:{0}'.format(c0_param1),
-                       'batchId': 9}
-            response = self.session.post(dwr_script, payload)
-            return response
-        except requests.ConnectTimeout, requests.ConnectionError:
-            raise NoInternetConnectionsException()
+        stream_url = 'https://www.tipsport.cz/live' + relative_url
+        page = self.session.get(stream_url)
+        token = get_token(page.text)
+        relative_url = relative_url.split('#')[0]
+        dwr_script = 'https://www.tipsport.cz/dwr/call/plaincall/StreamDWR.getStream.dwr'
+        payload = {'callCount': 1,
+                    'page': relative_url,
+                    'httpSessionId': '',
+                    'scriptSessionId': token,
+                    'c0-scriptName': 'StreamDWR',
+                    'c0-methodName': 'getStream',
+                    'c0-id': 0,
+                    'c0-param0': 'number:{0}'.format(get_stream_number(relative_url)),
+                    'c0-param1': 'string:{0}'.format(c0_param1),
+                    'batchId': 9}
+        response = self.session.post(dwr_script, payload)
+        return response
 
     def get_hls_stream_from_dwr(self, relative_url):
         response = self.get_response_dwr_get_stream(relative_url, 'HLS')
@@ -232,17 +217,14 @@ class Tipsport:
         return self.get_hls_stream(url.group(1))
 
     def get_hls_stream_from_page(self, page):
-        try:
-            next_hop = re.search('<iframe src="(.*?embed.*?)"', page)
-            if not next_hop:
-                raise UnableGetStreamMetadataException()
-            page = self.session.get(next_hop.group(1))
-            next_hop = re.search('"hls": "(.*?)"', page.text)
-            if not next_hop:
-                raise UnableGetStreamMetadataException()
-            return self.get_hls_stream(next_hop.group(1))
-        except requests.ConnectTimeout, requests.ConnectionError:
-            raise NoInternetConnectionsException()
+        next_hop = re.search('<iframe src="(.*?embed.*?)"', page)
+        if not next_hop:
+            raise UnableGetStreamMetadataException()
+        page = self.session.get(next_hop.group(1))
+        next_hop = re.search('"hls": "(.*?)"', page.text)
+        if not next_hop:
+            raise UnableGetStreamMetadataException()
+        return self.get_hls_stream(next_hop.group(1))
 
     def __select_stream_by_quality(self, list_of_streams):
         """List is ordered from the lowest to the best quality"""
@@ -257,51 +239,45 @@ class Tipsport:
                 return list_of_streams[-1]
 
     def get_hls_stream(self, url, reverse_order=False):
-        try:
-            url = url.replace('\\', '')
-            response = self.session.get(url)
-            if 'm3u8' not in response.text:
-                raise StreamHasNotStarted()
-            playlists = [playlist for playlist in response.text.split('\n') if not playlist.startswith('#')]
-            playlists = [playlist for playlist in playlists if playlist != '']
-            if reverse_order:
-                playlists.reverse()
-            playlist_relative_link = self.__select_stream_by_quality(playlists)
-            playlist = url.replace('playlist.m3u8', playlist_relative_link)
-            return HLSStream(playlist)
-        except requests.ConnectTimeout, requests.ConnectionError:
-            raise NoInternetConnectionsException()
+        url = url.replace('\\', '')
+        response = self.session.get(url)
+        if 'm3u8' not in response.text:
+            raise StreamHasNotStarted()
+        playlists = [playlist for playlist in response.text.split('\n') if not playlist.startswith('#')]
+        playlists = [playlist for playlist in playlists if playlist != '']
+        if reverse_order:
+            playlists.reverse()
+        playlist_relative_link = self.__select_stream_by_quality(playlists)
+        playlist = url.replace('playlist.m3u8', playlist_relative_link)
+        return HLSStream(playlist)
 
     def get_rtmp_stream(self, relative_url):
-        try:
-            response = self.get_response_dwr_get_stream(relative_url, 'SMIL')
-            search_type = re.search('type:"(.*?)"', response.text)
-            response_type = search_type.group(1) if search_type else 'ERROR'
-            if response_type == 'ERROR':  # use 'string:RTMP' instead of 'string:SMIL'
-                response = self.get_response_dwr_get_stream(relative_url, 'RTMP')
-            search_type = re.search('type:"(.*?)"', response.text)
-            response_type = search_type.group(1) if search_type else 'ERROR'
-            if response_type == 'ERROR':  # StreamDWR.getStream.dwr not working on this specific stream
+        response = self.get_response_dwr_get_stream(relative_url, 'SMIL')
+        search_type = re.search('type:"(.*?)"', response.text)
+        response_type = search_type.group(1) if search_type else 'ERROR'
+        if response_type == 'ERROR':  # use 'string:RTMP' instead of 'string:SMIL'
+            response = self.get_response_dwr_get_stream(relative_url, 'RTMP')
+        search_type = re.search('type:"(.*?)"', response.text)
+        response_type = search_type.group(1) if search_type else 'ERROR'
+        if response_type == 'ERROR':  # StreamDWR.getStream.dwr not working on this specific stream
+            raise UnableGetStreamMetadataException()
+        if response_type == 'RTMP_URL':
+            if re.search('value:"?(.*?)"?}', response.content.decode('unicode-escape')).group(1).lower() == 'null':
                 raise UnableGetStreamMetadataException()
-            if response_type == 'RTMP_URL':
-                if re.search('value:"?(.*?)"?}', response.content.decode('unicode-escape')).group(1).lower() == 'null':
-                    raise UnableGetStreamMetadataException()
-                urls = re.findall('(rtmp.*?)"',
-                                  response.content.decode('unicode-escape'))
-                urls.reverse()
-                urls = [url.replace(r'\u003d', '=') for url in urls]
-                urls = [url.replace('\\', '') for url in urls]
-                url = self.__select_stream_by_quality(urls)
-                return parse_stream_dwr_response('"RTMP_URL":"{url}"'.format(url=url))
-            else:
-                response_url = re.search('value:"(.*?)"', response.text)
-                url = response_url.group(1)
-                url = url.replace('\\', '')
-                response = self.session.get(url)
-                stream = parse_stream_dwr_response(response.text)
-                return stream
-        except requests.ConnectionError, requests.ConnectTimeout:
-            raise NoInternetConnectionsException()
+            urls = re.findall('(rtmp.*?)"',
+                                response.content.decode('unicode-escape'))
+            urls.reverse()
+            urls = [url.replace(r'\u003d', '=') for url in urls]
+            urls = [url.replace('\\', '') for url in urls]
+            url = self.__select_stream_by_quality(urls)
+            return parse_stream_dwr_response('"RTMP_URL":"{url}"'.format(url=url))
+        else:
+            response_url = re.search('value:"(.*?)"', response.text)
+            url = response_url.group(1)
+            url = url.replace('\\', '')
+            response = self.session.get(url)
+            stream = parse_stream_dwr_response(response.text)
+            return stream
 
     def decode_rtmp_url(self, url):
         try:
@@ -315,30 +291,27 @@ class Tipsport:
 
     def get_stream(self, relative_url):
         """Get instance of Stream class from given relative link"""
-        try:
-            if not self.logged_in:
-                self.login()
-            alert_text = self.get_alert_message()
-            if alert_text:
-                raise TipsportMsg(alert_text)
-            stream_source, stream_type, url = self.get_stream_source_type_and_data(relative_url)
-            if stream_source == 'LIVEBOX_ELH':
-                if stream_type == 'RTMP':
-                    return self.decode_rtmp_url(url)
-                elif stream_type == 'HLS':
-                    return self.get_hls_stream(url, True)
-                else:
-                    raise UnableGetStreamMetadataException()
-            elif stream_source == 'MANUAL':
-                stream_url = 'https://www.tipsport.cz/live' + relative_url
-                page = self.session.get(stream_url)
-                return self.get_hls_stream_from_page(page.text)
-            elif stream_source == 'HUSTE':
-                return self.get_hls_stream(url)
+        if not self.logged_in:
+            self.login()
+        alert_text = self.get_alert_message()
+        if alert_text:
+            raise TipsportMsg(alert_text)
+        stream_source, stream_type, url = self.get_stream_source_type_and_data(relative_url)
+        if stream_source == 'LIVEBOX_ELH':
+            if stream_type == 'RTMP':
+                return self.decode_rtmp_url(url)
+            elif stream_type == 'HLS':
+                return self.get_hls_stream(url, True)
             else:
                 raise UnableGetStreamMetadataException()
-        except (requests.ConnectionError, requests.ConnectTimeout, requests.exceptions.ChunkedEncodingError):
-            raise NoInternetConnectionsException()
+        elif stream_source == 'MANUAL':
+            stream_url = 'https://www.tipsport.cz/live' + relative_url
+            page = self.session.get(stream_url)
+            return self.get_hls_stream_from_page(page.text)
+        elif stream_source == 'HUSTE':
+            return self.get_hls_stream(url)
+        else:
+            raise UnableGetStreamMetadataException()
 
     def get_alert_message(self):
         """
