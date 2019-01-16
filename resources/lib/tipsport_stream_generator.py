@@ -10,7 +10,9 @@ import _strptime
 from tipsport_exceptions import *
 
 COMPETITIONS = {'CZ_TIPSPORT': [u'Česká Tipsport extraliga', u'Tipsport extraliga', u'CZ Tipsport extraliga'],
-                'SK_TIPSPORT': [u'Slovenská Tipsport liga', u'Slovensk\u00E1 Tipsport liga', u'Tipsport Liga']}
+                'SK_TIPSPORT': [u'Slovenská Tipsport liga', u'Slovensk\u00E1 Tipsport liga', u'Tipsport Liga'],
+                'CZ_CHANCE': [u'Česká Chance liga', u'CZ Chance liga']
+               }
 FULL_NAMES = {u'H.Králové': u'Hradec Králové',
               u'M.Boleslav': u'Mladá Boleslav',
               u'K.Vary': u'Karlovy Vary',
@@ -18,7 +20,16 @@ FULL_NAMES = {u'H.Králové': u'Hradec Králové',
               u'L.Mikuláš': u'Liptovský Mikuláš',
               u'N.Zámky': u'Nové Zámky',
               u'HK Poprad': u'Poprad',
-              u'B.Bystrica': u'Banská Bystrica'}
+              u'B.Bystrica': u'Banská Bystrica',
+              u'Fr.Místek':u'Frýdek-Místek',
+              u'Ústí': u'Ústí nad Labem',
+              u'Benátky': u'Benátky nad Jizerou',
+              u'Č.Budějovice': u'České Budějovice'
+              }
+COMPETITION_LOGO = {'CZ_TIPSPORT': 'cz_tipsport_logo.png',
+                    'SK_TIPSPORT': 'sk_tipsport_logo.png',
+                    'CZ_CHANCE': 'cz_chance_liga_logo.png'
+                   }
 
 
 class Quality(object):
@@ -162,15 +173,10 @@ class Tipsport:
         """Get list of all available ELH matches on https://www.tipsport.cz/tv"""
         response = self.get_matches_both_menu_response()
         data = json.loads(response.text)
-        if competition_name == 'CZ_TIPSPORT':
-            icon_name = 'cz_tipsport_logo.png'
-            minutes_enable_before_start = 60
-        elif competition_name == 'SK_TIPSPORT':
-            icon_name = 'sk_tipsport_logo.png'
-            minutes_enable_before_start = 15
+        if competition_name in COMPETITION_LOGO:
+            icon_name = COMPETITION_LOGO[competition_name]
         else:
             icon_name = None
-            minutes_enable_before_start = 60
         matches = []
         for sport in data['program']:
             if sport['id'] == 23:
@@ -186,7 +192,7 @@ class Tipsport:
 											     not_started=not match['live'],
 											     score=match['score']['scoreOffer'],
 											     icon_name=icon_name,
-											     minutes_enable_before_start=minutes_enable_before_start))
+                                                 minutes_enable_before_start=15))
         matches.sort(key=lambda match: match.match_time)
         return matches
 

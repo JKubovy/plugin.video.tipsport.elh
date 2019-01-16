@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <strings>
-	<string id="30000">OK</string>
+	  <string id="30000">OK</string>
     <string id="30001">Login successful</string>
     <string id="30002">Match start at</string>
     <string id="30003">Score</string>
@@ -9,6 +9,7 @@
 	  <string id="30006">The Czech Extraliga is the highest-level ice hockey league in the Czech Republic.</string>
     <string id="30007">Slovak Extraliga is the highest-level ice hockey league in Slovakia.</string>
     <string id="30008">Stream has not been started yet</string>
+    <string id="30009">The Chance Liga is the second-highest level of professional ice hockey in the Czech Republic.</string>
 
     <string id="31000">Tipsport Account</string>
     <string id="31001">Email</string>
