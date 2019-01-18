@@ -124,6 +124,7 @@ def main():
     mode = kodi_helper.get_arg('mode')
     try:
         if mode is None:
+            kodi_helper.remove_tmp_logos()
             tipsport.login()
             show_localized_notification(kodi_helper, 30000, 30001, xbmcgui.NOTIFICATION_INFO)
             show_available_competitions(kodi_helper)

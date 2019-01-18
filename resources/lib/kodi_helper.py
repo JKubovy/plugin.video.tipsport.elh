@@ -6,6 +6,7 @@ import urlparse
 import xbmc
 import xbmcaddon
 from tipsport_stream_generator import Quality
+from tipsport_exceptions import TipsportMsg
 try:
     import os
     from PIL import Image
@@ -92,20 +93,27 @@ class KodiHelper:
     def get_media(self, name):
         return os.path.join(self.media_path, name)
 
-    def get_logo(self, name):
+    def get_logo(self, name, first=True):
+        result = []
         for root, _ , filenames in os.walk(self.get_media(LOGO_BASEPATH)):
             for filename in fnmatch.filter(filenames, name):
-                return os.path.join(root, filename)
+                if first:
+                    return os.path.join(root, filename)
+                else:
+                    result.append(os.path.join(root, filename))
+        return result
 
     def get_tmp_path(self, name):
         return os.path.join(self.tmp_path, name)
 
     def get_match_icon(self, name_1, name_2):
-        if not self.can_generate_logos:
+        if not self.can_generate_logos or name_1 not in LOGOS or name_2 not in LOGOS:
             return None
-        filename = LOGOS[name_1] + '_VS_' + LOGOS[name_2] + ".png"
-        path = self.get_tmp_path(filename)
-        if not os.path.isfile(path) and self.generate_icon(LOGOS[name_1], LOGOS[name_2], path):
+        filename = '_' + LOGOS[name_1] + '_VS_' + LOGOS[name_2] + ".png"
+        #path = self.get_tmp_path(filename)
+        path = self.get_media(os.path.join(LOGO_BASEPATH, filename))
+        logo_exists = os.path.isfile(path)
+        if logo_exists or (not logo_exists and self.generate_icon(LOGOS[name_1], LOGOS[name_2], path)):
             return path
         else:
             return None
@@ -124,3 +132,8 @@ class KodiHelper:
             return True
         except:
             return False
+
+    def remove_tmp_logos(self):
+        logos = self.get_logo('_*')
+        for logo in logos:
+            os.remove(logo)
