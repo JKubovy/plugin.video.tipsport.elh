@@ -7,6 +7,7 @@ import urllib
 import time
 from datetime import datetime, timedelta
 import _strptime
+import xml.etree.ElementTree
 from tipsport_exceptions import *
 
 COMPETITIONS = {'CZ_TIPSPORT': [u'Česká Tipsport extraliga', u'Tipsport extraliga', u'CZ Tipsport extraliga'],
@@ -53,7 +54,7 @@ class Match:
 
     def __init__(self, name, competition, sport, url, start_time, status, not_started, score, icon_name,
                  minutes_enable_before_start):
-        self.name = self.parse_name(name)
+        self.first_team, self.second_team, self.name = self.parse_name(name)
         self.competition = competition
         self.sport = sport
         self.url = url
@@ -91,7 +92,8 @@ class Match:
             (first_team, second_team) = name.split('-')
             first_team = Match.get_full_name_if_possible(first_team)
             second_team = Match.get_full_name_if_possible(second_team)
-            return u'{first_team} - {second_team}'.format(first_team=first_team, second_team=second_team)
+            match_name = u'{first_team} - {second_team}'.format(first_team=first_team, second_team=second_team)
+            return (first_team, second_team, match_name)
         except ValueError:
             return name
 

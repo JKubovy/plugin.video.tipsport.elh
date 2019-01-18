@@ -2,8 +2,9 @@
 <settings>
     <category  label="31000">
         <setting id="username" type="text" label="31001" default=""/>
-	    <setting id="password" type="text" option="hidden" label="31002" default=""/>
+	      <setting id="password" type="text" option="hidden" label="31002" default=""/>
         <setting id="quality" type="select" label="31006" lvalues="31007|31008|31009" default="2"/>
+        <setting id="generate_logos" type="bool" label="31010" default="true"/>
         <setting type="sep"/>
         <setting id="check_login" type="action" label="31003" action="RunPlugin(plugin://plugin.video.tipsport.elh/?mode=check_login)" option="close"/>
     </category >
