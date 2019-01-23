@@ -8,6 +8,8 @@ import requests
 from resources.lib.tipsport_stream_generator import Tipsport
 from resources.lib.tipsport_exceptions import *
 from resources.lib.kodi_helper import KodiHelper
+from resources.lib.persistant_storage import PersistantStorage
+from resources.lib.utils import log
 
 
 def send_crash_report(kodi_helper, exception):
@@ -110,27 +112,46 @@ def show_available_competitions(kodi_helper):
 
     xbmcplugin.endOfDirectory(kodi_helper.plugin_handle)
 
+def get_tsg(kodi_helper, storage):
+    if int(kodi_helper.plugin_handle == 1) or not storage.load():
+        tipsport = Tipsport(kodi_helper.username, kodi_helper.password, kodi_helper.quality)
+        tipsport.login()
+        storage['tsg'] = tipsport
+        storage.save()
+    else:
+        tipsport = storage['tsg']
+    return tipsport
 
 def main():
     kodi_helper = KodiHelper(plugin_handle=int(sys.argv[1]),
                              args=sys.argv[2][1:],
                              base_url=sys.argv[0])
-    tipsport = Tipsport(kodi_helper.username, kodi_helper.password, kodi_helper.quality)
+    storage = PersistantStorage(kodi_helper.version)
     mode = kodi_helper.get_arg('mode')
     try:
         if mode is None:
             show_available_competitions(kodi_helper)
+            tipsport = get_tsg(kodi_helper, storage)
+            storage.save()
+
         elif mode == 'folder':
-            tipsport.login()
+            tipsport = get_tsg(kodi_helper, storage)
             show_available_elh_matches(kodi_helper, tipsport, kodi_helper.get_arg('foldername'))
+            storage.save()
+
         elif mode == 'play':
+            tipsport = get_tsg(kodi_helper, storage)
             stream = tipsport.get_stream(kodi_helper.get_arg('url'))
             title = '{name} ({time})'.format(name=kodi_helper.get_arg('name'), time=kodi_helper.get_arg('start_time'))
             play_video(title, kodi_helper.icon, stream.get_link())
+            storage.save()
+
         elif mode == 'notification':
             show_notification(kodi_helper.get_arg('title'), kodi_helper.get_arg('message'), xbmcgui.NOTIFICATION_INFO)
+
         elif mode == 'check_login':
-            tipsport.login()
+            tipsport = get_tsg(kodi_helper, storage)
+            tipsport.check_login()
             show_localized_notification(kodi_helper, 30000, 30001, xbmcgui.NOTIFICATION_INFO)
     except (NoInternetConnectionsException, requests.ConnectionError, requests.ConnectTimeout, requests.exceptions.ChunkedEncodingError):
         show_localized_notification(kodi_helper, 32000, 32001)
@@ -156,6 +177,7 @@ def main():
         if send_crash_report(kodi_helper, e):
             show_localized_notification(kodi_helper, 32000, 32009)
         else:
+            log(traceback.format_exc(e))
             show_localized_notification(kodi_helper, 32000, 32008)
 
 
