@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 import _strptime
 import xml.etree.ElementTree
 from tipsport_exceptions import *
+from utils import log
 
 COMPETITIONS = {'CZ_TIPSPORT': [u'Česká Tipsport extraliga', u'Tipsport extraliga', u'CZ Tipsport extraliga'],
                 'SK_TIPSPORT': [u'Slovenská Tipsport liga', u'Slovensk\u00E1 Tipsport liga', u'Tipsport Liga'],
@@ -127,12 +128,13 @@ class HLSStream:
 class Tipsport:
     """Class providing communication with Tipsport.cz site"""
 
-    def __init__(self, username, password, quality):
+    def __init__(self, username, password, quality, clean_function=None):
         self.session = requests.session()
         self.logged_in = False
         self.username = username
         self.password = password
         self.quality = quality
+        clean_function()
 
     def login(self):
         """Login to https://m.tipsport.cz site with given credentials"""
@@ -159,6 +161,7 @@ class Tipsport:
         success = re.search('\'logged\': \'(.*?)\'', page.text)
         if (success):
             self.logged_in = success.group(1) == 'true'
+            log('Logged in')
         if (not self.logged_in):
             raise LoginFailedException()
 

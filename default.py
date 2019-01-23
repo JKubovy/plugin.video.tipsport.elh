@@ -9,6 +9,7 @@ import requests
 from resources.lib.tipsport_stream_generator import Tipsport
 from resources.lib.tipsport_exceptions import *
 from resources.lib.kodi_helper import KodiHelper
+from resources.lib.utils import log
 
 
 def send_crash_report(kodi_helper, exception):
@@ -120,11 +121,10 @@ def main():
     kodi_helper = KodiHelper(plugin_handle=int(sys.argv[1]),
                              args=sys.argv[2][1:],
                              base_url=sys.argv[0])
-    tipsport = Tipsport(kodi_helper.username, kodi_helper.password, kodi_helper.quality)
+    tipsport = Tipsport(kodi_helper.username, kodi_helper.password, kodi_helper.quality, kodi_helper.remove_tmp_logos)
     mode = kodi_helper.get_arg('mode')
     try:
         if mode is None:
-            kodi_helper.remove_tmp_logos()
             tipsport.login()
             show_localized_notification(kodi_helper, 30000, 30001, xbmcgui.NOTIFICATION_INFO)
             show_available_competitions(kodi_helper)
@@ -164,6 +164,7 @@ def main():
         if send_crash_report(kodi_helper, e):
             show_localized_notification(kodi_helper, 32000, 32009)
         else:
+            log(e)
             show_localized_notification(kodi_helper, 32000, 32008)
 
 

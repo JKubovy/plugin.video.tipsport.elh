@@ -5,8 +5,10 @@ import urllib
 import urlparse
 import xbmc
 import xbmcaddon
+import xbmcvfs
 from tipsport_stream_generator import Quality
 from tipsport_exceptions import TipsportMsg
+from utils import log
 try:
     import os
     from PIL import Image
@@ -42,10 +44,23 @@ LOGOS = { # CZ Tipsport
          u'Poruba':u'poruba',
          u'Přerov':u'prerov',
          u'Prostějov':u'prostejov',
-         u'Slavia':u'slavia_praha',
+         u'Slavia Praha':u'slavia_praha',
          u'Třebíč':u'trebic',
          u'Ústí nad Labem':u'usti_nad_labem',
-         u'Vsetín':u'vsetin'
+         u'Vsetín':u'vsetin',
+         # SK Tipsport
+         u'Košice':u'kosice',
+         u'Miskolc':u'miskolc',
+         u'Žilina':u'zilina',
+         u'Nové Zámky':u'nove_zamky',
+         u'Banská Bystrica':u'banska_bystrica',
+         u'MAC Budapest':u'budapest',
+         u'Detva':u'detva',
+         u'Trenčín':u'dukla_trencin',
+         u'Liptovský Mikuláš':u'liptovsky_mikulas',
+         u'Nitra':u'nitra',
+         u'Poprad':u'poprad',
+         u'Zvolen':u'zvolen'
         }
 
 class KodiHelper:
@@ -128,12 +143,17 @@ class KodiHelper:
             new_img.paste(images[1], (0,0), images[1])
             new_img.paste(images[2], (int(images[0].width/2),0), images[2])
             new_img.paste(images[0], (0,0), images[0])
-            new_img.save(path)
+            #new_img.save(path)
+            f = xbmcvfs.File(path, 'w')
+            f.write(new_img.tobytes())
+            f.close()
+            log('Saved ({0})'.format(path))
             return True
         except:
             return False
 
     def remove_tmp_logos(self):
-        logos = self.get_logo('_*')
+        log('Removing old match logos')
+        logos = self.get_logo('_*.png', False)
         for logo in logos:
             os.remove(logo)
