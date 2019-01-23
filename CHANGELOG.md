@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.5.5] - 2019-1-23
+### Fix
+  - Crash on Android devices
+  - Unable get streams
+
 ## [0.5.4] - 2019-1-23
 ### Added
   - Persistant Storage (reuse session)
