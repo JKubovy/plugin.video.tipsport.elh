@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.5.4] - 2019-1-23
+### Added
+  - Persistant Storage (reuse session)
+  - Logger
+### Improve
+  - Loading speed
+
 ## [0.5.3] - 2019-1-16
 ### Added
   - CZ Chance League
