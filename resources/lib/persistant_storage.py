@@ -17,8 +17,6 @@ class PersistantStorage():
         self._backup_file = path.join(self._path, '{0}.data'.format(str(self._id)))
         self._lock = path.join(self._path, '{0}.lock'.format(str(self._id)))
         self._data = {}
-        f = xbmcvfs.File(self._lock + ".test", 'w')
-        f.close()
 
     def __getitem__(self, key):
         return self._data[key]
