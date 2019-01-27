@@ -112,45 +112,50 @@ def show_available_competitions(kodi_helper):
 
     xbmcplugin.endOfDirectory(kodi_helper.plugin_handle)
 
-def get_tsg(kodi_helper, storage):
-    if int(kodi_helper.plugin_handle == 1) or not storage.load():
-        tipsport = Tipsport(kodi_helper.username, kodi_helper.password, kodi_helper.quality)
-        tipsport.login()
-        storage['tsg'] = tipsport
-        storage.save()
-    else:
-        tipsport = storage['tsg']
+def get_tsg(kodi_helper):
+    tipsport = Tipsport(kodi_helper.username, kodi_helper.password, kodi_helper.quality)
+    tipsport.login()
     return tipsport
+
+#def get_tsg(kodi_helper, storage):
+#    if int(kodi_helper.plugin_handle == 1) or not storage.load():
+#        tipsport = Tipsport(kodi_helper.username, kodi_helper.password, kodi_helper.quality)
+#        tipsport.login()
+#        storage['tsg'] = tipsport
+#        storage.save()
+#    else:
+#        tipsport = storage['tsg']
+#    return tipsport
 
 def main():
     kodi_helper = KodiHelper(plugin_handle=int(sys.argv[1]),
                              args=sys.argv[2][1:],
                              base_url=sys.argv[0])
-    storage = PersistantStorage(kodi_helper.version)
+    #storage = PersistantStorage(kodi_helper.version)
     mode = kodi_helper.get_arg('mode')
     try:
         if mode is None:
             show_available_competitions(kodi_helper)
-            tipsport = get_tsg(kodi_helper, storage)
-            storage.save()
+            #tipsport = get_tsg(kodi_helper)
+            #storage.save()
 
         elif mode == 'folder':
-            tipsport = get_tsg(kodi_helper, storage)
+            tipsport = get_tsg(kodi_helper)
             show_available_elh_matches(kodi_helper, tipsport, kodi_helper.get_arg('foldername'))
-            storage.save()
+            #storage.save()
 
         elif mode == 'play':
-            tipsport = get_tsg(kodi_helper, storage)
+            tipsport = get_tsg(kodi_helper)
             stream = tipsport.get_stream(kodi_helper.get_arg('url'))
             title = '{name} ({time})'.format(name=kodi_helper.get_arg('name'), time=kodi_helper.get_arg('start_time'))
             play_video(title, kodi_helper.icon, stream.get_link())
-            storage.save()
+            #storage.save()
 
         elif mode == 'notification':
             show_notification(kodi_helper.get_arg('title'), kodi_helper.get_arg('message'), xbmcgui.NOTIFICATION_INFO)
 
         elif mode == 'check_login':
-            tipsport = get_tsg(kodi_helper, storage)
+            tipsport = get_tsg(kodi_helper)
             tipsport.check_login()
             show_localized_notification(kodi_helper, 30000, 30001, xbmcgui.NOTIFICATION_INFO)
     except (NoInternetConnectionsException, requests.ConnectionError, requests.ConnectTimeout, requests.exceptions.ChunkedEncodingError):

@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.5.6] - 2019-1-27
+### Revert
+  - Using Persistant Storage
+
 ## [0.5.5] - 2019-1-23
 ### Fix
   - Crash on Android devices
