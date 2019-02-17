@@ -72,9 +72,9 @@ class KodiHelper:
         self.base_url = base_url
         self.plugin_name = 'plugin.video.tipsport.elh'
         self.media_path = xbmc.translatePath('special://home/addons/{0}/resources/media'.format(self.plugin_name))
-        self.tmp_path = xbmc.translatePath('special://temp/{0}'.format(self.plugin_name))
-        if not os.path.exists(self.tmp_path):
-            os.makedirs(self.tmp_path)
+        self.tmp_path = xbmc.translatePath('special://temp/{0}/'.format(self.plugin_name))
+        if not xbmcvfs.exists(self.tmp_path):
+            xbmcvfs.mkdirs(self.tmp_path)
         self.version = addon.getAddonInfo('version')
         self.username = addon.getSetting('username')
         self.password = addon.getSetting('password')
@@ -110,12 +110,14 @@ class KodiHelper:
 
     def get_logo(self, name, first=True):
         result = []
-        for root, _ , filenames in os.walk(self.get_media(LOGO_BASEPATH)):
-            for filename in fnmatch.filter(filenames, name):
-                if first:
-                    return os.path.join(root, filename)
-                else:
-                    result.append(os.path.join(root, filename))
+        dirs = [self.get_media(LOGO_BASEPATH)]
+        while (len(dirs) > 0):
+            path = dirs.pop(0)
+            folders, files = xbmcvfs.listdir(path)
+            dirs.extend([os.path.join(path, folder) for folder in folders])
+            result.extend([os.path.join(path, f) for f in fnmatch.filter(files, name)])
+            if first and len(result) > 0:
+                return result[0]
         return result
 
     def get_tmp_path(self, name):
@@ -125,9 +127,9 @@ class KodiHelper:
         if not self.can_generate_logos or name_1 not in LOGOS or name_2 not in LOGOS:
             return None
         filename = '_' + LOGOS[name_1] + '_VS_' + LOGOS[name_2] + ".png"
-        #path = self.get_tmp_path(filename)
-        path = self.get_media(os.path.join(LOGO_BASEPATH, filename))
-        logo_exists = os.path.isfile(path)
+        path = self.get_tmp_path(filename)
+        #path = self.get_media(os.path.join(LOGO_BASEPATH, filename))
+        logo_exists = xbmcvfs.exists(path)
         if logo_exists or (not logo_exists and self.generate_icon(LOGOS[name_1], LOGOS[name_2], path)):
             return path
         else:
@@ -154,6 +156,7 @@ class KodiHelper:
 
     def remove_tmp_logos(self):
         log('Removing old match logos')
-        logos = self.get_logo('_*.png', False)
-        for logo in logos:
-            os.remove(logo)
+        _, logos = xbmcvfs.listdir(self.tmp_path)
+        for logo in fnmatch.filter(logos, '_*.png'):
+            xbmcvfs.delete(logo)
+
