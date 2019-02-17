@@ -1,4 +1,3 @@
-# coding=utf-8
 import re
 import sys
 import xbmc
@@ -9,6 +8,7 @@ import requests
 from resources.lib.tipsport_stream_generator import Tipsport
 from resources.lib.tipsport_exceptions import *
 from resources.lib.kodi_helper import KodiHelper
+from resources.lib.mem_storage import MemStorage
 from resources.lib.utils import log
 
 
@@ -60,7 +60,7 @@ def show_available_elh_matches(kodi_helper, tipsport, competitions):
     if len(matches) == 0:
         show_localized_notification(kodi_helper, 30004, 30005, xbmcgui.NOTIFICATION_INFO)
     for match in matches:
-        if match.started:
+        if match.is_stream_enabled():
             url = kodi_helper.build_url({'mode': 'play',
                                          'url': match.url,
                                          'name': match.name.encode('utf-8'),
@@ -76,13 +76,9 @@ def show_available_elh_matches(kodi_helper, tipsport, competitions):
                                                           if xbmc.getLanguage(xbmc.ISO_639_1) == 'cs' else '')
         else:
             plot = '{text} {time}'.format(text=kodi_helper.get_local_string(30002), time=match.start_time)
-        possible_match_icon = kodi_helper.get_match_icon(match.first_team, match.second_team)
-        if possible_match_icon:
-            icon = possible_match_icon
-        else:
-            icon = kodi_helper.get_media(match.icon_name) if match.icon_name else kodi_helper.icon
-        list_item = xbmcgui.ListItem(match.name)
-        list_item.setArt({'icon': icon, 'thumb': icon})
+        icon = kodi_helper.get_media(match.icon_name) if match.icon_name else kodi_helper.icon
+        list_item = xbmcgui.ListItem(match.name, iconImage=icon)
+        list_item.setThumbnailImage(icon)
         list_item.setInfo(type='Video', infoLabels={'Plot': plot})
         xbmcplugin.addDirectoryItem(handle=kodi_helper.plugin_handle, url=url, listitem=list_item)
     xbmcplugin.endOfDirectory(kodi_helper.plugin_handle)
@@ -92,53 +88,65 @@ def show_available_competitions(kodi_helper):
     xbmcplugin.setContent(kodi_helper.plugin_handle, 'movies')
     # CZ Tipsport Extraliga
     icon = kodi_helper.get_media('cz_tipsport_logo.png')
-    list_item = xbmcgui.ListItem('CZ Tipsport Extraliga')
-    list_item.setArt({'icon': icon, 'thumb': icon})
+    list_item = xbmcgui.ListItem('CZ Tipsport Extraliga', iconImage=icon)
+    list_item.setThumbnailImage(icon)
     list_item.setInfo(type='Video', infoLabels={'Plot': kodi_helper.get_local_string(30006)})
     url = kodi_helper.build_url({'mode': 'folder', 'foldername': 'CZ_TIPSPORT'})
     xbmcplugin.addDirectoryItem(handle=kodi_helper.plugin_handle, url=url, listitem=list_item, isFolder=True)
     
     # CZ Chance Liga
     icon = kodi_helper.get_media('cz_chance_liga_logo.png')
-    list_item = xbmcgui.ListItem('CZ Chance Liga')
-    list_item.setArt({'icon': icon, 'thumb': icon})
+    list_item = xbmcgui.ListItem('CZ Chance Liga', iconImage=icon)
+    list_item.setThumbnailImage(icon)
     list_item.setInfo(type='Video', infoLabels={'Plot': kodi_helper.get_local_string(30009)})
     url = kodi_helper.build_url({'mode': 'folder', 'foldername': 'CZ_CHANCE'})
     xbmcplugin.addDirectoryItem(handle=kodi_helper.plugin_handle, url=url, listitem=list_item, isFolder=True)
 
     # SK Tipsport Liga
     icon = kodi_helper.get_media('sk_tipsport_logo.png')
-    list_item = xbmcgui.ListItem('SK Tipsport Liga')
-    list_item.setArt({'icon': icon, 'thumb': icon})
+    list_item = xbmcgui.ListItem('SK Tipsport Liga', iconImage=icon)
+    list_item.setThumbnailImage(icon)
     list_item.setInfo(type='Video', infoLabels={'Plot': kodi_helper.get_local_string(30007)})
     url = kodi_helper.build_url({'mode': 'folder', 'foldername': 'SK_TIPSPORT'})
     xbmcplugin.addDirectoryItem(handle=kodi_helper.plugin_handle, url=url, listitem=list_item, isFolder=True)
 
     xbmcplugin.endOfDirectory(kodi_helper.plugin_handle)
 
-
 def main():
     kodi_helper = KodiHelper(plugin_handle=int(sys.argv[1]),
                              args=sys.argv[2][1:],
                              base_url=sys.argv[0])
-    tipsport = Tipsport(kodi_helper.username, kodi_helper.password, kodi_helper.quality, kodi_helper.remove_tmp_logos)
+    storage = MemStorage('plugin.video.tipsport.elh_' + kodi_helper.version)
+    tipsport_storage_id = 'tsg'
     mode = kodi_helper.get_arg('mode')
     try:
         if mode is None:
-            tipsport.login()
-            show_localized_notification(kodi_helper, 30000, 30001, xbmcgui.NOTIFICATION_INFO)
+            if tipsport_storage_id not in storage:
+                tipsport = Tipsport(kodi_helper.username, kodi_helper.password, kodi_helper.quality)
+                tipsport.login()
+                storage[tipsport_storage_id] = tipsport
             show_available_competitions(kodi_helper)
+
         elif mode == 'folder':
-            tipsport.login()
+            tipsport = storage[tipsport_storage_id]
             show_available_elh_matches(kodi_helper, tipsport, kodi_helper.get_arg('foldername'))
+            storage[tipsport_storage_id] = tipsport
+
         elif mode == 'play':
+            tipsport = storage[tipsport_storage_id]
             stream = tipsport.get_stream(kodi_helper.get_arg('url'))
             title = '{name} ({time})'.format(name=kodi_helper.get_arg('name'), time=kodi_helper.get_arg('start_time'))
             play_video(title, kodi_helper.icon, stream.get_link())
+            storage[tipsport_storage_id] = tipsport
+
         elif mode == 'notification':
             show_notification(kodi_helper.get_arg('title'), kodi_helper.get_arg('message'), xbmcgui.NOTIFICATION_INFO)
+
         elif mode == 'check_login':
+            tipsport = Tipsport(kodi_helper.username, kodi_helper.password, kodi_helper.quality)
             tipsport.login()
+            tipsport.check_login()
+            storage[tipsport_storage_id] = tipsport
             show_localized_notification(kodi_helper, 30000, 30001, xbmcgui.NOTIFICATION_INFO)
     except (NoInternetConnectionsException, requests.ConnectionError, requests.ConnectTimeout, requests.exceptions.ChunkedEncodingError):
         show_localized_notification(kodi_helper, 32000, 32001)
@@ -164,7 +172,7 @@ def main():
         if send_crash_report(kodi_helper, e):
             show_localized_notification(kodi_helper, 32000, 32009)
         else:
-            log(e)
+            log(traceback.format_exc(e))
             show_localized_notification(kodi_helper, 32000, 32008)
 
 

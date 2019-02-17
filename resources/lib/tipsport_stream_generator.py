@@ -153,6 +153,7 @@ class Tipsport:
             self.session.post('https://m.tipsport.cz/rest/client/v1/session', payload)  # actual login
         except Exception as e:
             raise e.__class__   # remove tipsport account credentials from traceback
+        log('Login')
         self.check_login()
 
     def check_login(self):
@@ -167,6 +168,8 @@ class Tipsport:
 
     def get_matches_both_menu_response(self):
         """Get dwr respond with all matches today"""
+        if not self.logged_in:
+            self.login()
         response = self.session.get('https://m.tipsport.cz/rest/articles/v1/tv/program?day=0&articleId=')
         response.encoding = 'utf-8'
         if ('days' not in response.text):
@@ -199,6 +202,7 @@ class Tipsport:
 											     icon_name=icon_name,
                                                  minutes_enable_before_start=15))
         matches.sort(key=lambda match: match.match_time)
+        log('Matches {0} loaded'.format(competition_name))
         return matches
 
     def get_response_dwr_get_stream(self, relative_url, c0_param1):
