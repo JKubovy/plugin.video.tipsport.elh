@@ -76,7 +76,11 @@ def show_available_elh_matches(kodi_helper, tipsport, competitions):
                                                           if xbmc.getLanguage(xbmc.ISO_639_1) == 'cs' else '')
         else:
             plot = '{text} {time}'.format(text=kodi_helper.get_local_string(30002), time=match.start_time)
-        icon = kodi_helper.get_media(match.icon_name) if match.icon_name else kodi_helper.icon
+        possible_match_icon = kodi_helper.get_match_icon(match.first_team, match.second_team)
+        if possible_match_icon:
+            icon = possible_match_icon
+        else:
+            icon = kodi_helper.get_media(match.icon_name) if match.icon_name else kodi_helper.icon
         list_item = xbmcgui.ListItem(match.name, iconImage=icon)
         list_item.setThumbnailImage(icon)
         list_item.setInfo(type='Video', infoLabels={'Plot': plot})
@@ -122,7 +126,7 @@ def main():
     try:
         if mode is None:
             if tipsport_storage_id not in storage:
-                tipsport = Tipsport(kodi_helper.username, kodi_helper.password, kodi_helper.quality)
+                tipsport = Tipsport(kodi_helper.username, kodi_helper.password, kodi_helper.quality, kodi_helper.remove_tmp_logos)
                 tipsport.login()
                 storage[tipsport_storage_id] = tipsport
             show_available_competitions(kodi_helper)
@@ -148,6 +152,7 @@ def main():
             tipsport.check_login()
             storage[tipsport_storage_id] = tipsport
             show_localized_notification(kodi_helper, 30000, 30001, xbmcgui.NOTIFICATION_INFO)
+
     except (NoInternetConnectionsException, requests.ConnectionError, requests.ConnectTimeout, requests.exceptions.ChunkedEncodingError):
         show_localized_notification(kodi_helper, 32000, 32001)
     except LoginFailedException:

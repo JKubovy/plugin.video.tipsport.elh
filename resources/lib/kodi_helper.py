@@ -10,7 +10,6 @@ from tipsport_stream_generator import Quality
 from tipsport_exceptions import TipsportMsg
 from utils import log
 try:
-    import os
     from PIL import Image
     CAN_GENERATE_LOGOS = True
 except:
@@ -145,10 +144,10 @@ class KodiHelper:
             new_img.paste(images[1], (0,0), images[1])
             new_img.paste(images[2], (int(images[0].width/2),0), images[2])
             new_img.paste(images[0], (0,0), images[0])
-            #new_img.save(path)
-            f = xbmcvfs.File(path, 'w')
-            f.write(new_img.tobytes())
-            f.close()
+            new_img.save(path)
+            #f = xbmcvfs.File(path, 'w')
+            #f.write(new_img.tobytes())
+            #f.close()
             log('Saved ({0})'.format(path))
             return True
         except:
@@ -158,5 +157,5 @@ class KodiHelper:
         log('Removing old match logos')
         _, logos = xbmcvfs.listdir(self.tmp_path)
         for logo in fnmatch.filter(logos, '_*.png'):
-            xbmcvfs.delete(logo)
+            xbmcvfs.delete(os.path.join(self.tmp_path, logo))
 

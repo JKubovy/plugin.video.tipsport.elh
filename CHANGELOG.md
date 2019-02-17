@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.5.8] - 2019-2-17
+### Add
+  - Generating match icons
+
 ## [0.5.7] - 2019-2-16
 ### Add
   - Memory Storage for session

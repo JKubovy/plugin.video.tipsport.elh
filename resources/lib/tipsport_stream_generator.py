@@ -134,7 +134,8 @@ class Tipsport:
         self.username = username
         self.password = password
         self.quality = quality
-        clean_function()
+        if clean_function is not None:
+            clean_function()
 
     def login(self):
         """Login to https://m.tipsport.cz site with given credentials"""
