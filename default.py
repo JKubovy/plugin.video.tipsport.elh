@@ -116,6 +116,11 @@ def show_available_competitions(kodi_helper):
 
     xbmcplugin.endOfDirectory(kodi_helper.plugin_handle)
 
+def get_tipsport(kodi_helper):
+    tipsport = Tipsport(kodi_helper.username, kodi_helper.password, kodi_helper.quality)
+    tipsport.login()
+    return tipsport
+
 def main():
     kodi_helper = KodiHelper(plugin_handle=int(sys.argv[1]),
                              args=sys.argv[2][1:],
@@ -126,17 +131,19 @@ def main():
     try:
         if mode is None:
             if tipsport_storage_id not in storage:
-                tipsport = Tipsport(kodi_helper.username, kodi_helper.password, kodi_helper.quality, kodi_helper.remove_tmp_logos)
-                tipsport.login()
-                storage[tipsport_storage_id] = tipsport
+                storage[tipsport_storage_id] = get_tipsport(kodi_helper)
             show_available_competitions(kodi_helper)
 
         elif mode == 'folder':
+            if tipsport_storage_id not in storage:
+                storage[tipsport_storage_id] = get_tipsport(kodi_helper)
             tipsport = storage[tipsport_storage_id]
             show_available_elh_matches(kodi_helper, tipsport, kodi_helper.get_arg('foldername'))
             storage[tipsport_storage_id] = tipsport
 
         elif mode == 'play':
+            if tipsport_storage_id not in storage:
+                storage[tipsport_storage_id] = get_tipsport(kodi_helper)
             tipsport = storage[tipsport_storage_id]
             stream = tipsport.get_stream(kodi_helper.get_arg('url'))
             title = '{name} ({time})'.format(name=kodi_helper.get_arg('name'), time=kodi_helper.get_arg('start_time'))
@@ -147,8 +154,7 @@ def main():
             show_notification(kodi_helper.get_arg('title'), kodi_helper.get_arg('message'), xbmcgui.NOTIFICATION_INFO)
 
         elif mode == 'check_login':
-            tipsport = Tipsport(kodi_helper.username, kodi_helper.password, kodi_helper.quality)
-            tipsport.login()
+            tipsport = get_tipsport(kodi_helper)
             tipsport.check_login()
             storage[tipsport_storage_id] = tipsport
             show_localized_notification(kodi_helper, 30000, 30001, xbmcgui.NOTIFICATION_INFO)
