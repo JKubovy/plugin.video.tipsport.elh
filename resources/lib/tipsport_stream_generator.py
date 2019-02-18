@@ -162,10 +162,15 @@ class Tipsport:
         if (not self.logged_in):
             raise LoginFailedException()
 
+    def relogin_if_needed(self):
+        try:
+            self.check_login()
+        except LoginFailedException:
+            self.login()
+
     def get_matches_both_menu_response(self):
         """Get dwr respond with all matches today"""
-        if not self.logged_in:
-            self.login()
+        self.relogin_if_needed()
         response = self.session.get('https://m.tipsport.cz/rest/articles/v1/tv/program?day=0&articleId=')
         response.encoding = 'utf-8'
         if ('days' not in response.text):
