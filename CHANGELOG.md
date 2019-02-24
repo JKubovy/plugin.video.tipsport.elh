@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.6.0] - 2019-2-24
+### Change
+ - New version with Memory Storage and Generating match logos
+
 ## [0.5.8] - 2019-2-17
 ### Add
   - Generating match icons
