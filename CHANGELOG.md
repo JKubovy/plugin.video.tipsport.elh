@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.6.1] - 2019-3-8
+### Change
+ - Disable match logo generating when path has non-ASCII characters
+
 ## [0.6.0] - 2019-2-24
 ### Change
  - New version with Memory Storage and Generating match logos

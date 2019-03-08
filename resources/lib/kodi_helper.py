@@ -1,4 +1,4 @@
-# coding=utf-8
+# -*- coding: utf-8 -*-
 import os
 import fnmatch
 import urllib
@@ -120,14 +120,20 @@ class KodiHelper:
         return result
 
     def get_tmp_path(self, name):
-        return os.path.join(self.tmp_path, name)
+        try:
+            return os.path.join(self.tmp_path, name)
+        except UnicodeDecodeError:
+            CAN_GENERATE_LOGOS = False
+            return None
+
 
     def get_match_icon(self, name_1, name_2):
         if not self.can_generate_logos or name_1 not in LOGOS or name_2 not in LOGOS:
             return None
         filename = '_' + LOGOS[name_1] + '_VS_' + LOGOS[name_2] + ".png"
         path = self.get_tmp_path(filename)
-        #path = self.get_media(os.path.join(LOGO_BASEPATH, filename))
+        if path is None:
+            return None
         logo_exists = xbmcvfs.exists(path)
         if logo_exists or (not logo_exists and self.generate_icon(LOGOS[name_1], LOGOS[name_2], path)):
             return path
@@ -145,9 +151,6 @@ class KodiHelper:
             new_img.paste(images[2], (int(images[0].width/2),0), images[2])
             new_img.paste(images[0], (0,0), images[0])
             new_img.save(path)
-            #f = xbmcvfs.File(path, 'w')
-            #f.write(new_img.tobytes())
-            #f.close()
             log('Saved ({0})'.format(path))
             return True
         except:
