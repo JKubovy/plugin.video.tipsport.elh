@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+##[0.6.2] -2019-4-3
+### Remve
+ - Inputstream addon version restriction
+
 ## [0.6.1] - 2019-3-8
 ### Change
  - Disable match logo generating when path has non-ASCII characters
