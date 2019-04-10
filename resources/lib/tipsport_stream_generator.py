@@ -137,15 +137,35 @@ class Tipsport:
         if clean_function is not None:
             clean_function()
 
+    def get_session_id(self, text):
+        id = re.search('\'sessionId\': \'(.*?)\',', text)
+        if id:
+            token = id.group(1)
+            return token
+        else:
+            raise LoginFailedException()
+    
+    def try_update_session_XAuthToken(self):
+        try:
+            page = self.session.get('https://m.tipsport.cz')
+            token = self.get_session_id(page.text)
+            self.session.headers.update({'X-Auth-Token': token})
+        except:
+            log('try_update_session_XAuthToken: token not found')
+
     def login(self):
         """Login to https://m.tipsport.cz site with given credentials"""
         page = self.session.get('https://m.tipsport.cz')  # load cookies
-        id = re.search('__SESSID = \'(.*?)\';', page.text)
-        if (id):
-            token = id.group(1)
-            self.session.headers.update({'X-Auth-Token': token})
-        else:
-            raise LoginFailedException()
+        token = self.get_session_id(page.text)
+        self.session.headers.update({'X-Auth-Token': token})
+        #id = re.search('\'sessionId\': \'(.*?)\',', page.text)
+        #if (id):
+        #    token = id.group(1)
+        #    log('sessionID: ' + token)
+        #    self.session.headers.update({'X-Auth-Token': token})
+        #else:
+        #    log('sessionID not found')
+        #    raise LoginFailedException()
         payload = {'username': self.username,
 			        'password': self.password,
 			        'redirect': '/',
@@ -154,17 +174,20 @@ class Tipsport:
             self.session.post('https://m.tipsport.cz/rest/client/v1/session', payload)  # actual login
         except Exception as e:
             raise e.__class__   # remove tipsport account credentials from traceback
+        self.try_update_session_XAuthToken()
         log('Login')
         self.check_login()
 
     def check_login(self):
         """Check if login to https://m.tipsport.cz was successful"""
         page = self.session.get('https://m.tipsport.cz')
-        success = re.search('\'logged\': \'(.*?)\'', page.text)
+        success = re.search('\'logged\': (.*?),', page.text)
         if (success):
+            log('check_login: "' + success.group(1) + '"')
             self.logged_in = success.group(1) == 'true'
             log('Logged in')
         if (not self.logged_in):
+            log('check_login: "logged" not found')
             raise LoginFailedException()
 
     def relogin_if_needed(self):
@@ -176,9 +199,10 @@ class Tipsport:
     def get_matches_both_menu_response(self):
         """Get dwr respond with all matches today"""
         self.relogin_if_needed()
-        response = self.session.get('https://m.tipsport.cz/rest/articles/v1/tv/program?day=0&articleId=')
+        response = self.session.get('https://m.tipsport.cz/rest/articles/v1/tv/program?columnId=23&day=0&countPerPage=1')
         response.encoding = 'utf-8'
         if ('days' not in response.text):
+            log(response.text)
             raise UnableGetStreamListException()
         else:
             return response

@@ -1,8 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-##[0.6.2] -2019-4-3
-### Remve
+##[0.6.3] - 2019-4-10
+###Fix
+ - New login system
+
+##[0.6.2] - 2019-4-3
+### Remove
  - Inputstream addon version restriction
 
 ## [0.6.1] - 2019-3-8
