@@ -1,11 +1,15 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-##[0.6.3] - 2019-4-10
-###Fix
+## [0.6.4] - 2019-9-28
+### Add
+ - Slovak language
+
+## [0.6.3] - 2019-4-10
+### Fix
  - New login system
 
-##[0.6.2] - 2019-4-3
+## [0.6.2] - 2019-4-3
 ### Remove
  - Inputstream addon version restriction
 

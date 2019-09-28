@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<strings>
+    <string id="30000">OK</string>
+    <string id="30001">Prihlásenie prebehlo v poriadku</string>
+    <string id="30002">Začiatok zápasu v</string>
+    <string id="30003">Stav</string>
+    <string id="30004">INFO</string>
+    <string id="30005">Dnes žiadne zápasy neprebiehajú</string>
+    <string id="30006">Extraliga ledního hokeje je najvyššia súťaž v ľadovom hokeji, ktorá je usporiadaná na území Českej republiky.</string>
+    <string id="30007">Tipsport liga je najvyššia klubová súťaž na slovenskom v ľadovom hokeji, ktorú organizuje Slovenský zväz ľadového hokeja.</string>
+    <string id="30008">Stream ešte nebol spustený</string>
+    <string id="30009">1. česká hokejová liga, od sezóny 2018/2019 nazývaná podľa svojho titulárneho partnera Chance liga, je druhá najvyššia hokejová súťaž v Českej republike.</string>
+
+    <string id="31000">Tipsport Účet</string>
+    <string id="31001">Email</string>
+    <string id="31002">Heslo</string>
+    <string id="31003">Skontrolovať prihlásenie</string>
+    <string id="31004">Chybové hlášky</string>
+    <string id="31005">Odosielať anonymné chybové hlásenie</string>
+    <string id="31006">Preferovaná kvalita</string>
+    <string id="31007">360p</string>
+    <string id="31008">540p</string>
+    <string id="31009">720p</string>
+    <string id="31010">Generovať loga zápasov</string>
+
+    <string id="32000">Chyba</string>
+    <string id="32001">Skontrolujte internetové pripojenie</string>
+    <string id="32002">Prihlásenie zlyhalo. Skontrolujte užívateľské meno/heslo v nastavení</string>
+    <string id="32003">Nepodarilo sa získať informácie o videu</string>
+    <string id="32004">Nepodarilo sa spracovať informácie o videu</string>
+    <string id="32005">Nepodporované informácie o videu</string>
+    <string id="32006">Nepodarilo sa získať scriptSessionId</string>
+    <string id="32007">Nepodarilo sa získať StreamNumber</string>
+    <string id="32008">Neznáma chyba, prosíme o zaslanie chybového hlásenia</string>
+    <string id="32009">Anonymné chybové hlásenie bolo odoslané</string>
+    <string id="32010">Nepodarilo sa získať zoznam prenosov. Opakujte akciu</string>
+</strings>
