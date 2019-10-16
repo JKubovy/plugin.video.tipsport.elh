@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <settings>
     <category  label="31000">
+        <setting id="site" type="select" label="31011" lvalues="31012|31013" default="0"/>
         <setting id="username" type="text" label="31001" default=""/>
 	      <setting id="password" type="text" option="hidden" label="31002" default=""/>
         <setting id="quality" type="select" label="31006" lvalues="31007|31008|31009" default="2"/>

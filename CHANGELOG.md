@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.6.5] - 2019-10-16
+### Add
+  - Tipsport.sk support [experimental]
+
 ## [0.6.4] - 2019-9-28
 ### Add
  - Slovak language
