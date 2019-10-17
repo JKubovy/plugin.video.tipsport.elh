@@ -50,6 +50,19 @@ class Quality(object):
     HIGH = 2
 
 
+class Site(object):
+    @staticmethod
+    def parse(str_site):
+        if str_site == '0':
+            return Site.CZ
+        elif str_site == '1':
+            return Site.SK
+        else:
+            raise UnknownException('Unknown site')
+    CZ = 'tipsport.cz'
+    SK = 'tipsport.sk'
+
+
 class Match:
     """Class represents one match with additional information"""
 
@@ -126,14 +139,16 @@ class HLSStream:
 
 
 class Tipsport:
-    """Class providing communication with Tipsport.cz site"""
+    """Class providing communication with Tipsport site"""
 
-    def __init__(self, username, password, quality, clean_function=None):
+    def __init__(self, username, password, quality, site, clean_function=None):
         self.session = requests.session()
         self.logged_in = False
         self.username = username
         self.password = password
         self.quality = quality
+        self.site = 'https://www.' + site
+        self.site_mobile = 'https://m.' + site
         if clean_function is not None:
             clean_function()
 
@@ -147,15 +162,15 @@ class Tipsport:
     
     def try_update_session_XAuthToken(self):
         try:
-            page = self.session.get('https://m.tipsport.cz')
+            page = self.session.get(self.site_mobile)
             token = self.get_session_id(page.text)
             self.session.headers.update({'X-Auth-Token': token})
         except:
             log('try_update_session_XAuthToken: token not found')
 
     def login(self):
-        """Login to https://m.tipsport.cz site with given credentials"""
-        page = self.session.get('https://m.tipsport.cz')  # load cookies
+        """Login to mobile tipsport site with given credentials"""
+        page = self.session.get(self.site_mobile)  # load cookies
         token = self.get_session_id(page.text)
         self.session.headers.update({'X-Auth-Token': token})
         #id = re.search('\'sessionId\': \'(.*?)\',', page.text)
@@ -171,7 +186,7 @@ class Tipsport:
 			        'redirect': '/',
 			        'token': token}
         try:
-            self.session.post('https://m.tipsport.cz/rest/client/v1/session', payload)  # actual login
+            self.session.post(self.site_mobile + '/rest/client/v1/session', payload)  # actual login
         except Exception as e:
             raise e.__class__   # remove tipsport account credentials from traceback
         self.try_update_session_XAuthToken()
@@ -179,8 +194,8 @@ class Tipsport:
         self.check_login()
 
     def check_login(self):
-        """Check if login to https://m.tipsport.cz was successful"""
-        page = self.session.get('https://m.tipsport.cz')
+        """Check if login was successful"""
+        page = self.session.get(self.site_mobile)
         success = re.search('\'logged\': (.*?),', page.text)
         if (success):
             log('check_login: "' + success.group(1) + '"')
@@ -199,7 +214,7 @@ class Tipsport:
     def get_matches_both_menu_response(self):
         """Get dwr respond with all matches today"""
         self.relogin_if_needed()
-        response = self.session.get('https://m.tipsport.cz/rest/articles/v1/tv/program?columnId=23&day=0&countPerPage=1')
+        response = self.session.get(self.site_mobile + '/rest/articles/v1/tv/program?columnId=23&day=0&countPerPage=1')
         response.encoding = 'utf-8'
         if ('days' not in response.text):
             log(response.text)
@@ -208,7 +223,7 @@ class Tipsport:
             return response
 
     def get_list_elh_matches(self, competition_name):
-        """Get list of all available ELH matches on https://www.tipsport.cz/tv"""
+        """Get list of all available ELH matches on tipsport site"""
         response = self.get_matches_both_menu_response()
         data = json.loads(response.text)
         if competition_name in COMPETITION_LOGO:
@@ -236,11 +251,11 @@ class Tipsport:
         return matches
 
     def get_response_dwr_get_stream(self, relative_url, c0_param1):
-        stream_url = 'https://www.tipsport.cz/live' + relative_url
+        stream_url = self.site + '/live' + relative_url
         page = self.session.get(stream_url)
         token = get_token(page.text)
         relative_url = relative_url.split('#')[0]
-        dwr_script = 'https://www.tipsport.cz/dwr/call/plaincall/StreamDWR.getStream.dwr'
+        dwr_script = self.site + '/dwr/call/plaincall/StreamDWR.getStream.dwr'
         payload = {'callCount': 1,
                     'page': relative_url,
                     'httpSessionId': '',
@@ -350,7 +365,7 @@ class Tipsport:
             else:
                 raise UnableGetStreamMetadataException()
         elif stream_source == 'MANUAL':
-            stream_url = 'https://www.tipsport.cz/live' + relative_url
+            stream_url = self.site + '/live' + relative_url
             page = self.session.get(stream_url)
             return self.get_hls_stream_from_page(page.text)
         elif stream_source == 'HUSTE':
@@ -363,7 +378,7 @@ class Tipsport:
         Return any alert message from Tipsport (like bet request)
         Return None if everything is OK
         """
-        page = self.session.get('https://m.tipsport.cz/rest/articles/v1/tv/info')
+        page = self.session.get(self.site_mobile + '/rest/articles/v1/tv/info')
         name = 'buttonDescription'
         try:
             data = json.loads(page.text)
@@ -393,8 +408,7 @@ class Tipsport:
     def get_stream_source_type_and_data(self, relative_url):
         """Get source and type of stream"""
         stream_number = get_stream_number(relative_url)
-        foramt = 'HLS'
-        base_url = 'https://m.tipsport.cz/rest/offer/v2/live/matches/{stream_number}/stream?deviceType=DESKTOP'.format(stream_number=stream_number)
+        base_url = self.site_mobile + '/rest/offer/v2/live/matches/{stream_number}/stream?deviceType=DESKTOP'.format(stream_number=stream_number)
         url = base_url + '&format=HLS'
         response = self.session.get(url)
         try:

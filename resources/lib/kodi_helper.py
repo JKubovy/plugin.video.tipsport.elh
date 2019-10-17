@@ -6,7 +6,7 @@ import urlparse
 import xbmc
 import xbmcaddon
 import xbmcvfs
-from tipsport_stream_generator import Quality
+from tipsport_stream_generator import Quality, Site
 from tipsport_exceptions import TipsportMsg
 from utils import log
 try:
@@ -78,6 +78,7 @@ class KodiHelper:
         self.username = addon.getSetting('username')
         self.password = addon.getSetting('password')
         self.quality = self.__get_quality(addon)
+        self.site = self.__get_site(addon)
         self.send_crash_reports = True if addon.getSetting('send_crash_reports') == 'true' else False
         self.icon = addon.getAddonInfo('icon')
         self.can_generate_logos = CAN_GENERATE_LOGOS and (addon.getSetting('generate_logos') == 'true')
@@ -85,6 +86,10 @@ class KodiHelper:
     @staticmethod
     def __get_quality(addon):
         return Quality.parse(addon.getSetting('quality'))
+
+    @staticmethod
+    def __get_site(addon):
+        return Site.parse(addon.getSetting('site'))
 
     @staticmethod
     def get_addon():

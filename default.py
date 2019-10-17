@@ -29,7 +29,7 @@ def send_crash_report(kodi_helper, exception):
             return True
         else:
             return False
-    except requests.ConnectionError, requests.ConnectTimeout:
+    except (requests.ConnectionError, requests.ConnectTimeout):
         return False
 
 
@@ -117,7 +117,7 @@ def show_available_competitions(kodi_helper):
     xbmcplugin.endOfDirectory(kodi_helper.plugin_handle)
 
 def get_tipsport(kodi_helper):
-    tipsport = Tipsport(kodi_helper.username, kodi_helper.password, kodi_helper.quality)
+    tipsport = Tipsport(kodi_helper.username, kodi_helper.password, kodi_helper.quality, kodi_helper.site)
     tipsport.login()
     return tipsport
 
