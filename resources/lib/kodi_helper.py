@@ -59,7 +59,9 @@ LOGOS = { # CZ Tipsport
          u'Liptovský Mikuláš':u'liptovsky_mikulas',
          u'Nitra':u'nitra',
          u'Poprad':u'poprad',
-         u'Zvolen':u'zvolen'
+         u'Zvolen':u'zvolen',
+         u'Michalovce':u'michalovce',
+         u'Slovan':u'slovan'
         }
 
 class KodiHelper:

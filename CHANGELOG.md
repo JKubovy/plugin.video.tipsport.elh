@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.6.6] - 2019-10-20
+### Fix
+  - Tipsport.sk streams [experimental]
+### Add
+  - Slovan and Michalovce logo
+
 ## [0.6.5] - 2019-10-16
 ### Add
   - Tipsport.sk support [experimental]
@@ -43,14 +49,14 @@ All notable changes to this project will be documented in this file.
   - Unable get streams
 
 ## [0.5.4] - 2019-1-23
-### Added
+### Add
   - Persistant Storage (reuse session)
   - Logger
 ### Improve
   - Loading speed
 
 ## [0.5.3] - 2019-1-16
-### Added
+### Add
   - CZ Chance League
 
 ## [0.5.2] - 2018-12-2
@@ -58,7 +64,7 @@ All notable changes to this project will be documented in this file.
   - No internet connection exception catching
 
 ## [0.5.1] - 2018-12-1
-### Added
+### Add
   - Full name for K.Vary
 ### Change
   - Login to mobile web version

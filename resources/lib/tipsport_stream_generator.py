@@ -357,7 +357,7 @@ class Tipsport:
         if alert_text:
             raise TipsportMsg(alert_text)
         stream_source, stream_type, url = self.get_stream_source_type_and_data(relative_url)
-        if stream_source == 'LIVEBOX_ELH':
+        if stream_source in ['LIVEBOX_ELH', 'LIVEBOX_SK']:
             if stream_type == 'RTMP':
                 return self.decode_rtmp_url(url)
             elif stream_type == 'HLS':
