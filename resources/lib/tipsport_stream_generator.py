@@ -170,23 +170,13 @@ class Tipsport:
 
     def login(self):
         """Login to mobile tipsport site with given credentials"""
-        page = self.session.get(self.site_mobile)  # load cookies
-        token = self.get_session_id(page.text)
-        self.session.headers.update({'X-Auth-Token': token})
-        #id = re.search('\'sessionId\': \'(.*?)\',', page.text)
-        #if (id):
-        #    token = id.group(1)
-        #    log('sessionID: ' + token)
-        #    self.session.headers.update({'X-Auth-Token': token})
-        #else:
-        #    log('sessionID not found')
-        #    raise LoginFailedException()
-        payload = {'username': self.username,
-			        'password': self.password,
-			        'redirect': '/',
-			        'token': token}
+        page = self.session.get(self.site)  # load cookies
+        #token = self.get_session_id(page.text)
+        #self.session.headers.update({'X-Auth-Token': token})
+        payload = {'userName': self.username,
+			       'password': self.password}
         try:
-            self.session.post(self.site_mobile + '/rest/client/v1/session', payload)  # actual login
+            self.session.post(self.site + '/LoginAction.do', payload)  # actual login
         except Exception as e:
             raise e.__class__   # remove tipsport account credentials from traceback
         self.try_update_session_XAuthToken()

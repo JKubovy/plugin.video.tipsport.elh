@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.6.7] - 2020-1-16
+### Fix
+  - New login system
+
 ## [0.6.6] - 2019-10-20
 ### Fix
   - Tipsport.sk streams [experimental]
