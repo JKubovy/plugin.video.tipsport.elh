@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.6.8] - 2020-3-11
+### Fix
+  - New login system (again)
+
 ## [0.6.7] - 2020-1-16
 ### Fix
   - New login system

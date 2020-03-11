@@ -33,6 +33,9 @@ COMPETITION_LOGO = {'CZ_TIPSPORT': 'cz_tipsport_logo.png',
                     'CZ_CHANCE': 'cz_chance_liga_logo.png'
                    }
 
+AGENT = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 " \
+        "Safari/537.36 OPR/42.0.2393.137 "
+
 
 class Quality(object):
     @staticmethod
@@ -174,7 +177,11 @@ class Tipsport:
         #token = self.get_session_id(page.text)
         #self.session.headers.update({'X-Auth-Token': token})
         payload = {'userName': self.username,
-			       'password': self.password}
+			       'password': self.password,
+                   'fPrint': generate_random_number(),
+                   'originalBrowserUri': '/',
+                   'agent': AGENT
+                    }
         try:
             self.session.post(self.site + '/LoginAction.do', payload)  # actual login
         except Exception as e:
@@ -186,7 +193,7 @@ class Tipsport:
     def check_login(self):
         """Check if login was successful"""
         page = self.session.get(self.site_mobile)
-        success = re.search('\'logged\': (.*?),', page.text)
+        success = re.search('\'logged\': \'(.*?)\'', page.text)
         if (success):
             log('check_login: "' + success.group(1) + '"')
             self.logged_in = success.group(1) == 'true'
