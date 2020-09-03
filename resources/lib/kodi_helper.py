@@ -16,53 +16,54 @@ except:
     CAN_GENERATE_LOGOS = False
 
 LOGO_BASEPATH = 'LOGOS'
-LOGOS = { # CZ Tipsport
-         u'Chomutov':u'chomutov',
-         u'Kometa Brno':u'kometa_brno',
-         u'Karlovy Vary':u'karlovy_vary',
-         u'Liberec':u'liberec',
-         u'Litvínov':u'litvinov',
-         u'Mladá Boleslav':u'mlada_boleslav',
-         u'Hradec Králové':u'hradec_kralove',
-         u'Olomouc':u'olomouc',
-         u'Pardubice':u'pardubice',
-         u'Plzeň':u'plzen',
-         u'Sparta Praha':u'sparta_praha',
-         u'Třinec':u'trinec',
-         u'Vítkovice':u'vitkovice',
-         u'Zlín':u'zlin',
-         # CZ Chance
-         u'Benátky nad Jizerou':u'benatky_nad_jizerou',
-         u'České Budějovice':u'ceske_budejovice',
-         u'Frýdek-Místek':u'frydek_mistek',
-         u'Havířov':u'havirov',
-         u'Jihlava':u'jihlava',
-         u'Kadaň':u'kadan',
-         u'Kladno':u'kladno',
-         u'Litoměřice':u'litomerice',
-         u'Poruba':u'poruba',
-         u'Přerov':u'prerov',
-         u'Prostějov':u'prostejov',
-         u'Slavia Praha':u'slavia_praha',
-         u'Třebíč':u'trebic',
-         u'Ústí nad Labem':u'usti_nad_labem',
-         u'Vsetín':u'vsetin',
-         # SK Tipsport
-         u'Košice':u'kosice',
-         u'Miskolc':u'miskolc',
-         u'Žilina':u'zilina',
-         u'Nové Zámky':u'nove_zamky',
-         u'Banská Bystrica':u'banska_bystrica',
-         u'MAC Budapest':u'budapest',
-         u'Detva':u'detva',
-         u'Trenčín':u'dukla_trencin',
-         u'Liptovský Mikuláš':u'liptovsky_mikulas',
-         u'Nitra':u'nitra',
-         u'Poprad':u'poprad',
-         u'Zvolen':u'zvolen',
-         u'Michalovce':u'michalovce',
-         u'Slovan':u'slovan'
-        }
+LOGOS = {  # CZ Tipsport
+    u'Chomutov': u'chomutov',
+    u'Kometa Brno': u'kometa_brno',
+    u'Karlovy Vary': u'karlovy_vary',
+    u'Liberec': u'liberec',
+    u'Litvínov': u'litvinov',
+    u'Mladá Boleslav': u'mlada_boleslav',
+    u'Hradec Králové': u'hradec_kralove',
+    u'Olomouc': u'olomouc',
+    u'Pardubice': u'pardubice',
+    u'Plzeň': u'plzen',
+    u'Sparta Praha': u'sparta_praha',
+    u'Třinec': u'trinec',
+    u'Vítkovice': u'vitkovice',
+    u'Zlín': u'zlin',
+    # CZ Chance
+    u'Benátky nad Jizerou': u'benatky_nad_jizerou',
+    u'České Budějovice': u'ceske_budejovice',
+    u'Frýdek-Místek': u'frydek_mistek',
+    u'Havířov': u'havirov',
+    u'Jihlava': u'jihlava',
+    u'Kadaň': u'kadan',
+    u'Kladno': u'kladno',
+    u'Litoměřice': u'litomerice',
+    u'Poruba': u'poruba',
+    u'Přerov': u'prerov',
+    u'Prostějov': u'prostejov',
+    u'Slavia Praha': u'slavia_praha',
+    u'Třebíč': u'trebic',
+    u'Ústí nad Labem': u'usti_nad_labem',
+    u'Vsetín': u'vsetin',
+    # SK Tipsport
+    u'Košice': u'kosice',
+    u'Miskolc': u'miskolc',
+    u'Žilina': u'zilina',
+    u'Nové Zámky': u'nove_zamky',
+    u'Banská Bystrica': u'banska_bystrica',
+    u'MAC Budapest': u'budapest',
+    u'Detva': u'detva',
+    u'Trenčín': u'dukla_trencin',
+    u'Liptovský Mikuláš': u'liptovsky_mikulas',
+    u'Nitra': u'nitra',
+    u'Poprad': u'poprad',
+    u'Zvolen': u'zvolen',
+    u'Michalovce': u'michalovce',
+    u'Slovan': u'slovan'
+}
+
 
 class KodiHelper:
     """Store all the configuration data from Kodi"""
@@ -133,7 +134,6 @@ class KodiHelper:
             CAN_GENERATE_LOGOS = False
             return None
 
-
     def get_match_icon(self, name_1, name_2):
         if not self.can_generate_logos or name_1 not in LOGOS or name_2 not in LOGOS:
             return None
@@ -149,14 +149,16 @@ class KodiHelper:
 
     def generate_icon(self, name_1, name_2, path):
         try:
-            images = list(map(Image.open, [self.get_logo('vs.png'),
-                                           self.get_logo(name_1 + '.png'),
-                                           self.get_logo(name_2 + '.png')]))
+            images = list(
+                map(Image.open,
+                    [self.get_logo('vs.png'),
+                     self.get_logo(name_1 + '.png'),
+                     self.get_logo(name_2 + '.png')]))
             new_img = Image.new('RGB', (images[0].width, images[0].height))
             new_img.putalpha(0)
-            new_img.paste(images[1], (0,0), images[1])
-            new_img.paste(images[2], (int(images[0].width/2),0), images[2])
-            new_img.paste(images[0], (0,0), images[0])
+            new_img.paste(images[1], (0, 0), images[1])
+            new_img.paste(images[2], (int(images[0].width / 2), 0), images[2])
+            new_img.paste(images[0], (0, 0), images[0])
             new_img.save(path)
             log('Saved ({0})'.format(path))
             return True
@@ -168,4 +170,3 @@ class KodiHelper:
         _, logos = xbmcvfs.listdir(self.tmp_path)
         for logo in fnmatch.filter(logos, '_*.png'):
             xbmcvfs.delete(os.path.join(self.tmp_path, logo))
-

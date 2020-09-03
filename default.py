@@ -41,7 +41,7 @@ def play_video(title, icon, link, media_type='Video'):
     xbmc.Player().play(item=link, listitem=list_item)
 
 
-def show_notification(heading_string,  message_string, icon):
+def show_notification(heading_string, message_string, icon):
     """Show Kodi notification with given strings"""
     xbmcgui.Dialog().notification(heading_string, message_string, icon)
 
@@ -61,19 +61,23 @@ def show_available_elh_matches(kodi_helper, tipsport, competitions):
         show_localized_notification(kodi_helper, 30004, 30005, xbmcgui.NOTIFICATION_INFO)
     for match in matches:
         if match.is_stream_enabled():
-            url = kodi_helper.build_url({'mode': 'play',
-                                         'url': match.url,
-                                         'name': match.name.encode('utf-8'),
-                                         'start_time': match.start_time})
+            url = kodi_helper.build_url({
+                'mode': 'play',
+                'url': match.url,
+                'name': match.name.encode('utf-8'),
+                'start_time': match.start_time
+            })
         else:
-            url = kodi_helper.build_url({'mode': 'notification',
-                                         'title': match.name.encode('utf-8'),
-                                         'message': kodi_helper.get_local_string(30008)})
+            url = kodi_helper.build_url({
+                'mode': 'notification',
+                'title': match.name.encode('utf-8'),
+                'message': kodi_helper.get_local_string(30008)
+            })
         if match.started:
-            plot = '\n{text}: {score:<20}{status}'.format(text=kodi_helper.get_local_string(30003),
-                                                          score=match.score,
-                                                          status=match.status.encode('utf-8')
-                                                          if xbmc.getLanguage(xbmc.ISO_639_1) == 'cs' else '')
+            plot = '\n{text}: {score:<20}{status}'.format(
+                text=kodi_helper.get_local_string(30003),
+                score=match.score,
+                status=match.status.encode('utf-8') if xbmc.getLanguage(xbmc.ISO_639_1) == 'cs' else '')
         else:
             plot = '{text} {time}'.format(text=kodi_helper.get_local_string(30002), time=match.start_time)
         possible_match_icon = kodi_helper.get_match_icon(match.first_team, match.second_team)
@@ -97,7 +101,7 @@ def show_available_competitions(kodi_helper):
     list_item.setInfo(type='Video', infoLabels={'Plot': kodi_helper.get_local_string(30006)})
     url = kodi_helper.build_url({'mode': 'folder', 'foldername': 'CZ_TIPSPORT'})
     xbmcplugin.addDirectoryItem(handle=kodi_helper.plugin_handle, url=url, listitem=list_item, isFolder=True)
-    
+
     # CZ Chance Liga
     icon = kodi_helper.get_media('cz_chance_liga_logo.png')
     list_item = xbmcgui.ListItem('CZ Chance Liga', iconImage=icon)
@@ -116,15 +120,15 @@ def show_available_competitions(kodi_helper):
 
     xbmcplugin.endOfDirectory(kodi_helper.plugin_handle)
 
+
 def get_tipsport(kodi_helper):
     tipsport = Tipsport(kodi_helper.username, kodi_helper.password, kodi_helper.quality, kodi_helper.site, None)
     tipsport.login()
     return tipsport
 
+
 def main():
-    kodi_helper = KodiHelper(plugin_handle=int(sys.argv[1]),
-                             args=sys.argv[2][1:],
-                             base_url=sys.argv[0])
+    kodi_helper = KodiHelper(plugin_handle=int(sys.argv[1]), args=sys.argv[2][1:], base_url=sys.argv[0])
     storage = MemStorage('plugin.video.tipsport.elh_' + kodi_helper.version)
     tipsport_storage_id = 'tsg'
     mode = kodi_helper.get_arg('mode')
@@ -159,7 +163,8 @@ def main():
             storage[tipsport_storage_id] = tipsport
             show_localized_notification(kodi_helper, 30000, 30001, xbmcgui.NOTIFICATION_INFO)
 
-    except (NoInternetConnectionsException, requests.ConnectionError, requests.ConnectTimeout, requests.exceptions.ChunkedEncodingError):
+    except (NoInternetConnectionsException, requests.ConnectionError, requests.ConnectTimeout,
+            requests.exceptions.ChunkedEncodingError):
         show_localized_notification(kodi_helper, 32000, 32001)
     except LoginFailedException:
         show_localized_notification(kodi_helper, 32000, 32002)

@@ -11,6 +11,7 @@ try:
 except ImportError:
     import pickle
 
+
 class MemStorage(MutableMapping):
     """
     MemStorage(storage_id)
@@ -119,4 +120,3 @@ class MemStorage(MutableMapping):
 
     def __len__(self):
         return len(self['__keys__'])
-

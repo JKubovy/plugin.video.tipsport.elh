@@ -8,33 +8,35 @@ import time
 from datetime import datetime, timedelta
 import _strptime
 import xml.etree.ElementTree
-from tipsport_exceptions import *
-from utils import log
+from .tipsport_exceptions import *
+from .utils import log
 
-COMPETITIONS = {'CZ_TIPSPORT': [u'Česká Tipsport extraliga', u'Tipsport extraliga', u'CZ Tipsport extraliga'],
-                'SK_TIPSPORT': [u'Slovenská Tipsport liga', u'Slovensk\u00E1 Tipsport liga', u'Tipsport Liga'],
-                'CZ_CHANCE': [u'Česká Chance liga', u'CZ Chance liga']
-               }
-FULL_NAMES = {u'H.Králové': u'Hradec Králové',
-              u'M.Boleslav': u'Mladá Boleslav',
-              u'K.Vary': u'Karlovy Vary',
-              u'SR 20': u'Slovensko 20',
-              u'L.Mikuláš': u'Liptovský Mikuláš',
-              u'N.Zámky': u'Nové Zámky',
-              u'HK Poprad': u'Poprad',
-              u'B.Bystrica': u'Banská Bystrica',
-              u'Fr.Místek':u'Frýdek-Místek',
-              u'Ústí': u'Ústí nad Labem',
-              u'Benátky': u'Benátky nad Jizerou',
-              u'Č.Budějovice': u'České Budějovice'
-              }
-COMPETITION_LOGO = {'CZ_TIPSPORT': 'cz_tipsport_logo.png',
-                    'SK_TIPSPORT': 'sk_tipsport_logo.png',
-                    'CZ_CHANCE': 'cz_chance_liga_logo.png'
-                   }
+COMPETITIONS = {
+    'CZ_TIPSPORT': [u'Česká Tipsport extraliga', u'Tipsport extraliga', u'CZ Tipsport extraliga'],
+    'SK_TIPSPORT': [u'Slovenská Tipsport liga', u'Slovensk\u00E1 Tipsport liga', u'Tipsport Liga'],
+    'CZ_CHANCE': [u'Česká Chance liga', u'CZ Chance liga']
+}
+FULL_NAMES = {
+    u'H.Králové': u'Hradec Králové',
+    u'M.Boleslav': u'Mladá Boleslav',
+    u'K.Vary': u'Karlovy Vary',
+    u'SR 20': u'Slovensko 20',
+    u'L.Mikuláš': u'Liptovský Mikuláš',
+    u'N.Zámky': u'Nové Zámky',
+    u'HK Poprad': u'Poprad',
+    u'B.Bystrica': u'Banská Bystrica',
+    u'Fr.Místek': u'Frýdek-Místek',
+    u'Ústí': u'Ústí nad Labem',
+    u'Benátky': u'Benátky nad Jizerou',
+    u'Č.Budějovice': u'České Budějovice'
+}
+COMPETITION_LOGO = {
+    'CZ_TIPSPORT': 'cz_tipsport_logo.png',
+    'SK_TIPSPORT': 'sk_tipsport_logo.png',
+    'CZ_CHANCE': 'cz_chance_liga_logo.png'
+}
 
-AGENT = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 " \
-        "Safari/537.36 OPR/42.0.2393.137 "
+AGENT = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 " "Safari/537.36 OPR/42.0.2393.137 "
 
 
 class Quality(object):
@@ -48,6 +50,7 @@ class Quality(object):
             return Quality.HIGH
         else:
             raise UnknownException('Unknown quality')
+
     LOW = 0
     MID = 1
     HIGH = 2
@@ -62,13 +65,13 @@ class Site(object):
             return Site.SK
         else:
             raise UnknownException('Unknown site')
+
     CZ = 'tipsport.cz'
     SK = 'tipsport.sk'
 
 
 class Match:
     """Class represents one match with additional information"""
-
     def __init__(self, name, competition, sport, url, start_time, status, not_started, score, icon_name,
                  minutes_enable_before_start):
         self.first_team, self.second_team, self.name = self.parse_name(name)
@@ -82,7 +85,7 @@ class Match:
         self.icon_name = icon_name
         self.minutes_enable_before_start = minutes_enable_before_start
         self.match_time = self.get_match_time()
-    
+
     def get_match_time(self):
         now = datetime.now()
         match_time = datetime(*(time.strptime(self.start_time, '%H:%M')[0:6]))
@@ -117,7 +120,6 @@ class Match:
 
 class RTMPStream:
     """Class represent one stream and store metadata used to generate rtmp stream link"""
-
     def __init__(self, rtmp_url, playpath, app, live_stream):
         self.rtmp_url = rtmp_url
         self.playpath = playpath
@@ -133,7 +135,6 @@ class RTMPStream:
 
 class HLSStream:
     """Class represent one stream and store metadata used to generate hls stream link"""
-
     def __init__(self, url):
         self.url = url.strip()
 
@@ -143,7 +144,6 @@ class HLSStream:
 
 class Tipsport:
     """Class providing communication with Tipsport site"""
-
     def __init__(self, username, password, quality, site, clean_function=None):
         self.session = requests.session()
         self.logged_in = False
@@ -162,7 +162,7 @@ class Tipsport:
             return token
         else:
             raise LoginFailedException()
-    
+
     def try_update_session_XAuthToken(self):
         try:
             page = self.session.get(self.site_mobile)
@@ -176,16 +176,17 @@ class Tipsport:
         page = self.session.get(self.site)  # load cookies
         #token = self.get_session_id(page.text)
         #self.session.headers.update({'X-Auth-Token': token})
-        payload = {'userName': self.username,
-			       'password': self.password,
-                   'fPrint': generate_random_number(),
-                   'originalBrowserUri': '/',
-                   'agent': AGENT
-                    }
+        payload = {
+            'userName': self.username,
+            'password': self.password,
+            'fPrint': generate_random_number(),
+            'originalBrowserUri': '/',
+            'agent': AGENT
+        }
         try:
             self.session.post(self.site + '/LoginAction.do', payload)  # actual login
         except Exception as e:
-            raise e.__class__   # remove tipsport account credentials from traceback
+            raise e.__class__  # remove tipsport account credentials from traceback
         self.try_update_session_XAuthToken()
         log('Login')
         self.check_login()
@@ -233,16 +234,17 @@ class Tipsport:
                 for part in sport['matchesByTimespans']:
                     for match in part:
                         if match['competition'] in COMPETITIONS[competition_name]:
-                            matches.append(Match(name=match['name'],
-											     competition=match['competition'],
-											     sport=match['sport'],
-											     url=match['url'],
-											     start_time=match['matchStartTime'],
-											     status=match['score']['statusOffer'],
-											     not_started=not match['live'],
-											     score=match['score']['scoreOffer'],
-											     icon_name=icon_name,
-                                                 minutes_enable_before_start=15))
+                            matches.append(
+                                Match(name=match['name'],
+                                      competition=match['competition'],
+                                      sport=match['sport'],
+                                      url=match['url'],
+                                      start_time=match['matchStartTime'],
+                                      status=match['score']['statusOffer'],
+                                      not_started=not match['live'],
+                                      score=match['score']['scoreOffer'],
+                                      icon_name=icon_name,
+                                      minutes_enable_before_start=15))
         matches.sort(key=lambda match: match.match_time)
         log('Matches {0} loaded'.format(competition_name))
         return matches
@@ -253,16 +255,18 @@ class Tipsport:
         token = get_token(page.text)
         relative_url = relative_url.split('#')[0]
         dwr_script = self.site + '/dwr/call/plaincall/StreamDWR.getStream.dwr'
-        payload = {'callCount': 1,
-                    'page': relative_url,
-                    'httpSessionId': '',
-                    'scriptSessionId': token,
-                    'c0-scriptName': 'StreamDWR',
-                    'c0-methodName': 'getStream',
-                    'c0-id': 0,
-                    'c0-param0': 'number:{0}'.format(get_stream_number(relative_url)),
-                    'c0-param1': 'string:{0}'.format(c0_param1),
-                    'batchId': 9}
+        payload = {
+            'callCount': 1,
+            'page': relative_url,
+            'httpSessionId': '',
+            'scriptSessionId': token,
+            'c0-scriptName': 'StreamDWR',
+            'c0-methodName': 'getStream',
+            'c0-id': 0,
+            'c0-param0': 'number:{0}'.format(get_stream_number(relative_url)),
+            'c0-param1': 'string:{0}'.format(c0_param1),
+            'batchId': 9
+        }
         response = self.session.post(dwr_script, payload)
         return response
 
@@ -321,8 +325,7 @@ class Tipsport:
         if response_type == 'RTMP_URL':
             if re.search('value:"?(.*?)"?}', response.content.decode('unicode-escape')).group(1).lower() == 'null':
                 raise UnableGetStreamMetadataException()
-            urls = re.findall('(rtmp.*?)"',
-                                response.content.decode('unicode-escape'))
+            urls = re.findall('(rtmp.*?)"', response.content.decode('unicode-escape'))
             urls.reverse()
             urls = [url.replace(r'\u003d', '=') for url in urls]
             urls = [url.replace('\\', '') for url in urls]
@@ -388,12 +391,12 @@ class Tipsport:
                 return text.split('.')[0] + '.'
         except TypeError:
             raise UnableGetStreamMetadataException()
-    
+
     @staticmethod
     def _parse_stream_info_response(response):
         data = json.loads(response.text)
         if data['displayRules'] == None:
-            raise(TipsportMsg(data['data']))
+            raise (TipsportMsg(data['data']))
         #if data['returnCode']['name'] == 'NOT_STARTED':
         #    raise StreamHasNotStarted()
         stream_source = data['source']
@@ -405,7 +408,8 @@ class Tipsport:
     def get_stream_source_type_and_data(self, relative_url):
         """Get source and type of stream"""
         stream_number = get_stream_number(relative_url)
-        base_url = self.site_mobile + '/rest/offer/v2/live/matches/{stream_number}/stream?deviceType=DESKTOP'.format(stream_number=stream_number)
+        base_url = self.site_mobile + '/rest/offer/v2/live/matches/{stream_number}/stream?deviceType=DESKTOP'.format(
+            stream_number=stream_number)
         url = base_url + '&format=HLS'
         response = self.session.get(url)
         try:
