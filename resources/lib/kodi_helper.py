@@ -7,6 +7,7 @@ import xbmc
 import xbmcaddon
 import xbmcvfs
 from .tipsport_stream_generator import Quality, Site
+from .user_data import UserData
 from .utils import log
 try:
     from PIL import Image
@@ -82,10 +83,7 @@ class KodiHelper:
         if not xbmcvfs.exists(self.tmp_path):
             xbmcvfs.mkdirs(self.tmp_path)
         self.version = addon.getAddonInfo('version')
-        self.username = addon.getSetting('username')
-        self.password = addon.getSetting('password')
-        self.quality = self.__get_quality(addon)
-        self.site = self.__get_site(addon)
+        self.user_data = UserData(addon.getSetting('username'), addon.getSetting('password'), self.__get_quality(addon), self.__get_site(addon))
         self.send_crash_reports = True if addon.getSetting('send_crash_reports') == 'true' else False
         self.icon = addon.getAddonInfo('icon')
         self.can_generate_logos_settings = addon.getSetting('generate_logos') == 'true'

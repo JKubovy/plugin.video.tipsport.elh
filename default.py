@@ -122,7 +122,7 @@ def show_available_competitions(kodi_helper):
 
 
 def get_tipsport(kodi_helper):
-    tipsport = Tipsport(kodi_helper.username, kodi_helper.password, kodi_helper.quality, kodi_helper.site, None)
+    tipsport = Tipsport(kodi_helper.user_data, None)
     tipsport.login()
     return tipsport
 
@@ -159,7 +159,8 @@ def main():
 
         elif mode == 'check_login':
             tipsport = get_tipsport(kodi_helper)
-            tipsport.check_login()
+            if not tipsport.is_logged_in():
+                raise LoginFailedException()
             storage[tipsport_storage_id] = tipsport
             show_localized_notification(kodi_helper, 30000, 30001, xbmcgui.NOTIFICATION_INFO)
 

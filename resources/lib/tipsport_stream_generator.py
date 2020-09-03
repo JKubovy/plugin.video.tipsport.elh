@@ -30,24 +30,20 @@ AGENT = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Ge
 
 class Tipsport:
     """Class providing communication with Tipsport site"""
-    def __init__(self, username, password, quality, site, clean_function=None):
+    def __init__(self, user_data, clean_function=None):
         self.session = requests.session()
         self.logged_in = False
-        self.username = username
-        self.password = password
-        self.quality = quality
-        self.site = 'https://www.' + site
-        self.site_mobile = 'https://m.' + site
+        self.user_data = user_data
         if clean_function is not None:
             clean_function()
 
-    def get_session_id(self, text):
-        id = re.search('\'sessionId\': \'(.*?)\',', text)
-        if id:
-            token = id.group(1)
-            return token
-        else:
-            raise LoginFailedException()
+    @staticmethod
+    def get_session_id(text):
+        session_id = re.search('\'sessionId\': \'(.*?)\',', text)
+        if session_id:
+            return session_id.group(1)
+        log('sessionId not found')
+        raise LoginFailedException()
 
     def try_update_session_XAuthToken(self):
         try:
@@ -59,61 +55,63 @@ class Tipsport:
 
     def login(self):
         """Login to mobile tipsport site with given credentials"""
-        page = self.session.get(self.site)  # load cookies
-        #token = self.get_session_id(page.text)
-        #self.session.headers.update({'X-Auth-Token': token})
+        _ = self.session.get(self.user_data.site)  # load cookies
+        # token = self.get_session_id(page.text)
+        # self.session.headers.update({'X-Auth-Token': token})
         payload = {
-            'userName': self.username,
-            'password': self.password,
+            'userName': self.user_data.username,
+            'password': self.user_data.password,
             'fPrint': generate_random_number(),
             'originalBrowserUri': '/',
             'agent': AGENT
         }
         try:
-            self.session.post(self.site + '/LoginAction.do', payload)  # actual login
+            self.session.post(self.user_data.site + '/LoginAction.do', payload)  # actual login
         except Exception as e:
             raise e.__class__  # remove tipsport account credentials from traceback
-        self.try_update_session_XAuthToken()
+        # self.try_update_session_XAuthToken()
         log('Login')
-        self.check_login()
-
-    def check_login(self):
-        """Check if login was successful"""
-        page = self.session.get(self.site_mobile)
-        success = re.search('\'logged\': \'(.*?)\'', page.text)
-        if (success):
-            log('check_login: "' + success.group(1) + '"')
-            self.logged_in = success.group(1) == 'true'
-            log('Logged in')
-        if (not self.logged_in):
-            log('check_login: "logged" not found')
+        if not self.is_logged_in():
             raise LoginFailedException()
 
+    def is_logged_in(self):
+        """Check if login was successful"""
+        response = self.session.put(self.user_data.site_mobile + '/rest/ver1/client/restrictions/login/duration')
+        if response.status_code == requests.status_codes.codes['OK']:
+            log('Logged in')
+            return True
+        else:
+            return False
+            # raise LoginFailedException()
+        # page = self.session.get(self.user_data.site_mobile)
+        # success = re.search('\'logged\': \'(.*?)\'', page.text)
+        # if success:
+        #     log('check_login: "' + success.group(1) + '"')
+        #     self.logged_in = success.group(1) == 'true'
+        #     log('Logged in')
+        # if not self.logged_in:
+        #     log('check_login: "logged" not found')
+        #     raise LoginFailedException()
+
     def relogin_if_needed(self):
-        try:
-            self.check_login()
-        except LoginFailedException:
+        if not self.is_logged_in():
             self.login()
 
     def get_matches_both_menu_response(self):
         """Get dwr respond with all matches today"""
         self.relogin_if_needed()
-        response = self.session.get(self.site_mobile + '/rest/articles/v1/tv/program?columnId=23&day=0&countPerPage=1')
+        response = self.session.get(self.user_data.site_mobile + '/rest/articles/v1/tv/program?columnId=23&day=0&countPerPage=1')
         response.encoding = 'utf-8'
-        if ('days' not in response.text):
+        if 'days' not in response.text:
             log(response.text)
             raise UnableGetStreamListException()
-        else:
-            return response
+        return response
 
     def get_list_elh_matches(self, competition_name):
         """Get list of all available ELH matches on tipsport site"""
         response = self.get_matches_both_menu_response()
         data = json.loads(response.text)
-        if competition_name in COMPETITION_LOGO:
-            icon_name = COMPETITION_LOGO[competition_name]
-        else:
-            icon_name = None
+        icon_name = COMPETITION_LOGO.get(competition_name)
         matches = []
         for sport in data['program']:
             if sport['id'] == 23:
@@ -136,11 +134,11 @@ class Tipsport:
         return matches
 
     def get_response_dwr_get_stream(self, relative_url, c0_param1):
-        stream_url = self.site + '/live' + relative_url
+        stream_url = self.user_data.site + '/live' + relative_url
         page = self.session.get(stream_url)
         token = get_token(page.text)
         relative_url = relative_url.split('#')[0]
-        dwr_script = self.site + '/dwr/call/plaincall/StreamDWR.getStream.dwr'
+        dwr_script = self.user_data.site + '/dwr/call/plaincall/StreamDWR.getStream.dwr'
         payload = {
             'callCount': 1,
             'page': relative_url,
@@ -177,13 +175,11 @@ class Tipsport:
         """List is ordered from the lowest to the best quality"""
         if len(list_of_streams) <= 0:
             raise UnableGetStreamMetadataException('List of streams by quality is empty')
-        if len(list_of_streams) > self.quality:
-            return list_of_streams[self.quality]
-        else:
-            if self.quality in [Quality.LOW, Quality.MID]:
-                return list_of_streams[0]
-            else:
-                return list_of_streams[-1]
+        if len(list_of_streams) > self.user_data.quality:
+            return list_of_streams[self.user_data.quality]
+        if self.user_data.quality in [Quality.LOW, Quality.MID]:
+            return list_of_streams[0]
+        return list_of_streams[-1]
 
     def get_hls_stream(self, url, reverse_order=False):
         url = url.replace('\\', '')
@@ -251,7 +247,7 @@ class Tipsport:
             else:
                 raise UnableGetStreamMetadataException()
         elif stream_source == 'MANUAL':
-            stream_url = self.site + '/live' + relative_url
+            stream_url = self.user_data.site + '/live' + relative_url
             page = self.session.get(stream_url)
             return self.get_hls_stream_from_page(page.text)
         elif stream_source == 'HUSTE':
@@ -264,17 +260,16 @@ class Tipsport:
         Return any alert message from Tipsport (like bet request)
         Return None if everything is OK
         """
-        page = self.session.get(self.site_mobile + '/rest/articles/v1/tv/info')
+        page = self.session.get(self.user_data.site_mobile + '/rest/articles/v1/tv/info')
         name = 'buttonDescription'
         try:
             data = json.loads(page.text)
-            if not name in data:
+            if name not in data:
                 raise TipsportMsg()
             text = data[name]
             if text is None:
                 return None
-            else:
-                return text.split('.')[0] + '.'
+            return text.split('.')[0] + '.'
         except TypeError:
             raise UnableGetStreamMetadataException()
 
@@ -283,8 +278,8 @@ class Tipsport:
         data = json.loads(response.text)
         if data['displayRules'] is None:
             raise (TipsportMsg(data['data']))
-        #if data['returnCode']['name'] == 'NOT_STARTED':
-        #    raise StreamHasNotStarted()
+        # if data['returnCode']['name'] == 'NOT_STARTED':
+        #     raise StreamHasNotStarted()
         stream_source = data['source']
         stream_type = data['type']
         if stream_source is None or stream_type is None:
@@ -294,7 +289,7 @@ class Tipsport:
     def get_stream_source_type_and_data(self, relative_url):
         """Get source and type of stream"""
         stream_number = get_stream_number(relative_url)
-        base_url = self.site_mobile + '/rest/offer/v2/live/matches/{stream_number}/stream?deviceType=DESKTOP'.format(
+        base_url = self.user_data.site_mobile + '/rest/offer/v2/live/matches/{stream_number}/stream?deviceType=DESKTOP'.format(
             stream_number=stream_number)
         url = base_url + '&format=HLS'
         response = self.session.get(url)
