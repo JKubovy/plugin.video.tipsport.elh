@@ -6,9 +6,8 @@ import urlparse
 import xbmc
 import xbmcaddon
 import xbmcvfs
-from tipsport_stream_generator import Quality, Site
-from tipsport_exceptions import TipsportMsg
-from utils import log
+from .tipsport_stream_generator import Quality, Site
+from .utils import log
 try:
     from PIL import Image
     CAN_GENERATE_LOGOS = True
@@ -75,7 +74,7 @@ class KodiHelper:
     def __init__(self, plugin_handle=None, args=None, base_url=None):
         addon = self.get_addon()
         self.plugin_handle = plugin_handle
-        self.args = parse_qs(args)
+        self.args = urlparse.parse_qs(args)
         self.base_url = base_url
         self.plugin_name = 'plugin.video.tipsport.elh'
         self.media_path = xbmc.translatePath('special://home/addons/{0}/resources/media'.format(self.plugin_name))
@@ -89,7 +88,11 @@ class KodiHelper:
         self.site = self.__get_site(addon)
         self.send_crash_reports = True if addon.getSetting('send_crash_reports') == 'true' else False
         self.icon = addon.getAddonInfo('icon')
-        self.can_generate_logos = CAN_GENERATE_LOGOS and (addon.getSetting('generate_logos') == 'true')
+        self.can_generate_logos_settings = addon.getSetting('generate_logos') == 'true'
+
+    @property
+    def can_generate_logos(self):
+        return CAN_GENERATE_LOGOS and self.can_generate_logos_settings
 
     @staticmethod
     def __get_quality(addon):
@@ -123,7 +126,7 @@ class KodiHelper:
     def get_logo(self, name, first=True):
         result = []
         dirs = [self.get_media(LOGO_BASEPATH)]
-        while (len(dirs) > 0):
+        while len(dirs) > 0:
             path = dirs.pop(0)
             folders, files = xbmcvfs.listdir(path)
             dirs.extend([os.path.join(path, folder) for folder in folders])
@@ -136,6 +139,7 @@ class KodiHelper:
         try:
             return os.path.join(self.tmp_path, name)
         except UnicodeDecodeError:
+            global CAN_GENERATE_LOGOS
             CAN_GENERATE_LOGOS = False
             return None
 

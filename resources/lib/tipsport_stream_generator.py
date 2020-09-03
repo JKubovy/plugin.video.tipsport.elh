@@ -5,30 +5,19 @@ import json
 import requests
 import urllib
 import time
-from datetime import datetime, timedelta
-import _strptime
 import xml.etree.ElementTree
 from .tipsport_exceptions import *
+from .quality import Quality
+from .site import Site
+from .match import Match
+from .stream import HLSStream, RTMPStream
 from .utils import log
+
 
 COMPETITIONS = {
     'CZ_TIPSPORT': [u'Česká Tipsport extraliga', u'Tipsport extraliga', u'CZ Tipsport extraliga'],
     'SK_TIPSPORT': [u'Slovenská Tipsport liga', u'Slovensk\u00E1 Tipsport liga', u'Tipsport Liga'],
     'CZ_CHANCE': [u'Česká Chance liga', u'CZ Chance liga']
-}
-FULL_NAMES = {
-    u'H.Králové': u'Hradec Králové',
-    u'M.Boleslav': u'Mladá Boleslav',
-    u'K.Vary': u'Karlovy Vary',
-    u'SR 20': u'Slovensko 20',
-    u'L.Mikuláš': u'Liptovský Mikuláš',
-    u'N.Zámky': u'Nové Zámky',
-    u'HK Poprad': u'Poprad',
-    u'B.Bystrica': u'Banská Bystrica',
-    u'Fr.Místek': u'Frýdek-Místek',
-    u'Ústí': u'Ústí nad Labem',
-    u'Benátky': u'Benátky nad Jizerou',
-    u'Č.Budějovice': u'České Budějovice'
 }
 COMPETITION_LOGO = {
     'CZ_TIPSPORT': 'cz_tipsport_logo.png',
@@ -36,110 +25,7 @@ COMPETITION_LOGO = {
     'CZ_CHANCE': 'cz_chance_liga_logo.png'
 }
 
-AGENT = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 " "Safari/537.36 OPR/42.0.2393.137 "
-
-
-class Quality(object):
-    @staticmethod
-    def parse(str_quality):
-        if str_quality == '0':
-            return Quality.LOW
-        elif str_quality == '1':
-            return Quality.MID
-        elif str_quality == '2':
-            return Quality.HIGH
-        else:
-            raise UnknownException('Unknown quality')
-
-    LOW = 0
-    MID = 1
-    HIGH = 2
-
-
-class Site(object):
-    @staticmethod
-    def parse(str_site):
-        if str_site == '0':
-            return Site.CZ
-        elif str_site == '1':
-            return Site.SK
-        else:
-            raise UnknownException('Unknown site')
-
-    CZ = 'tipsport.cz'
-    SK = 'tipsport.sk'
-
-
-class Match:
-    """Class represents one match with additional information"""
-    def __init__(self, name, competition, sport, url, start_time, status, not_started, score, icon_name,
-                 minutes_enable_before_start):
-        self.first_team, self.second_team, self.name = self.parse_name(name)
-        self.competition = competition
-        self.sport = sport
-        self.url = url
-        self.start_time = start_time
-        self.status = status
-        self.started = True if not_started in ['false', False] else False
-        self.score = score
-        self.icon_name = icon_name
-        self.minutes_enable_before_start = minutes_enable_before_start
-        self.match_time = self.get_match_time()
-
-    def get_match_time(self):
-        now = datetime.now()
-        match_time = datetime(*(time.strptime(self.start_time, '%H:%M')[0:6]))
-        match_time = datetime.now().replace(hour=match_time.hour, minute=match_time.minute, second=0, microsecond=0)
-        return match_time
-
-    def is_stream_enabled(self):
-        time_to_start = self.match_time - datetime.now()
-        if time_to_start.days < 0:
-            return True
-        else:
-            return time_to_start.seconds < timedelta(minutes=self.minutes_enable_before_start).seconds
-
-    @staticmethod
-    def get_full_name_if_possible(name):
-        if name in FULL_NAMES:
-            return FULL_NAMES[name]
-        else:
-            return name
-
-    @staticmethod
-    def parse_name(name):
-        try:
-            (first_team, second_team) = name.split('-')
-            first_team = Match.get_full_name_if_possible(first_team)
-            second_team = Match.get_full_name_if_possible(second_team)
-            match_name = u'{first_team} - {second_team}'.format(first_team=first_team, second_team=second_team)
-            return (first_team, second_team, match_name)
-        except ValueError:
-            return name
-
-
-class RTMPStream:
-    """Class represent one stream and store metadata used to generate rtmp stream link"""
-    def __init__(self, rtmp_url, playpath, app, live_stream):
-        self.rtmp_url = rtmp_url
-        self.playpath = playpath
-        self.app = app
-        self.live_stream = live_stream
-
-    def get_link(self):
-        return '{rtmp_url} playpath={playpath} app={app}{live}'.format(rtmp_url=self.rtmp_url,
-                                                                       playpath=self.playpath,
-                                                                       app=self.app,
-                                                                       live=' live=true' if self.live_stream else '')
-
-
-class HLSStream:
-    """Class represent one stream and store metadata used to generate hls stream link"""
-    def __init__(self, url):
-        self.url = url.strip()
-
-    def get_link(self):
-        return self.url
+AGENT = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36 OPR/42.0.2393.137 "
 
 
 class Tipsport:
@@ -395,7 +281,7 @@ class Tipsport:
     @staticmethod
     def _parse_stream_info_response(response):
         data = json.loads(response.text)
-        if data['displayRules'] == None:
+        if data['displayRules'] is None:
             raise (TipsportMsg(data['data']))
         #if data['returnCode']['name'] == 'NOT_STARTED':
         #    raise StreamHasNotStarted()
@@ -414,7 +300,7 @@ class Tipsport:
         response = self.session.get(url)
         try:
             stream_source, stream_type, data = self._parse_stream_info_response(response)
-            if not 'auth=' in data:
+            if 'auth=' not in data:
                 url = base_url + '&format=RTMP'
                 response = self.session.get(url)
                 stream_source, stream_type, data = self._parse_stream_info_response(response)

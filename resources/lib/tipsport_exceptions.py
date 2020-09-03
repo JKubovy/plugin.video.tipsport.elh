@@ -1,6 +1,5 @@
 class TpgException(Exception):
-    def __init__(self, message):
-        super(TpgException, self).__init__(message)
+    pass
 
 
 class NoInternetConnectionsException(TpgException):
