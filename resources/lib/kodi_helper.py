@@ -75,7 +75,7 @@ class KodiHelper:
     def __init__(self, plugin_handle=None, args=None, base_url=None):
         addon = self.get_addon()
         self.plugin_handle = plugin_handle
-        self.args = urlparse.parse_qs(args)
+        self.args = parse_qs(args)
         self.base_url = base_url
         self.plugin_name = 'plugin.video.tipsport.elh'
         self.media_path = xbmc.translatePath('special://home/addons/{0}/resources/media'.format(self.plugin_name))
