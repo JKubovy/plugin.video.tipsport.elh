@@ -118,10 +118,18 @@ def show_available_competitions(kodi_helper):
     url = kodi_helper.build_url({'mode': 'folder', 'foldername': 'SK_TIPSPORT'})
     xbmcplugin.addDirectoryItem(handle=kodi_helper.plugin_handle, url=url, listitem=list_item, isFolder=True)
 
+    # TODO: delete
+
+    if kodi_helper.show_all_matches:
+        list_item = xbmcgui.ListItem('All')
+        list_item.setInfo(type='Video', infoLabels={'Plot': ''})
+        url = kodi_helper.build_url({'mode': 'folder', 'foldername': '_ALL'})
+        xbmcplugin.addDirectoryItem(handle=kodi_helper.plugin_handle, url=url, listitem=list_item, isFolder=True)
+
     xbmcplugin.endOfDirectory(kodi_helper.plugin_handle)
 
 
-def get_tipsport(kodi_helper):
+def get_new_tipsport(kodi_helper):
     tipsport = Tipsport(kodi_helper.user_data, None)
     tipsport.login()
     return tipsport
@@ -135,19 +143,19 @@ def main():
     try:
         if mode is None:
             if tipsport_storage_id not in storage:
-                storage[tipsport_storage_id] = get_tipsport(kodi_helper)
+                storage[tipsport_storage_id] = get_new_tipsport(kodi_helper)
             show_available_competitions(kodi_helper)
 
         elif mode == 'folder':
             if tipsport_storage_id not in storage:
-                storage[tipsport_storage_id] = get_tipsport(kodi_helper)
+                storage[tipsport_storage_id] = get_new_tipsport(kodi_helper)
             tipsport = storage[tipsport_storage_id]
             show_available_elh_matches(kodi_helper, tipsport, kodi_helper.get_arg('foldername'))
             storage[tipsport_storage_id] = tipsport
 
         elif mode == 'play':
             if tipsport_storage_id not in storage:
-                storage[tipsport_storage_id] = get_tipsport(kodi_helper)
+                storage[tipsport_storage_id] = get_new_tipsport(kodi_helper)
             tipsport = storage[tipsport_storage_id]
             stream = tipsport.get_stream(kodi_helper.get_arg('url'))
             title = '{name} ({time})'.format(name=kodi_helper.get_arg('name'), time=kodi_helper.get_arg('start_time'))
@@ -158,7 +166,7 @@ def main():
             show_notification(kodi_helper.get_arg('title'), kodi_helper.get_arg('message'), xbmcgui.NOTIFICATION_INFO)
 
         elif mode == 'check_login':
-            tipsport = get_tipsport(kodi_helper)
+            tipsport = get_new_tipsport(kodi_helper)
             if not tipsport.is_logged_in():
                 raise LoginFailedException()
             storage[tipsport_storage_id] = tipsport

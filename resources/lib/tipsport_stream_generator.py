@@ -11,7 +11,7 @@ from .quality import Quality
 from .site import Site
 from .match import Match
 from .stream import HLSStream, RTMPStream
-from .utils import log
+from .utils import log, get_session_id_from_page
 
 
 COMPETITIONS = {
@@ -37,31 +37,21 @@ class Tipsport:
         if clean_function is not None:
             clean_function()
 
-    @staticmethod
-    def get_session_id(text):
-        session_id = re.search('\'sessionId\': \'(.*?)\',', text)
-        if session_id:
-            return session_id.group(1)
-        log('sessionId not found')
-        raise LoginFailedException()
-
-    def try_update_session_XAuthToken(self):
-        try:
-            page = self.session.get(self.site_mobile)
-            token = self.get_session_id(page.text)
+    def _try_update_session_XAuthToken(self):
+        page = self.session.get(self.user_data.site_mobile)
+        token = get_session_id_from_page(page.text)
+        if token:
             self.session.headers.update({'X-Auth-Token': token})
-        except:
+        else:
             log('try_update_session_XAuthToken: token not found')
 
     def login(self):
         """Login to mobile tipsport site with given credentials"""
         _ = self.session.get(self.user_data.site)  # load cookies
-        # token = self.get_session_id(page.text)
-        # self.session.headers.update({'X-Auth-Token': token})
         payload = {
             'userName': self.user_data.username,
             'password': self.user_data.password,
-            'fPrint': generate_random_number(),
+            'fPrint': _generate_random_number(),
             'originalBrowserUri': '/',
             'agent': AGENT
         }
@@ -69,8 +59,7 @@ class Tipsport:
             self.session.post(self.user_data.site + '/LoginAction.do', payload)  # actual login
         except Exception as e:
             raise e.__class__  # remove tipsport account credentials from traceback
-        # self.try_update_session_XAuthToken()
-        log('Login')
+        # self._try_update_session_XAuthToken()
         if not self.is_logged_in():
             raise LoginFailedException()
 
@@ -78,62 +67,78 @@ class Tipsport:
         """Check if login was successful"""
         response = self.session.put(self.user_data.site_mobile + '/rest/ver1/client/restrictions/login/duration')
         if response.status_code == requests.status_codes.codes['OK']:
-            log('Logged in')
+            log('Is logged in')
             return True
-        else:
-            return False
-            # raise LoginFailedException()
+        log('Is logged out')
+        return False
+
         # page = self.session.get(self.user_data.site_mobile)
         # success = re.search('\'logged\': \'(.*?)\'', page.text)
         # if success:
         #     log('check_login: "' + success.group(1) + '"')
         #     self.logged_in = success.group(1) == 'true'
         #     log('Logged in')
+        #     return True
         # if not self.logged_in:
         #     log('check_login: "logged" not found')
-        #     raise LoginFailedException()
+        #     return False
 
-    def relogin_if_needed(self):
+    def _relogin_if_needed(self):
         if not self.is_logged_in():
             self.login()
 
-    def get_matches_both_menu_response(self):
+    def _get_matches_both_menu_response(self):
         """Get dwr respond with all matches today"""
-        self.relogin_if_needed()
+        self._relogin_if_needed()
         response = self.session.get(self.user_data.site_mobile + '/rest/articles/v1/tv/program?columnId=23&day=0&countPerPage=1')
         response.encoding = 'utf-8'
-        if 'days' not in response.text:
+        if 'program' not in response.text:
             log(response.text)
             raise UnableGetStreamListException()
         return response
 
     def get_list_elh_matches(self, competition_name):
         """Get list of all available ELH matches on tipsport site"""
-        response = self.get_matches_both_menu_response()
+        response = self._get_matches_both_menu_response()
         data = json.loads(response.text)
         icon_name = COMPETITION_LOGO.get(competition_name)
-        matches = []
-        for sport in data['program']:
-            if sport['id'] == 23:
-                for part in sport['matchesByTimespans']:
-                    for match in part:
-                        if match['competition'] in COMPETITIONS[competition_name]:
-                            matches.append(
-                                Match(name=match['name'],
-                                      competition=match['competition'],
-                                      sport=match['sport'],
-                                      url=match['url'],
-                                      start_time=match['matchStartTime'],
-                                      status=match['score']['statusOffer'],
-                                      not_started=not match['live'],
-                                      score=match['score']['scoreOffer'],
-                                      icon_name=icon_name,
-                                      minutes_enable_before_start=15))
+        matches_data = [match for sports in data['program'] if sports['id'] == 23
+                        for matchesInTimespan in sports['matchesByTimespans']
+                        for match in matchesInTimespan]
+        if competition_name in COMPETITIONS:
+            matches_data = [match for match in matches_data if match['competition'] in COMPETITIONS[competition_name]]
+        matches = [Match(name=match['name'],
+                         competition=match['competition'],
+                         sport=match['sport'],
+                         url=match['url'],
+                         start_time=match['matchStartTime'],
+                         status=match['score']['statusOffer'],
+                         not_started=not match['live'],
+                         score=match['score']['scoreOffer'],
+                         icon_name=icon_name,
+                         minutes_enable_before_start=15) for match in matches_data]
+        # matches = []
+        # for sport in data['program']:
+        #     if sport['id'] == 23:
+        #         for part in sport['matchesByTimespans']:
+        #             for match in part:
+        #                 if match['competition'] in COMPETITIONS[competition_name]:
+        #                     matches.append(
+        #                         Match(name=match['name'],
+        #                               competition=match['competition'],
+        #                               sport=match['sport'],
+        #                               url=match['url'],
+        #                               start_time=match['matchStartTime'],
+        #                               status=match['score']['statusOffer'],
+        #                               not_started=not match['live'],
+        #                               score=match['score']['scoreOffer'],
+        #                               icon_name=icon_name,
+        #                               minutes_enable_before_start=15))
         matches.sort(key=lambda match: match.match_time)
         log('Matches {0} loaded'.format(competition_name))
         return matches
 
-    def get_response_dwr_get_stream(self, relative_url, c0_param1):
+    def _get_response_dwr_get_stream(self, relative_url, c0_param1):
         stream_url = self.user_data.site + '/live' + relative_url
         page = self.session.get(stream_url)
         token = get_token(page.text)
@@ -154,14 +159,14 @@ class Tipsport:
         response = self.session.post(dwr_script, payload)
         return response
 
-    def get_hls_stream_from_dwr(self, relative_url):
-        response = self.get_response_dwr_get_stream(relative_url, 'HLS')
+    def _get_hls_stream_from_dwr(self, relative_url):
+        response = self._get_response_dwr_get_stream(relative_url, 'HLS')
         url = re.search('value:"(.*?)"', response.text)
         if not url:
             raise UnableGetStreamMetadataException()
-        return self.get_hls_stream(url.group(1))
+        return self._get_hls_stream(url.group(1))
 
-    def get_hls_stream_from_page(self, page):
+    def _get_hls_stream_from_page(self, page):
         next_hop = re.search('<iframe src="(.*?embed.*?)"', page)
         if not next_hop:
             raise UnableGetStreamMetadataException()
@@ -169,9 +174,9 @@ class Tipsport:
         next_hop = re.search('"hls": "(.*?)"', page.text)
         if not next_hop:
             raise UnableGetStreamMetadataException()
-        return self.get_hls_stream(next_hop.group(1))
+        return self._get_hls_stream(next_hop.group(1))
 
-    def __select_stream_by_quality(self, list_of_streams):
+    def _select_stream_by_quality(self, list_of_streams):
         """List is ordered from the lowest to the best quality"""
         if len(list_of_streams) <= 0:
             raise UnableGetStreamMetadataException('List of streams by quality is empty')
@@ -181,7 +186,7 @@ class Tipsport:
             return list_of_streams[0]
         return list_of_streams[-1]
 
-    def get_hls_stream(self, url, reverse_order=False):
+    def _get_hls_stream(self, url, reverse_order=False):
         url = url.replace('\\', '')
         response = self.session.get(url)
         if 'm3u8' not in response.text:
@@ -190,16 +195,16 @@ class Tipsport:
         playlists = [playlist for playlist in playlists if playlist != '']
         if reverse_order:
             playlists.reverse()
-        playlist_relative_link = self.__select_stream_by_quality(playlists)
+        playlist_relative_link = self._select_stream_by_quality(playlists)
         playlist = url.replace('playlist.m3u8', playlist_relative_link)
         return HLSStream(playlist)
 
-    def get_rtmp_stream(self, relative_url):
-        response = self.get_response_dwr_get_stream(relative_url, 'SMIL')
+    def _get_rtmp_stream(self, relative_url):
+        response = self._get_response_dwr_get_stream(relative_url, 'SMIL')
         search_type = re.search('type:"(.*?)"', response.text)
         response_type = search_type.group(1) if search_type else 'ERROR'
         if response_type == 'ERROR':  # use 'string:RTMP' instead of 'string:SMIL'
-            response = self.get_response_dwr_get_stream(relative_url, 'RTMP')
+            response = self._get_response_dwr_get_stream(relative_url, 'RTMP')
         search_type = re.search('type:"(.*?)"', response.text)
         response_type = search_type.group(1) if search_type else 'ERROR'
         if response_type == 'ERROR':  # StreamDWR.getStream.dwr not working on this specific stream
@@ -211,17 +216,17 @@ class Tipsport:
             urls.reverse()
             urls = [url.replace(r'\u003d', '=') for url in urls]
             urls = [url.replace('\\', '') for url in urls]
-            url = self.__select_stream_by_quality(urls)
-            return parse_stream_dwr_response('"RTMP_URL":"{url}"'.format(url=url))
+            url = self._select_stream_by_quality(urls)
+            return _parse_stream_dwr_response('"RTMP_URL":"{url}"'.format(url=url))
         else:
             response_url = re.search('value:"(.*?)"', response.text)
             url = response_url.group(1)
             url = url.replace('\\', '')
             response = self.session.get(url)
-            stream = parse_stream_dwr_response(response.text)
+            stream = _parse_stream_dwr_response(response.text)
             return stream
 
-    def decode_rtmp_url(self, url):
+    def _decode_rtmp_url(self, url):
         try:
             playpath = (url.split('/'))[-1]
             url = url.replace('/' + playpath, '')
@@ -235,27 +240,27 @@ class Tipsport:
         """Get instance of Stream class from given relative link"""
         if not self.logged_in:
             self.login()
-        alert_text = self.get_alert_message()
+        alert_text = self._get_alert_message()
         if alert_text:
             raise TipsportMsg(alert_text)
-        stream_source, stream_type, url = self.get_stream_source_type_and_data(relative_url)
+        stream_source, stream_type, url = self._get_stream_source_type_and_data(relative_url)
         if stream_source in ['LIVEBOX_ELH', 'LIVEBOX_SK']:
             if stream_type == 'RTMP':
-                return self.decode_rtmp_url(url)
+                return self._decode_rtmp_url(url)
             elif stream_type == 'HLS':
-                return self.get_hls_stream(url, True)
+                return self._get_hls_stream(url, True)
             else:
                 raise UnableGetStreamMetadataException()
         elif stream_source == 'MANUAL':
             stream_url = self.user_data.site + '/live' + relative_url
             page = self.session.get(stream_url)
-            return self.get_hls_stream_from_page(page.text)
+            return self._get_hls_stream_from_page(page.text)
         elif stream_source == 'HUSTE':
-            return self.get_hls_stream(url)
+            return self._get_hls_stream(url)
         else:
             raise UnableGetStreamMetadataException()
 
-    def get_alert_message(self):
+    def _get_alert_message(self):
         """
         Return any alert message from Tipsport (like bet request)
         Return None if everything is OK
@@ -286,7 +291,7 @@ class Tipsport:
             raise UnableGetStreamMetadataException()
         return stream_source, stream_type, data['data']
 
-    def get_stream_source_type_and_data(self, relative_url):
+    def _get_stream_source_type_and_data(self, relative_url):
         """Get source and type of stream"""
         stream_number = get_stream_number(relative_url)
         base_url = self.user_data.site_mobile + '/rest/offer/v2/live/matches/{stream_number}/stream?deviceType=DESKTOP'.format(
@@ -304,14 +309,14 @@ class Tipsport:
             raise UnableGetStreamMetadataException()
 
 
-def generate_random_number():
+def _generate_random_number():
     """Generate string with given length that contains random numbers"""
     result = ''.join(random.SystemRandom().choice('0123456789') for _ in range(10))
     result = result + '-' + ''.join(random.SystemRandom().choice('0123456789abcdef') for _ in range(32))
     return result
 
 
-def parse_stream_dwr_response(response_text):
+def _parse_stream_dwr_response(response_text):
     """Parse response and try to get stream metadata"""
     response_text = str(urllib.unquote(response_text))
     if '<smil>' in response_text:

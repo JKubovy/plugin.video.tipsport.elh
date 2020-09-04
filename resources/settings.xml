@@ -11,5 +11,6 @@
     </category >
     <category label="31004">
         <setting id="send_crash_reports" type="bool" label="31005" default="true"/>
+        <setting id="show_all_matches" type="bool" label="31014" default="false"/>
     </category>
 </settings>
