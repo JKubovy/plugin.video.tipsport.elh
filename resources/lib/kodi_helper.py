@@ -17,7 +17,7 @@ except:
 
 LOGO_BASEPATH = 'LOGOS'
 LOGOS = {  # CZ Tipsport
-    u'Chomutov': u'chomutov',
+    u'České Budějovice': u'ceske_budejovice',
     u'Kometa Brno': u'kometa_brno',
     u'Karlovy Vary': u'karlovy_vary',
     u'Liberec': u'liberec',
@@ -33,19 +33,22 @@ LOGOS = {  # CZ Tipsport
     u'Zlín': u'zlin',
     # CZ Chance
     u'Benátky nad Jizerou': u'benatky_nad_jizerou',
-    u'České Budějovice': u'ceske_budejovice',
     u'Frýdek-Místek': u'frydek_mistek',
     u'Havířov': u'havirov',
     u'Jihlava': u'jihlava',
     u'Kadaň': u'kadan',
     u'Kladno': u'kladno',
+    u'Kolín': u'kolin',
     u'Litoměřice': u'litomerice',
     u'Poruba': u'poruba',
     u'Přerov': u'prerov',
     u'Prostějov': u'prostejov',
     u'Slavia Praha': u'slavia_praha',
+    u'Sokolov': u'sokolov',
+    u'Šumperk': u'sumperk',
     u'Třebíč': u'trebic',
     u'Ústí nad Labem': u'usti_nad_labem',
+    u'Vrchlabí': u'vrchlabi',
     u'Vsetín': u'vsetin',
     # SK Tipsport
     u'Košice': u'kosice',
@@ -61,7 +64,9 @@ LOGOS = {  # CZ Tipsport
     u'Poprad': u'poprad',
     u'Zvolen': u'zvolen',
     u'Michalovce': u'michalovce',
-    u'Slovan': u'slovan'
+    u'Slovan': u'slovan',
+    # OLD
+    u'Chomutov': u'chomutov'
 }
 
 
