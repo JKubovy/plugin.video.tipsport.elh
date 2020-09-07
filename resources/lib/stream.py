@@ -13,8 +13,8 @@ class RTMPStream:
                                                                        live=' live=true' if self._live_stream else '')
 
 
-class HLSStream:
-    """Class represent one stream and store metadata used to generate hls stream link"""
+class PlainStream:
+    """Class represent one stream and store metadata used to generate plain/hls stream link"""
     def __init__(self, url):
         self._url = url.strip()
 

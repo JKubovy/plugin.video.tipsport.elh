@@ -10,8 +10,9 @@ from .tipsport_exceptions import *
 from .quality import Quality
 from .site import Site
 from .match import Match
-from .stream import HLSStream, RTMPStream
+from .stream import PlainStream, RTMPStream
 from .utils import log, get_session_id_from_page
+from .stream_strategy_factory import StreamStrategyFactory
 
 
 COMPETITIONS = {
@@ -25,7 +26,7 @@ COMPETITION_LOGO = {
     'CZ_CHANCE': 'cz_chance_liga_logo.png'
 }
 
-AGENT = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36 OPR/42.0.2393.137 "
+AGENT = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36 OPR/42.0.2393.137"
 
 
 class Tipsport:
@@ -34,16 +35,9 @@ class Tipsport:
         self.session = requests.session()
         self.logged_in = False
         self.user_data = user_data
+        self.stream_strategy_factory = StreamStrategyFactory(self.session, self.user_data)
         if clean_function is not None:
             clean_function()
-
-    def _try_update_session_XAuthToken(self):
-        page = self.session.get(self.user_data.site_mobile)
-        token = get_session_id_from_page(page.text)
-        if token:
-            self.session.headers.update({'X-Auth-Token': token})
-        else:
-            log('try_update_session_XAuthToken: token not found')
 
     def login(self):
         """Login to mobile tipsport site with given credentials"""
@@ -72,41 +66,19 @@ class Tipsport:
         log('Is logged out')
         return False
 
-        # page = self.session.get(self.user_data.site_mobile)
-        # success = re.search('\'logged\': \'(.*?)\'', page.text)
-        # if success:
-        #     log('check_login: "' + success.group(1) + '"')
-        #     self.logged_in = success.group(1) == 'true'
-        #     log('Logged in')
-        #     return True
-        # if not self.logged_in:
-        #     log('check_login: "logged" not found')
-        #     return False
-
-    def _relogin_if_needed(self):
-        if not self.is_logged_in():
-            self.login()
-
-    def _get_matches_both_menu_response(self):
-        """Get dwr respond with all matches today"""
-        self._relogin_if_needed()
-        response = self.session.get(self.user_data.site_mobile + '/rest/articles/v1/tv/program?columnId=23&day=0&countPerPage=1')
-        response.encoding = 'utf-8'
-        if 'program' not in response.text:
-            log(response.text)
-            raise UnableGetStreamListException()
-        return response
-
     def get_list_elh_matches(self, competition_name):
         """Get list of all available ELH matches on tipsport site"""
         response = self._get_matches_both_menu_response()
         data = json.loads(response.text)
         icon_name = COMPETITION_LOGO.get(competition_name)
-        matches_data = [match for sports in data['program'] if sports['id'] == 23
-                        for matchesInTimespan in sports['matchesByTimespans']
-                        for match in matchesInTimespan]
         if competition_name in COMPETITIONS:
-            matches_data = [match for match in matches_data if match['competition'] in COMPETITIONS[competition_name]]
+            matches_data = [match for sports in data['program'] if sports['id'] == 23
+                            for matchesInTimespan in sports['matchesByTimespans']
+                            for match in matchesInTimespan if match['competition'] in COMPETITIONS[competition_name]]
+        else:
+            matches_data = [match for sports in data['program']
+                            for matchesInTimespan in sports['matchesByTimespans']
+                            for match in matchesInTimespan]
         matches = [Match(name=match['name'],
                          competition=match['competition'],
                          sport=match['sport'],
@@ -117,26 +89,45 @@ class Tipsport:
                          score=match['score']['scoreOffer'],
                          icon_name=icon_name,
                          minutes_enable_before_start=15) for match in matches_data]
-        # matches = []
-        # for sport in data['program']:
-        #     if sport['id'] == 23:
-        #         for part in sport['matchesByTimespans']:
-        #             for match in part:
-        #                 if match['competition'] in COMPETITIONS[competition_name]:
-        #                     matches.append(
-        #                         Match(name=match['name'],
-        #                               competition=match['competition'],
-        #                               sport=match['sport'],
-        #                               url=match['url'],
-        #                               start_time=match['matchStartTime'],
-        #                               status=match['score']['statusOffer'],
-        #                               not_started=not match['live'],
-        #                               score=match['score']['scoreOffer'],
-        #                               icon_name=icon_name,
-        #                               minutes_enable_before_start=15))
         matches.sort(key=lambda match: match.match_time)
         log('Matches {0} loaded'.format(competition_name))
         return matches
+
+    def get_stream(self, relative_url):
+        """Get instance of Stream class from given relative link"""
+        self._relogin_if_needed()
+        self._check_alert_message_and_throw_exception()
+        strategy = self.stream_strategy_factory.get_stream_strategy(relative_url)
+        try:
+            stream = strategy.get_stream(self.user_data.quality)
+        except:
+            raise UnableParseStreamMetadataException()
+        if not stream:
+            raise UnsupportedFormatStreamMetadataException()
+        return stream
+
+    def _relogin_if_needed(self):
+        if not self.is_logged_in():
+            self.login()
+
+    def _try_update_session_XAuthToken(self):
+        page = self.session.get(self.user_data.site_mobile)
+        token = get_session_id_from_page(page.text)
+        if token:
+            self.session.headers.update({'X-Auth-Token': token})
+        else:
+            log('try_update_session_XAuthToken: token not found')
+
+    def _get_matches_both_menu_response(self):
+        """Get dwr respond with all matches today"""
+        self._relogin_if_needed()
+        # response = self.session.get(self.user_data.site_mobile + '/rest/articles/v1/tv/program?columnId=23&day=0&countPerPage=1')
+        response = self.session.get(self.user_data.site_mobile + '/rest/articles/v1/tv/program?day=0&articleId=')
+        response.encoding = 'utf-8'
+        if 'program' not in response.text:
+            log(response.text)
+            raise UnableGetStreamListException()
+        return response
 
     def _get_response_dwr_get_stream(self, relative_url, c0_param1):
         stream_url = self.user_data.site + '/live' + relative_url
@@ -197,7 +188,7 @@ class Tipsport:
             playlists.reverse()
         playlist_relative_link = self._select_stream_by_quality(playlists)
         playlist = url.replace('playlist.m3u8', playlist_relative_link)
-        return HLSStream(playlist)
+        return PlainStream(playlist)
 
     def _get_rtmp_stream(self, relative_url):
         response = self._get_response_dwr_get_stream(relative_url, 'SMIL')
@@ -226,41 +217,7 @@ class Tipsport:
             stream = _parse_stream_dwr_response(response.text)
             return stream
 
-    def _decode_rtmp_url(self, url):
-        try:
-            playpath = (url.split('/'))[-1]
-            url = url.replace('/' + playpath, '')
-            tokens = url.split('/')
-            app = '/'.join([tokens[-2], tokens[-1]])
-            return RTMPStream(url, playpath, app, True)
-        except IndexError:
-            raise UnableParseStreamMetadataException()
-
-    def get_stream(self, relative_url):
-        """Get instance of Stream class from given relative link"""
-        if not self.logged_in:
-            self.login()
-        alert_text = self._get_alert_message()
-        if alert_text:
-            raise TipsportMsg(alert_text)
-        stream_source, stream_type, url = self._get_stream_source_type_and_data(relative_url)
-        if stream_source in ['LIVEBOX_ELH', 'LIVEBOX_SK']:
-            if stream_type == 'RTMP':
-                return self._decode_rtmp_url(url)
-            elif stream_type == 'HLS':
-                return self._get_hls_stream(url, True)
-            else:
-                raise UnableGetStreamMetadataException()
-        elif stream_source == 'MANUAL':
-            stream_url = self.user_data.site + '/live' + relative_url
-            page = self.session.get(stream_url)
-            return self._get_hls_stream_from_page(page.text)
-        elif stream_source == 'HUSTE':
-            return self._get_hls_stream(url)
-        else:
-            raise UnableGetStreamMetadataException()
-
-    def _get_alert_message(self):
+    def _check_alert_message_and_throw_exception(self):
         """
         Return any alert message from Tipsport (like bet request)
         Return None if everything is OK
@@ -274,8 +231,9 @@ class Tipsport:
             text = data[name]
             if text is None:
                 return None
-            return text.split('.')[0] + '.'
+            raise TipsportMsg(text.split('.')[0] + '.')
         except TypeError:
+            log('Unable to get Tipsport alert message')
             raise UnableGetStreamMetadataException()
 
     @staticmethod
