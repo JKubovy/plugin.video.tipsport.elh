@@ -43,11 +43,12 @@ class Tipsport:
         """Login to mobile tipsport site with given credentials"""
         _ = self.session.get(self.user_data.site)  # load cookies
         payload = {
-            'userName': self.user_data.username,
-            'password': self.user_data.password,
-            'fPrint': _generate_random_number(),
+            'agent': AGENT,
+            'requestURI': '/',
+            'fPrint': 'unknown', # _generate_random_number(),
             'originalBrowserUri': '/',
-            'agent': AGENT
+            'userName': self.user_data.username,
+            'password': self.user_data.password
         }
         try:
             self.session.post(self.user_data.site + '/LoginAction.do', payload)  # actual login
