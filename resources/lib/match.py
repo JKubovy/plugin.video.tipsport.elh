@@ -67,4 +67,4 @@ class Match:
                                                                 second_team=second_team)
             return (first_team, second_team, match_name)
         except ValueError:
-            return name
+            return '', '', name
