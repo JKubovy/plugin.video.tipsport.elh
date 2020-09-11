@@ -1,10 +1,10 @@
 # coding=utf-8
 import re
-import xbmc
+from xbmc import log as log_fce
 
 
 def log(message):
-    xbmc.log('|plugin.video.tipsport.elh|\t{0}'.format(message))
+    log_fce('|plugin.video.tipsport.elh|\t{0}'.format(message))
 
 
 def get_session_id_from_page(page_text):

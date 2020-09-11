@@ -24,7 +24,7 @@ class StreamStrategyFactory:
         stream_strategy = self._try_rtmp_with_hls_strategy(base_url)
         if stream_strategy:
             return stream_strategy
-        return NoneStrategy()
+        return NoneStrategy(relative_url)
 
 
 

@@ -1,3 +1,6 @@
+from .utils import log
+
+
 class RTMPStream:
     """Class represent one stream and store metadata used to generate rtmp stream link"""
     def __init__(self, rtmp_url, playpath, app, live_stream):
@@ -7,10 +10,12 @@ class RTMPStream:
         self._live_stream = live_stream
 
     def get_link(self):
-        return '{rtmp_url} playpath={playpath} app={app}{live}'.format(rtmp_url=self._rtmp_url,
-                                                                       playpath=self._playpath,
-                                                                       app=self._app,
-                                                                       live=' live=true' if self._live_stream else '')
+        result = '{rtmp_url} playpath={playpath} app={app}{live}'.format(rtmp_url=self._rtmp_url,
+                                                                         playpath=self._playpath,
+                                                                         app=self._app,
+                                                                         live=' live=true' if self._live_stream else '')
+        log('RTMPStream link: ' + result)
+        return result
 
 
 class PlainStream:
@@ -19,4 +24,5 @@ class PlainStream:
         self._url = url.strip()
 
     def get_link(self):
+        log('PlainStream link: ' + self._url)
         return self._url

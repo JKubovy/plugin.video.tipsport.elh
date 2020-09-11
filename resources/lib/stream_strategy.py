@@ -93,7 +93,11 @@ class TvComStreamStrategy:
 
 
 class NoneStrategy:
+    def __init__(self, relative_url):
+        self.relative_url = relative_url
+
     def get_stream(self, _):
+        log('NoneStrategy: ' + self.relative_url)
         return None
 
 
