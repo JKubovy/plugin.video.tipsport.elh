@@ -1,6 +1,9 @@
 import re
 import json
-import urlparse
+try:
+    from urlparse import urljoin
+except:
+    from urllib.parse import urljoin
 from .utils import log
 from .quality import Quality
 from .stream import RTMPStream, PlainStream
@@ -45,8 +48,15 @@ class HLSStreamStrategy:
         self._session = session
 
     def get_stream(self, quality):
+        url_query = _get_query_part(self._url)
         m3u8_playlist = self._session.get(self._url)
         stream_url = _get_stream_url_from_m3u8(m3u8_playlist, self._url, quality)
+        if url_query:
+            if '?' in stream_url:
+                stream_url = stream_url.strip() + '&' + url_query
+            else:
+                stream_url = stream_url.strip() + '?' + url_query
+        stream_url = stream_url.strip()
         return PlainStream(stream_url)
 
 
@@ -118,7 +128,7 @@ def _get_stream_url_from_m3u8(m3u8_playlist, m3u8_playlist_url, quality):
     stream_url = _select_stream_by_quality(urls, quality)
     if _is_stream_relative(stream_url):
         url = m3u8_playlist_url.split('?')[0]
-        stream_url = urlparse.urljoin(url, stream_url)
+        stream_url = urljoin(url, stream_url)
     return stream_url
 
 
@@ -141,3 +151,12 @@ def _is_stream_relative(stream_url):
     if len(tokens) >= 2 and tokens[1].startswith('m3u8'):
         return True
     return True
+
+
+def _get_query_part(url):
+    if '?' not in url:
+        return None
+    query_part = url.split('?')[1]
+    if len(query_part) == 0:
+        return None
+    return query_part
