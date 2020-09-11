@@ -1,6 +1,15 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.7.0] - 2020-9-11
+### Fix
+  - login
+### Add
+  - New logos
+  - Settings to show all streams (not everything works)
+### Refactor
+  - Codebase
+
 ## [0.6.8] - 2020-3-11
 ### Fix
   - New login system (again)
