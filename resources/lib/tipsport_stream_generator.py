@@ -17,7 +17,7 @@ from .stream_strategy_factory import StreamStrategyFactory
 
 COMPETITIONS = {
     'CZ_TIPSPORT': [u'Česká Tipsport extraliga', u'Tipsport extraliga', u'CZ Tipsport extraliga'],
-    'SK_TIPSPORT': [u'Slovenská Tipsport liga', u'Slovensk\u00E1 Tipsport liga', u'Tipsport Liga'],
+    'SK_TIPSPORT': [u'Slovenská Tipsport liga', u'Slovensk\u00E1 Tipsport liga', u'Tipsport Liga', u'Slovenská extraliga'],
     'CZ_CHANCE': [u'Česká Chance liga', u'CZ Chance liga']
 }
 COMPETITION_LOGO = {

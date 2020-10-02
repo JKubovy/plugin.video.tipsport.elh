@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.7.1] - 2020-10-2
+### Fix
+  - Slovak league name
+
 ## [0.7.0] - 2020-9-11
 ### Fix
   - login
