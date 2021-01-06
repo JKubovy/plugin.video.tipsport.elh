@@ -35,7 +35,8 @@ def send_crash_report(kodi_helper, exception):
 
 def play_video(title, icon, link, media_type='Video'):
     """Start playing given video stream"""
-    list_item = xbmcgui.ListItem(label=title, iconImage=icon, path=link)
+    list_item = xbmcgui.ListItem(label=title, path=link)
+    list_item.setArt({'icon': icon})
     list_item.setInfo(type=media_type, infoLabels={"Title": title})
     list_item.setProperty('IsPlayable', 'true')
     xbmc.Player().play(item=link, listitem=list_item)
@@ -64,20 +65,20 @@ def show_available_elh_matches(kodi_helper, tipsport, competitions):
             url = kodi_helper.build_url({
                 'mode': 'play',
                 'url': match.url,
-                'name': match.name.encode('utf-8'),
+                'name': match.name,
                 'start_time': match.start_time
             })
         else:
             url = kodi_helper.build_url({
                 'mode': 'notification',
-                'title': match.name.encode('utf-8'),
+                'title': match.name,
                 'message': kodi_helper.get_local_string(30008)
             })
         if match.started:
             plot = '\n{text}: {score:<20}{status}'.format(
                 text=kodi_helper.get_local_string(30003),
                 score=match.score,
-                status=match.status.encode('utf-8') if xbmc.getLanguage(xbmc.ISO_639_1) == 'cs' else '')
+                status=match.status if xbmc.getLanguage(xbmc.ISO_639_1) == 'cs' else '')
         else:
             plot = '{text} {time}'.format(text=kodi_helper.get_local_string(30002), time=match.start_time)
         possible_match_icon = kodi_helper.get_match_icon(match.first_team, match.second_team)
@@ -85,8 +86,8 @@ def show_available_elh_matches(kodi_helper, tipsport, competitions):
             icon = possible_match_icon
         else:
             icon = kodi_helper.get_media(match.icon_name) if match.icon_name else kodi_helper.icon
-        list_item = xbmcgui.ListItem(match.name, iconImage=icon)
-        list_item.setThumbnailImage(icon)
+        list_item = xbmcgui.ListItem(match.name)
+        list_item.setArt({'icon': icon})
         list_item.setInfo(type='Video', infoLabels={'Plot': plot})
         xbmcplugin.addDirectoryItem(handle=kodi_helper.plugin_handle, url=url, listitem=list_item)
     xbmcplugin.endOfDirectory(kodi_helper.plugin_handle)
@@ -96,24 +97,24 @@ def show_available_competitions(kodi_helper):
     xbmcplugin.setContent(kodi_helper.plugin_handle, 'movies')
     # CZ Tipsport Extraliga
     icon = kodi_helper.get_media('cz_tipsport_logo.png')
-    list_item = xbmcgui.ListItem('CZ Tipsport Extraliga', iconImage=icon)
-    list_item.setThumbnailImage(icon)
+    list_item = xbmcgui.ListItem('CZ Tipsport Extraliga')
+    list_item.setArt({'icon': icon})
     list_item.setInfo(type='Video', infoLabels={'Plot': kodi_helper.get_local_string(30006)})
     url = kodi_helper.build_url({'mode': 'folder', 'foldername': 'CZ_TIPSPORT'})
     xbmcplugin.addDirectoryItem(handle=kodi_helper.plugin_handle, url=url, listitem=list_item, isFolder=True)
 
     # CZ Chance Liga
     icon = kodi_helper.get_media('cz_chance_liga_logo.png')
-    list_item = xbmcgui.ListItem('CZ Chance Liga', iconImage=icon)
-    list_item.setThumbnailImage(icon)
+    list_item = xbmcgui.ListItem('CZ Chance Liga')
+    list_item.setArt({'icon': icon})
     list_item.setInfo(type='Video', infoLabels={'Plot': kodi_helper.get_local_string(30009)})
     url = kodi_helper.build_url({'mode': 'folder', 'foldername': 'CZ_CHANCE'})
     xbmcplugin.addDirectoryItem(handle=kodi_helper.plugin_handle, url=url, listitem=list_item, isFolder=True)
 
     # SK Tipsport Liga
     icon = kodi_helper.get_media('sk_tipsport_logo.png')
-    list_item = xbmcgui.ListItem('SK Tipsport Liga', iconImage=icon)
-    list_item.setThumbnailImage(icon)
+    list_item = xbmcgui.ListItem('SK Tipsport Liga')
+    list_item.setArt({'icon': icon})
     list_item.setInfo(type='Video', infoLabels={'Plot': kodi_helper.get_local_string(30007)})
     url = kodi_helper.build_url({'mode': 'folder', 'foldername': 'SK_TIPSPORT'})
     xbmcplugin.addDirectoryItem(handle=kodi_helper.plugin_handle, url=url, listitem=list_item, isFolder=True)
@@ -192,7 +193,7 @@ def main():
     except StreamHasNotStarted:
         show_localized_notification(kodi_helper, 30004, 30008, xbmcgui.NOTIFICATION_INFO)
     except TipsportMsg as e:
-        xbmcgui.Dialog().ok(kodi_helper.get_local_string(32000), e.message)
+        xbmcgui.Dialog().ok(kodi_helper.get_local_string(32000), str(e))
     except Exception as e:
         if send_crash_report(kodi_helper, e):
             show_localized_notification(kodi_helper, 32000, 32009)

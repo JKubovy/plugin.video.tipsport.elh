@@ -45,12 +45,14 @@ class Tipsport:
         payload = {
             'agent': AGENT,
             'requestURI': '/',
-            'fPrint': 'unknown', # _generate_random_number(),
+            'fPrint': _generate_random_number(),
             'originalBrowserUri': '/',
             'userName': self.user_data.username,
             'password': self.user_data.password
         }
         try:
+            log(self.user_data.site + '/LoginAction.do')
+            log(payload)
             self.session.post(self.user_data.site + '/LoginAction.do', payload)  # actual login
         except Exception as e:
             raise e.__class__  # remove tipsport account credentials from traceback
@@ -61,6 +63,7 @@ class Tipsport:
     def is_logged_in(self):
         """Check if login was successful"""
         response = self.session.put(self.user_data.site_mobile + '/rest/ver1/client/restrictions/login/duration')
+        log(response.status_code)
         if response.status_code == requests.status_codes.codes['OK']:
             log('Is logged in')
             return True

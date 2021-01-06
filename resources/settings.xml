@@ -1,16 +1,89 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<settings>
-    <category  label="31000">
-        <setting id="site" type="select" label="31011" lvalues="31012|31013" default="0"/>
-        <setting id="username" type="text" label="31001" default=""/>
-	      <setting id="password" type="text" option="hidden" label="31002" default=""/>
-        <setting id="quality" type="select" label="31006" lvalues="31007|31008|31009" default="2"/>
-        <setting id="generate_logos" type="bool" label="31010" default="true"/>
-        <setting type="sep"/>
-        <setting id="check_login" type="action" label="31003" action="RunPlugin(plugin://plugin.video.tipsport.elh/?mode=check_login)" option="close"/>
-    </category >
-    <category label="31004">
-        <setting id="send_crash_reports" type="bool" label="31005" default="true"/>
-        <setting id="show_all_matches" type="bool" label="31014" default="false"/>
-    </category>
+<?xml version="1.0" ?>
+<settings version="1">
+    <section id="plugin.video.tipsport.elh">
+        <category id="1" label="31000" help="">
+            <group id="1" label="">
+                <setting id="site" type="integer" label="31011" help="">
+                    <level>0</level>
+                    <default>0</default>
+                    <constraints>
+                        <options>
+                            <option label="31012">0</option>
+                            <option label="31013">1</option>
+                        </options>
+                    </constraints>
+                    <control type="list" format="string">
+                        <heading>31011</heading>
+                    </control>
+                </setting>
+
+                <setting id="username" type="string" label="31001" help="">
+                    <level>0</level>
+                    <default/>
+                    <constraints>
+                        <allowempty>true</allowempty>
+                    </constraints>
+                    <control type="edit" format="string">
+                        <heading>31001</heading>
+                    </control>
+                </setting>
+
+                <setting id="password" type="string" label="31002" help="">
+                    <level>0</level>
+                    <default/>
+                    <constraints>
+                        <allowempty>true</allowempty>
+                    </constraints>
+                    <control type="edit" format="string">
+                        <heading>31002</heading>
+                        <hidden>true</hidden>
+                    </control>
+                </setting>
+
+                <setting id="quality" type="integer" label="31006" help="">
+                    <level>0</level>
+                    <default>2</default>
+                    <constraints>
+                        <options>
+                            <option label="31007">0</option>
+                            <option label="31008">1</option>
+                            <option label="31009">2</option>
+                        </options>
+                    </constraints>
+                    <control type="list" format="string">
+                        <heading>31006</heading>
+                    </control>
+                </setting>
+
+                <setting id="generate_logos" type="boolean" label="31010" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+            </group>
+            <group id="2" label="">
+                <setting id="check_login" type="action" label="31003" help="">
+                    <level>0</level>
+                    <data>RunPlugin(plugin://plugin.video.tipsport.elh/?mode=check_login)</data>
+                    <control type="button" format="action">
+                        <close>true</close>
+                    </control>
+                </setting>
+            </group>
+        </category>
+        <category id="2" label="31004" help="">
+            <group id="1" label="">
+                <setting id="send_crash_reports" type="boolean" label="31005" help="">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="show_all_matches" type="boolean" label="31014" help="">
+                    <level>0</level>
+                    <default>false</default>
+                    <control type="toggle"/>
+                </setting>
+            </group>
+        </category>
+    </section>
 </settings>

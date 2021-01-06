@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import fnmatch
-import urllib
-import urlparse
+from urllib.parse import parse_qs, urlencode
 import xbmc
 import xbmcaddon
 import xbmcvfs
@@ -75,11 +74,11 @@ class KodiHelper:
     def __init__(self, plugin_handle=None, args=None, base_url=None):
         addon = self.get_addon()
         self.plugin_handle = plugin_handle
-        self.args = urlparse.parse_qs(args)
+        self.args = parse_qs(args)
         self.base_url = base_url
         self.plugin_name = 'plugin.video.tipsport.elh'
-        self.media_path = xbmc.translatePath('special://home/addons/{0}/resources/media'.format(self.plugin_name))
-        self.tmp_path = xbmc.translatePath('special://temp/{0}/'.format(self.plugin_name))
+        self.media_path = xbmcvfs.translatePath('special://home/addons/{0}/resources/media'.format(self.plugin_name))
+        self.tmp_path = xbmcvfs.translatePath('special://temp/{0}/'.format(self.plugin_name))
         if not xbmcvfs.exists(self.tmp_path):
             xbmcvfs.mkdirs(self.tmp_path)
         self.version = addon.getAddonInfo('version')
@@ -106,7 +105,7 @@ class KodiHelper:
         return xbmcaddon.Addon()
 
     def build_url(self, query):
-        return self.base_url + '?' + urllib.urlencode(query)
+        return self.base_url + '?' + urlencode(query)
 
     def get_arg(self, key):
         value = self.args.get(key, None)
@@ -115,8 +114,6 @@ class KodiHelper:
     def get_local_string(self, string_id):
         src = xbmc if string_id < 30000 else self.get_addon()
         localized_string = src.getLocalizedString(string_id)
-        if isinstance(localized_string, unicode):
-            localized_string = localized_string.encode('utf-8')
         return localized_string
 
     def get_media(self, name):

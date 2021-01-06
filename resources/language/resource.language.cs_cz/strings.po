@@ -1,0 +1,164 @@
+# Kodi Media Center language file
+# Addon Name: Tipsport ELH
+# Addon id: plugin.video.tipsport.elh
+# Addon Provider: Jan Kubový
+msgid  ""
+msgstr ""
+
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: cz\n"
+
+msgctxt "#30000"
+msgid "OK"
+msgstr "OK"
+
+msgctxt "#30001"
+msgid "Login successful"
+msgstr "Přihlášení proběhlo v pořádku"
+
+msgctxt "#30002"
+msgid "Match start at"
+msgstr "Začátek zápasu v"
+
+msgctxt "#30003"
+msgid "Score"
+msgstr "Stav"
+
+msgctxt "#30004"
+msgid "INFO"
+msgstr "INFO"
+
+msgctxt "#30005"
+msgid "Today no streams are available"
+msgstr "Dnes žádné zápasy neprobíhají"
+
+msgctxt "#30006"
+msgid ""
+"The Czech Extraliga is the highest-level ice hockey league in the Czech "
+"Republic."
+msgstr ""
+"Extraliga ledního hokeje je nejvyšší soutěž v ledním hokeji, která je "
+"pořádána na území České republiky."
+
+msgctxt "#30007"
+msgid "Slovak Extraliga is the highest-level ice hockey league in Slovakia."
+msgstr ""
+"Tipsport liga je nejvyšší klubová soutěž na Slovensku v ledním "
+"hokeji, kterou organizuje Slovenský svaz ledního hokeje."
+
+msgctxt "#30008"
+msgid "Stream has not been started yet"
+msgstr "Stream ještě nebyl spuštěn"
+
+msgctxt "#30009"
+msgid ""
+"The Chance Liga is the second-highest level of professional ice hockey in "
+"the Czech Republic."
+msgstr ""
+"1. česká hokejová liga, od sezóny 2018/2019 nazývaná podle svého "
+"titulárního partnera Chance liga, je druhá nejvyšší hokejová soutěž "
+"v České republice."
+
+msgctxt "#31000"
+msgid "Tipsport Account"
+msgstr "Tipsport Účet"
+
+msgctxt "#31001"
+msgid "Email"
+msgstr "Email"
+
+msgctxt "#31002"
+msgid "Password"
+msgstr "Heslo"
+
+msgctxt "#31003"
+msgid "Check login"
+msgstr "Ověřit přihlášení"
+
+msgctxt "#31004"
+msgid "Misc"
+msgstr "Ostatní"
+
+msgctxt "#31005"
+msgid "Send anonymous crash logs"
+msgstr "Odesílat anonymní chybové hlášení"
+
+msgctxt "#31006"
+msgid "Preferred quality"
+msgstr "Preferovaná kvalita"
+
+msgctxt "#31007"
+msgid "360p"
+msgstr "360p"
+
+msgctxt "#31008"
+msgid "540p"
+msgstr "540p"
+
+msgctxt "#31009"
+msgid "720p"
+msgstr "720p"
+
+msgctxt "#31010"
+msgid "Generate match logos"
+msgstr "Generovat loga zápasů"
+
+msgctxt "#31011"
+msgid "Preferred page"
+msgstr "Preferovaná stránka"
+
+msgctxt "#31012"
+msgid "tipsport.cz"
+msgstr "tipsport.cz"
+
+msgctxt "#31013"
+msgid "tipsport.sk"
+msgstr "tipsport.sk"
+
+msgctxt "#31014"
+msgid "Show all streams (could not work!)"
+msgstr "Ukázat všechny přenosy (nemusí fungovat!)"
+
+msgctxt "#32000"
+msgid "Error"
+msgstr "Chyba"
+
+msgctxt "#32001"
+msgid "Check internet connection"
+msgstr "Zkontrolujte internetové připojení"
+
+msgctxt "#32002"
+msgid "Login failed. Check username/password in settings"
+msgstr "Přihlášení selhalo. Zkontrolujte uživatelské jméno/heslo v nastavení"
+
+msgctxt "#32003"
+msgid "Unable to get stream metadata"
+msgstr "Nepovedlo se získat informace o videu"
+
+msgctxt "#32004"
+msgid "Unable to parse stream metadata"
+msgstr "Nepovedlo se zpracovat informace o videu"
+
+msgctxt "#32005"
+msgid "Unsupported format of stream metadata"
+msgstr "Nepodporované informace o videu"
+
+msgctxt "#32006"
+msgid "Unable to detect scriptSessionId"
+msgstr "Nepovedlo se získat scriptSessionId"
+
+msgctxt "#32007"
+msgid "Unable to get StreamNumber"
+msgstr "Nepovedlo se získat StreamNumber"
+
+msgctxt "#32008"
+msgid "Unknown error, please send us crash log"
+msgstr "Neznámá chyba, prosíme o zaslání chybového hlášení"
+
+msgctxt "#32009"
+msgid "Anonymous crash log was send"
+msgstr "Anonymní chybové hlášení bylo odesláno"
+
+msgctxt "#32010"
+msgid "Unable to get list of streams. Please repeate request"
+msgstr "Nepodařilo se získat seznam přenosů. Opakujte akci"
