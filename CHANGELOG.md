@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.8.0] - 2021-1-7
+### Add
+  - Support to Kodi v19
+### Remove
+  - Support to Kodi v18 and older
+
 ## [0.7.2] - 2021-1-6
 ### Change
   - Pardubice team logo
