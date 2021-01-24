@@ -7,7 +7,6 @@ import urllib
 import time
 import xml.etree.ElementTree
 from .tipsport_exceptions import *
-from .quality import Quality
 from .site import Site
 from .match import Match
 from .stream import PlainStream, RTMPStream
@@ -103,7 +102,7 @@ class Tipsport:
         self._check_alert_message_and_throw_exception()
         strategy = self.stream_strategy_factory.get_stream_strategy(relative_url)
         try:
-            stream = strategy.get_stream(self.user_data.quality)
+            stream = strategy.get_stream()
         except:
             raise UnableParseStreamMetadataException()
         if not stream:
@@ -153,73 +152,6 @@ class Tipsport:
         }
         response = self.session.post(dwr_script, payload)
         return response
-
-    def _get_hls_stream_from_dwr(self, relative_url):
-        response = self._get_response_dwr_get_stream(relative_url, 'HLS')
-        url = re.search('value:"(.*?)"', response.text)
-        if not url:
-            raise UnableGetStreamMetadataException()
-        return self._get_hls_stream(url.group(1))
-
-    def _get_hls_stream_from_page(self, page):
-        next_hop = re.search('<iframe src="(.*?embed.*?)"', page)
-        if not next_hop:
-            raise UnableGetStreamMetadataException()
-        page = self.session.get(next_hop.group(1))
-        next_hop = re.search('"hls": "(.*?)"', page.text)
-        if not next_hop:
-            raise UnableGetStreamMetadataException()
-        return self._get_hls_stream(next_hop.group(1))
-
-    def _select_stream_by_quality(self, list_of_streams):
-        """List is ordered from the lowest to the best quality"""
-        if len(list_of_streams) <= 0:
-            raise UnableGetStreamMetadataException('List of streams by quality is empty')
-        if len(list_of_streams) > self.user_data.quality:
-            return list_of_streams[self.user_data.quality]
-        if self.user_data.quality in [Quality.LOW, Quality.MID]:
-            return list_of_streams[0]
-        return list_of_streams[-1]
-
-    def _get_hls_stream(self, url, reverse_order=False):
-        url = url.replace('\\', '')
-        response = self.session.get(url)
-        if 'm3u8' not in response.text:
-            raise StreamHasNotStarted()
-        playlists = [playlist for playlist in response.text.split('\n') if not playlist.startswith('#')]
-        playlists = [playlist for playlist in playlists if playlist != '']
-        if reverse_order:
-            playlists.reverse()
-        playlist_relative_link = self._select_stream_by_quality(playlists)
-        playlist = url.replace('playlist.m3u8', playlist_relative_link)
-        return PlainStream(playlist)
-
-    def _get_rtmp_stream(self, relative_url):
-        response = self._get_response_dwr_get_stream(relative_url, 'SMIL')
-        search_type = re.search('type:"(.*?)"', response.text)
-        response_type = search_type.group(1) if search_type else 'ERROR'
-        if response_type == 'ERROR':  # use 'string:RTMP' instead of 'string:SMIL'
-            response = self._get_response_dwr_get_stream(relative_url, 'RTMP')
-        search_type = re.search('type:"(.*?)"', response.text)
-        response_type = search_type.group(1) if search_type else 'ERROR'
-        if response_type == 'ERROR':  # StreamDWR.getStream.dwr not working on this specific stream
-            raise UnableGetStreamMetadataException()
-        if response_type == 'RTMP_URL':
-            if re.search('value:"?(.*?)"?}', response.content.decode('unicode-escape')).group(1).lower() == 'null':
-                raise UnableGetStreamMetadataException()
-            urls = re.findall('(rtmp.*?)"', response.content.decode('unicode-escape'))
-            urls.reverse()
-            urls = [url.replace(r'\u003d', '=') for url in urls]
-            urls = [url.replace('\\', '') for url in urls]
-            url = self._select_stream_by_quality(urls)
-            return _parse_stream_dwr_response('"RTMP_URL":"{url}"'.format(url=url))
-        else:
-            response_url = re.search('value:"(.*?)"', response.text)
-            url = response_url.group(1)
-            url = url.replace('\\', '')
-            response = self.session.get(url)
-            stream = _parse_stream_dwr_response(response.text)
-            return stream
 
     def _check_alert_message_and_throw_exception(self):
         """

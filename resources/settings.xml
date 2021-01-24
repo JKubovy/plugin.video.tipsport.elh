@@ -40,21 +40,6 @@
                     </control>
                 </setting>
 
-                <setting id="quality" type="integer" label="31006" help="">
-                    <level>0</level>
-                    <default>2</default>
-                    <constraints>
-                        <options>
-                            <option label="31007">0</option>
-                            <option label="31008">1</option>
-                            <option label="31009">2</option>
-                        </options>
-                    </constraints>
-                    <control type="list" format="string">
-                        <heading>31006</heading>
-                    </control>
-                </setting>
-
                 <setting id="generate_logos" type="boolean" label="31010" help="">
                     <level>0</level>
                     <default>true</default>

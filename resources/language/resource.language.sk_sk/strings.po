@@ -83,22 +83,6 @@ msgctxt "#31005"
 msgid "Send anonymous crash logs"
 msgstr "Odosielať anonymné chybové hlásenie"
 
-msgctxt "#31006"
-msgid "Preferred quality"
-msgstr "Preferovaná kvalita"
-
-msgctxt "#31007"
-msgid "360p"
-msgstr "360p"
-
-msgctxt "#31008"
-msgid "540p"
-msgstr "540p"
-
-msgctxt "#31009"
-msgid "720p"
-msgstr "720p"
-
 msgctxt "#31010"
 msgid "Generate match logos"
 msgstr "Generovať loga zápasov"
@@ -162,3 +146,7 @@ msgstr "Anonymné chybové hlásenie bolo odoslané"
 msgctxt "#32010"
 msgid "Unable to get list of streams. Please repeate request"
 msgstr "Nepodarilo sa získať zoznam prenosov. Opakujte akciu"
+
+msgctxt "#32011"
+msgid "Unexpected addon error. Reinstall addon if this message reappearing"
+msgstr "Neočakávaná chyba doplnku. Preinštaluje addon, ak sa správa objavuje opakovane"

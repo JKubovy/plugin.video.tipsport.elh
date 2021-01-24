@@ -80,22 +80,6 @@ msgctxt "#31005"
 msgid "Send anonymous crash logs"
 msgstr "Send anonymous crash logs"
 
-msgctxt "#31006"
-msgid "Preferred quality"
-msgstr "Preferred quality"
-
-msgctxt "#31007"
-msgid "360p"
-msgstr "360p"
-
-msgctxt "#31008"
-msgid "540p"
-msgstr "540p"
-
-msgctxt "#31009"
-msgid "720p"
-msgstr "720p"
-
 msgctxt "#31010"
 msgid "Generate match logos"
 msgstr "Generate match logos"
@@ -159,3 +143,7 @@ msgstr "Anonymous crash log was send"
 msgctxt "#32010"
 msgid "Unable to get list of streams. Please repeate request"
 msgstr "Unable to get list of streams. Please repeate request"
+
+msgctxt "#32011"
+msgid "Unexpected addon error. Reinstall addon if this message reappearing"
+msgstr "Unexpected addon error. Reinstall addon if this message reappearing"

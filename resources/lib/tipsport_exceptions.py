@@ -55,3 +55,8 @@ class UnknownException(TpgException):
 class TipsportMsg(TpgException):
     def __init__(self, message="Try stream on Tipsport page for further details"):
         super(TipsportMsg, self).__init__(message)
+
+
+class StrangeXBMCException(TpgException):
+    def __init__(self, message="Unexpected addon error. Reinstall addon if this message reappearing"):
+        super(StrangeXBMCException, self).__init__(message)

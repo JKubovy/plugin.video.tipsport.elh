@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<addon id="plugin.video.tipsport.elh" name="Tipsport ELH" provider-name="Jan Kubový" version="0.8.0">
+<addon id="plugin.video.tipsport.elh" name="Tipsport ELH" provider-name="Jan Kubový" version="0.8.1">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
         <import addon="script.module.requests" version="2.12.4"/>
@@ -28,6 +28,9 @@
             <screenshot>resources\screenshot-03.jpg</screenshot>
         </assets>
         <news>
+v0.8.1(24.1.2021)
+  - Remove Quality selector
+  - Add Handle some unexpected addon errors
 v0.8.0(6.1.2021)
   - Change support to Kodi v19
   - Won't work for older Kodi

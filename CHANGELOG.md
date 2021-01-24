@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.8.1] - 2021-1-24
+### Remove
+  - Quality selector
+### Add
+  - Handle some unexpected addon errors
+
 ## [0.8.0] - 2021-1-7
 ### Add
   - Support to Kodi v19
