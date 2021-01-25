@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.8.2] - 2021-1-25
+### Fix
+  - Playing stream
+
 ## [0.8.1] - 2021-1-24
 ### Remove
   - Quality selector
