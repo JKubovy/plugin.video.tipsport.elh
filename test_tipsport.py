@@ -5,7 +5,6 @@ import sys
 sys.modules['xbmc'] = xbmc
 from resources.lib.tipsport_stream_generator import Tipsport
 from resources.lib.user_data import UserData
-from resources.lib.quality import Quality
 
 
 def test_login(tipsport) -> bool:
@@ -28,7 +27,7 @@ def test_all_streams(tipsport) -> None:
 
 
 def _get_tipsport(username, password) -> Tipsport:
-    return Tipsport(UserData(username, password, Quality.HIGH, 'tipsport.cz'), None)
+    return Tipsport(UserData(username, password, 'tipsport.cz'), None)
 
 
 if __name__ == '__main__':

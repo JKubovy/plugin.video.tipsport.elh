@@ -143,11 +143,14 @@ class StreamStrategyFactory:
 
     @staticmethod
     def _parse_stream_info_response(response):
-        data = json.loads(response.text)
-        if 'displayRules' not in data:
+        try:
+            data = json.loads(response.text)
+            if 'displayRules' not in data:
+                raise UnableGetStreamMetadataException()
+            if data['displayRules'] is None:
+                raise (TipsportMsg(data['data']))
+            stream_source = data['source']
+            stream_type = data['type']
+            return stream_source, stream_type, data['data']
+        except:
             raise UnableGetStreamMetadataException()
-        if data['displayRules'] is None:
-            raise (TipsportMsg(data['data']))
-        stream_source = data['source']
-        stream_type = data['type']
-        return stream_source, stream_type, data['data']

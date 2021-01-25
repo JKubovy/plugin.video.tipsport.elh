@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 ## [0.7.3] - 2021-1-25
 ### Fix
   - Playing stream
+### Remove
+  - Quality selector
 
 ## [0.7.2] - 2021-1-6
 ### Change

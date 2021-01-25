@@ -17,10 +17,6 @@
     <string id="31003">Skontrolovať prihlásenie</string>
     <string id="31004">Ostatné</string>
     <string id="31005">Odosielať anonymné chybové hlásenie</string>
-    <string id="31006">Preferovaná kvalita</string>
-    <string id="31007">360p</string>
-    <string id="31008">540p</string>
-    <string id="31009">720p</string>
     <string id="31010">Generovať loga zápasov</string>
     <string id="31011">Preferovaná stránka</string>
     <string id="31012">tipsport.cz</string>
@@ -38,4 +34,5 @@
     <string id="32008">Neznáma chyba, prosíme o zaslanie chybového hlásenia</string>
     <string id="32009">Anonymné chybové hlásenie bolo odoslané</string>
     <string id="32010">Nepodarilo sa získať zoznam prenosov. Opakujte akciu</string>
+    <string id="32011">Neočakávaná chyba doplnku. Preinštaluje addon, ak sa správa objavuje opakovane</string>
 </strings>
