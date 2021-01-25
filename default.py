@@ -33,12 +33,12 @@ def send_crash_report(kodi_helper, exception):
         return False
 
 
-def play_video(title, icon, link, media_type='Video'):
+def play_video(plugin_handle, title, icon, link, media_type='Video'):
     """Start playing given video stream"""
     list_item = xbmcgui.ListItem(label=title, iconImage=icon, path=link)
     list_item.setInfo(type=media_type, infoLabels={"Title": title})
     list_item.setProperty('IsPlayable', 'true')
-    xbmc.Player().play(item=link, listitem=list_item)
+    xbmcplugin.setResolvedUrl(plugin_handle, True, listitem=list_item)
 
 
 def show_notification(heading_string, message_string, icon):
@@ -88,6 +88,7 @@ def show_available_elh_matches(kodi_helper, tipsport, competitions):
         list_item = xbmcgui.ListItem(match.name, iconImage=icon)
         list_item.setThumbnailImage(icon)
         list_item.setInfo(type='Video', infoLabels={'Plot': plot})
+        list_item.setProperty('IsPlayable', 'true')
         xbmcplugin.addDirectoryItem(handle=kodi_helper.plugin_handle, url=url, listitem=list_item)
     xbmcplugin.endOfDirectory(kodi_helper.plugin_handle)
 
@@ -159,7 +160,7 @@ def main():
             tipsport = storage[tipsport_storage_id]
             stream = tipsport.get_stream(kodi_helper.get_arg('url'))
             title = '{name} ({time})'.format(name=kodi_helper.get_arg('name'), time=kodi_helper.get_arg('start_time'))
-            play_video(title, kodi_helper.icon, stream.get_link())
+            play_video(kodi_helper.plugin_handle, title, kodi_helper.icon, stream.get_link())
             storage[tipsport_storage_id] = tipsport
 
         elif mode == 'notification':
