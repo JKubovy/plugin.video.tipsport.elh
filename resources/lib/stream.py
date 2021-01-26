@@ -17,6 +17,9 @@ class RTMPStream:
         log('RTMPStream link: ' + result)
         return result
 
+    def is_rtmp(self):
+        return True
+
 
 class PlainStream:
     """Class represent one stream and store metadata used to generate plain/hls stream link"""
@@ -26,3 +29,6 @@ class PlainStream:
     def get_link(self):
         log('PlainStream link: ' + self._url)
         return self._url
+
+    def is_rtmp(self):
+        return False

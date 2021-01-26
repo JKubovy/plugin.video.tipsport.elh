@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.7.4] - 2021-1-26
+### Improve
+  - Stream starting (InputStream Adaptive)
+### Add
+  - Quality settings shortcut
+
 ## [0.7.3] - 2021-1-25
 ### Fix
   - Playing stream
