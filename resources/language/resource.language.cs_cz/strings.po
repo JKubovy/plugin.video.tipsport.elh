@@ -103,6 +103,10 @@ msgctxt "#31014"
 msgid "Show all streams (could not work!)"
 msgstr "Ukázat všechny přenosy (nemusí fungovat!)"
 
+msgctxt "#31015"
+msgid "Set preferred quality"
+msgstr "Nastavit preferovanou kvalitu"
+
 msgctxt "#32000"
 msgid "Error"
 msgstr "Chyba"

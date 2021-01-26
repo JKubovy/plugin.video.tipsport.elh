@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<addon id="plugin.video.tipsport.elh" name="Tipsport ELH" provider-name="Jan Kubový" version="0.8.2">
+<addon id="plugin.video.tipsport.elh" name="Tipsport ELH" provider-name="Jan Kubový" version="0.8.3">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
         <import addon="script.module.requests" version="2.12.4"/>
@@ -28,7 +28,10 @@
             <screenshot>resources\screenshot-03.jpg</screenshot>
         </assets>
         <news>
-v0.8.2(35.1.2021)
+v0.8.3(26.1.2021)
+  - Improve stream starting (InputStream Adaptive)
+  - Add Quality settings shortcut
+v0.8.2(25.1.2021)
   - Fix Playing stream
 v0.8.1(24.1.2021)
   - Remove Quality selector

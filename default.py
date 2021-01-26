@@ -33,12 +33,16 @@ def send_crash_report(kodi_helper, exception):
         return False
 
 
-def play_video(plugin_handle, title, icon, link, media_type='Video'):
+def play_video(plugin_handle, title, icon, stream, media_type='Video'):
     """Start playing given video stream"""
+    link = stream.get_link()
+    input_stream = 'inputstream.rtmp' if stream.is_rtmp() else 'inputstream.adaptive'
     list_item = xbmcgui.ListItem(label=title, path=link)
     list_item.setArt({'icon': icon})
     list_item.setInfo(type=media_type, infoLabels={"Title": title})
     list_item.setProperty('IsPlayable', 'true')
+    list_item.setProperty('inputstream', input_stream)
+    list_item.setProperty('inputstream.adaptive.manifest_type', 'hls')
     xbmcplugin.setResolvedUrl(plugin_handle, True, listitem=list_item)
 
 
@@ -161,7 +165,7 @@ def main():
             tipsport = storage[tipsport_storage_id]
             stream = tipsport.get_stream(kodi_helper.get_arg('url'))
             title = '{name} ({time})'.format(name=kodi_helper.get_arg('name'), time=kodi_helper.get_arg('start_time'))
-            play_video(kodi_helper.plugin_handle, title, kodi_helper.icon, stream.get_link())
+            play_video(kodi_helper.plugin_handle, title, kodi_helper.icon, stream)
             storage[tipsport_storage_id] = tipsport
 
         elif mode == 'notification':

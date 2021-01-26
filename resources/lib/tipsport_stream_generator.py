@@ -50,8 +50,6 @@ class Tipsport:
             'password': self.user_data.password
         }
         try:
-            log(self.user_data.site + '/LoginAction.do')
-            log(payload)
             self.session.post(self.user_data.site + '/LoginAction.do', payload)  # actual login
         except Exception as e:
             raise e.__class__  # remove tipsport account credentials from traceback
@@ -62,7 +60,6 @@ class Tipsport:
     def is_logged_in(self):
         """Check if login was successful"""
         response = self.session.put(self.user_data.site_mobile + '/rest/ver1/client/restrictions/login/duration')
-        log(response.status_code)
         if response.status_code == requests.status_codes.codes['OK']:
             log('Is logged in')
             return True
@@ -132,27 +129,6 @@ class Tipsport:
             raise UnableGetStreamListException()
         return response
 
-    def _get_response_dwr_get_stream(self, relative_url, c0_param1):
-        stream_url = self.user_data.site + '/live' + relative_url
-        page = self.session.get(stream_url)
-        token = get_token(page.text)
-        relative_url = relative_url.split('#')[0]
-        dwr_script = self.user_data.site + '/dwr/call/plaincall/StreamDWR.getStream.dwr'
-        payload = {
-            'callCount': 1,
-            'page': relative_url,
-            'httpSessionId': '',
-            'scriptSessionId': token,
-            'c0-scriptName': 'StreamDWR',
-            'c0-methodName': 'getStream',
-            'c0-id': 0,
-            'c0-param0': 'number:{0}'.format(get_stream_number(relative_url)),
-            'c0-param1': 'string:{0}'.format(c0_param1),
-            'batchId': 9
-        }
-        response = self.session.post(dwr_script, payload)
-        return response
-
     def _check_alert_message_and_throw_exception(self):
         """
         Return any alert message from Tipsport (like bet request)
@@ -172,95 +148,12 @@ class Tipsport:
             log('Unable to get Tipsport alert message')
             raise UnableGetStreamMetadataException()
 
-    @staticmethod
-    def _parse_stream_info_response(response):
-        data = json.loads(response.text)
-        if data['displayRules'] is None:
-            raise (TipsportMsg(data['data']))
-        # if data['returnCode']['name'] == 'NOT_STARTED':
-        #     raise StreamHasNotStarted()
-        stream_source = data['source']
-        stream_type = data['type']
-        if stream_source is None or stream_type is None:
-            raise UnableGetStreamMetadataException()
-        return stream_source, stream_type, data['data']
-
-    def _get_stream_source_type_and_data(self, relative_url):
-        """Get source and type of stream"""
-        stream_number = get_stream_number(relative_url)
-        base_url = self.user_data.site_mobile + '/rest/offer/v2/live/matches/{stream_number}/stream?deviceType=DESKTOP'.format(
-            stream_number=stream_number)
-        url = base_url + '&format=HLS'
-        response = self.session.get(url)
-        try:
-            stream_source, stream_type, data = self._parse_stream_info_response(response)
-            if 'auth=' not in data:
-                url = base_url + '&format=RTMP'
-                response = self.session.get(url)
-                stream_source, stream_type, data = self._parse_stream_info_response(response)
-            return stream_source, stream_type, data
-        except (TypeError, KeyError):
-            raise UnableGetStreamMetadataException()
-
 
 def _generate_random_number():
     """Generate string with given length that contains random numbers"""
     result = ''.join(random.SystemRandom().choice('0123456789') for _ in range(10))
     result = result + '-' + ''.join(random.SystemRandom().choice('0123456789abcdef') for _ in range(32))
     return result
-
-
-def _parse_stream_dwr_response(response_text):
-    """Parse response and try to get stream metadata"""
-    response_text = str(urllib.unquote(response_text))
-    if '<smil>' in response_text:
-        try:
-            url = (re.search('meta base="(.*?)"', response_text)).group(1)
-            playpath = (re.search('video src="(.*?)"', response_text)).group(1)
-            app = (url.split(':80/'))[1]
-        except (AttributeError, IndexError):
-            raise UnableParseStreamMetadataException()
-    elif '<data>' in response_text:
-        try:
-            response_text = response_text.replace('&amp;', '&')
-            url = (re.search('url="(.*?)"', response_text)).group(1)
-            auth = (re.search('auth="(.*)"', response_text)).group(1)
-            stream = (re.search('stream="(.*)"', response_text)).group(1)
-            app = url.split('/')[1]
-            url = 'rtmp://' + url
-            playpath = '{app}/{stream}?auth={auth}'.format(app=app, stream=stream, auth=auth)
-            if 'aifp="v001"' in response_text:
-                playpath = playpath + '&aifp=1'
-        except (AttributeError, IndexError):
-            raise UnableParseStreamMetadataException()
-    elif 'videohi' in response_text:
-        try:
-            url = (re.search('videohi=(.*?)&', response_text)).group(1)
-            app = (url.split('/'))[3]
-            playpath = app + '/' + (url.split(app + '/'))[1]
-            url = (url.split(app + '/'))[0] + app
-        except (AttributeError, IndexError):
-            raise UnableParseStreamMetadataException()
-    elif 'rtmpUrl' in response_text:
-        try:
-            url = (re.search('"rtmpUrl":"(.*?)"', response_text)).group(1)
-            app = (url.split('/'))[3]
-            playpath = app + '/' + (url.split(app + '/'))[1]
-            url = (url.split(app + '/'))[0] + app
-        except (AttributeError, IndexError):
-            raise UnableParseStreamMetadataException()
-    elif 'RTMP_URL' in response_text:
-        try:
-            url = (re.search('"RTMP_URL":"(.*?)"', response_text)).group(1)
-            playpath = (url.split('/'))[-1]
-            url = url.replace('/' + playpath, '')
-            tokens = url.split('/')
-            app = '/'.join([tokens[-2], tokens[-1]])
-        except (AttributeError, IndexError):
-            raise UnableParseStreamMetadataException()
-    else:
-        raise UnsupportedFormatStreamMetadataException()
-    return RTMPStream(url, playpath, app, True)
 
 
 def get_token(page):

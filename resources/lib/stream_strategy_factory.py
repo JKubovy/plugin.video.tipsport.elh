@@ -152,5 +152,5 @@ class StreamStrategyFactory:
             stream_source = data['source']
             stream_type = data['type']
             return stream_source, stream_type, data['data']
-        except:
+        except ValueError:
             raise UnableGetStreamMetadataException()
