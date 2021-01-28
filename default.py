@@ -79,10 +79,13 @@ def show_available_elh_matches(kodi_helper, tipsport, competitions):
                 'message': kodi_helper.get_local_string(30008)
             })
         if match.started:
+            status = ''
+            if match.status is not None:
+                status = match.status.encode('utf-8') if xbmc.getLanguage(xbmc.ISO_639_1) == 'cs' else ''
             plot = '\n{text}: {score:<20}{status}'.format(
                 text=kodi_helper.get_local_string(30003),
                 score=match.score,
-                status=match.status.encode('utf-8') if xbmc.getLanguage(xbmc.ISO_639_1) == 'cs' else '')
+                status=status)
         else:
             plot = '{text} {time}'.format(text=kodi_helper.get_local_string(30002), time=match.start_time)
         possible_match_icon = kodi_helper.get_match_icon(match.first_team, match.second_team)
