@@ -1,0 +1,8 @@
+version: "1"
+rules:
+  - base: master
+    upstream: JKubovy:master
+    mergeMethod: hardreset
+  - base: leia
+    upstream: JKubovy:leia
+    mergeMethod: hardreset
