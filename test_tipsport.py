@@ -17,7 +17,7 @@ def test_login(tipsport) -> bool:
 
 def test_all_streams(tipsport) -> None:
     tipsport.login()
-    matches = tipsport.get_list_elh_matches(None)
+    matches = tipsport.get_list_matches(None)
     for match in matches:
         try:
             if match.is_stream_enabled():

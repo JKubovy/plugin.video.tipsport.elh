@@ -61,7 +61,7 @@ class Tipsport:
         log('Is logged out')
         return False
 
-    def get_list_elh_matches(self, competition_name):
+    def get_list_matches(self, competition_name):
         """Get list of all available ELH matches on tipsport site"""
         response = self._get_matches_both_menu_response()
         data = json.loads(response.text)

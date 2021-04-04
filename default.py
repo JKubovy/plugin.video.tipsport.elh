@@ -57,43 +57,87 @@ def show_localized_notification(kodi_helper, heading_string_id, message_string_i
                       icon)
 
 
+def show_all_matches(kodi_helper, tipsport, folder_url):
+    """Generate list of all matches in folders (sport -> competition -> match)"""
+    url_tokens = folder_url.split('/')
+    url_mode = len(url_tokens)
+    if url_mode == 1:  # need to show sport folders
+        xbmcplugin.setContent(kodi_helper.plugin_handle, 'movies')
+        matches = tipsport.get_list_matches(url_tokens[0])
+        if len(matches) == 0:
+            show_localized_notification(kodi_helper, 30004, 30005, xbmcgui.NOTIFICATION_INFO)
+        sports = list(set([m.sport for m in matches]))
+        for sport in sports:
+            url = kodi_helper.build_url({'mode': 'folder', 'foldername': '/'.join([folder_url, sport])})
+            list_item = xbmcgui.ListItem(sport)
+            list_item.setInfo(type='Video', infoLabels={'Plot': sport})
+            xbmcplugin.addDirectoryItem(handle=kodi_helper.plugin_handle, url=url, listitem=list_item, isFolder=True)
+        xbmcplugin.endOfDirectory(kodi_helper.plugin_handle)
+    elif url_mode == 2:  # competition folders
+        xbmcplugin.setContent(kodi_helper.plugin_handle, 'movies')
+        matches = tipsport.get_list_matches(url_tokens[0])
+        matches = [m for m in matches if m.sport == url_tokens[1]]
+        if len(matches) == 0:
+            show_localized_notification(kodi_helper, 30004, 30005, xbmcgui.NOTIFICATION_INFO)
+        competitions = list(set([m.competition for m in matches]))
+        for competition in competitions:
+            url = kodi_helper.build_url({'mode': 'folder', 'foldername': '/'.join([folder_url, competition])})
+            list_item = xbmcgui.ListItem(competition)
+            list_item.setInfo(type='Video', infoLabels={'Plot': competition})
+            xbmcplugin.addDirectoryItem(handle=kodi_helper.plugin_handle, url=url, listitem=list_item, isFolder=True)
+        xbmcplugin.endOfDirectory(kodi_helper.plugin_handle)
+    else:  # match folders
+        xbmcplugin.setContent(kodi_helper.plugin_handle, 'movies')
+        matches = tipsport.get_list_matches(url_tokens[0])
+        matches = [m for m in matches if m.sport == url_tokens[1] and m.competition == url_tokens[2]]
+        if len(matches) == 0:
+            show_localized_notification(kodi_helper, 30004, 30005, xbmcgui.NOTIFICATION_INFO)
+        for match in matches:
+            add_match_item(match, kodi_helper)
+        xbmcplugin.endOfDirectory(kodi_helper.plugin_handle)
+
+
+def add_match_item(match, kodi_helper):
+    if match.is_stream_enabled():
+        url = kodi_helper.build_url({
+            'mode': 'play',
+            'url': match.url,
+            'name': match.name,
+            'start_time': match.start_time
+        })
+    else:
+        url = kodi_helper.build_url({
+            'mode': 'notification',
+            'title': match.name,
+            'message': kodi_helper.get_local_string(30008)
+        })
+    if match.started:
+        plot = '\n{text}: {score:<20}{status}'.format(
+            text=kodi_helper.get_local_string(30003),
+            score=match.score,
+            status=match.status if xbmc.getLanguage(xbmc.ISO_639_1) == 'cs' else '')
+    else:
+        plot = '{text} {time}'.format(text=kodi_helper.get_local_string(30002), time=match.start_time)
+    possible_match_icon = kodi_helper.get_match_icon(match.first_team, match.second_team)
+    if possible_match_icon:
+        icon = possible_match_icon
+    else:
+        icon = kodi_helper.get_media(match.icon_name) if match.icon_name else kodi_helper.icon
+    list_item = xbmcgui.ListItem(match.name)
+    list_item.setArt({'icon': icon})
+    list_item.setInfo(type='Video', infoLabels={'Plot': plot})
+    list_item.setProperty('IsPlayable', 'true')
+    xbmcplugin.addDirectoryItem(handle=kodi_helper.plugin_handle, url=url, listitem=list_item)
+
+
 def show_available_elh_matches(kodi_helper, tipsport, competitions):
     """Generate list of available elh matches in Kodi"""
     xbmcplugin.setContent(kodi_helper.plugin_handle, 'movies')
-    matches = tipsport.get_list_elh_matches(competitions)
+    matches = tipsport.get_list_matches(competitions)
     if len(matches) == 0:
         show_localized_notification(kodi_helper, 30004, 30005, xbmcgui.NOTIFICATION_INFO)
     for match in matches:
-        if match.is_stream_enabled():
-            url = kodi_helper.build_url({
-                'mode': 'play',
-                'url': match.url,
-                'name': match.name,
-                'start_time': match.start_time
-            })
-        else:
-            url = kodi_helper.build_url({
-                'mode': 'notification',
-                'title': match.name,
-                'message': kodi_helper.get_local_string(30008)
-            })
-        if match.started:
-            plot = '\n{text}: {score:<20}{status}'.format(
-                text=kodi_helper.get_local_string(30003),
-                score=match.score,
-                status=match.status if xbmc.getLanguage(xbmc.ISO_639_1) == 'cs' else '')
-        else:
-            plot = '{text} {time}'.format(text=kodi_helper.get_local_string(30002), time=match.start_time)
-        possible_match_icon = kodi_helper.get_match_icon(match.first_team, match.second_team)
-        if possible_match_icon:
-            icon = possible_match_icon
-        else:
-            icon = kodi_helper.get_media(match.icon_name) if match.icon_name else kodi_helper.icon
-        list_item = xbmcgui.ListItem(match.name)
-        list_item.setArt({'icon': icon})
-        list_item.setInfo(type='Video', infoLabels={'Plot': plot})
-        list_item.setProperty('IsPlayable', 'true')
-        xbmcplugin.addDirectoryItem(handle=kodi_helper.plugin_handle, url=url, listitem=list_item)
+        add_match_item(match, kodi_helper)
     xbmcplugin.endOfDirectory(kodi_helper.plugin_handle)
 
 
@@ -155,7 +199,12 @@ def main():
             if tipsport_storage_id not in storage:
                 storage[tipsport_storage_id] = get_new_tipsport(kodi_helper)
             tipsport = storage[tipsport_storage_id]
-            show_available_elh_matches(kodi_helper, tipsport, kodi_helper.get_arg('foldername'))
+            folder_url = kodi_helper.get_arg('foldername')
+            log(f'Folder url: "{folder_url}"')
+            if folder_url.startswith('_ALL'):
+                show_all_matches(kodi_helper, tipsport, folder_url)
+            else:
+                show_available_elh_matches(kodi_helper, tipsport, folder_url)
             storage[tipsport_storage_id] = tipsport
 
         elif mode == 'play':
