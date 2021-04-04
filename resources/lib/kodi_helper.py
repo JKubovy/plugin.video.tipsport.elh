@@ -6,7 +6,7 @@ import xbmc
 import xbmcaddon
 import xbmcvfs
 from .tipsport_exceptions import StrangeXBMCException
-from .tipsport_stream_generator import Site
+from .site import Site
 from .user_data import UserData
 from .utils import log
 try:

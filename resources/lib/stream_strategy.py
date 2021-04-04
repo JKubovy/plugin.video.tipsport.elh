@@ -6,7 +6,6 @@ except:
     from urllib.parse import urljoin
 from .utils import log
 from .stream import RTMPStream, PlainStream
-from .tipsport_exceptions import UnableGetStreamMetadataException
 
 
 class RTMPStreamStrategy:
@@ -64,7 +63,8 @@ class UrlPerformeStreamStrategy:
 
     def get_stream(self):
         xml_data = self._session.get(self._url)
-        possible_m3u8_urls = re.findall('<streamLaunchCode><!\[CDATA\[(.*)\]\]></streamLaunchCode>', xml_data.text.replace('\n', ''))
+        possible_m3u8_urls = re.findall('<streamLaunchCode><!\[CDATA\[(.*)\]\]></streamLaunchCode>',
+                                        xml_data.text.replace('\n', ''))
         possible_m3u8_urls = [m3u8_url for m3u8_url in possible_m3u8_urls if 'm3u8' in m3u8_url or 'hls' in m3u8_url]
         if len(possible_m3u8_urls) == 0:
             return None

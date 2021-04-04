@@ -3,7 +3,6 @@ from datetime import datetime, timedelta
 import _strptime
 import time
 
-
 FULL_NAMES = {
     u'H.Králové': u'Hradec Králové',
     u'M.Boleslav': u'Mladá Boleslav',
@@ -22,8 +21,8 @@ FULL_NAMES = {
 
 class Match:
     """Class represents one match with additional information"""
-    def __init__(self, name, competition, sport, url, start_time, status,
-                 not_started, score, icon_name, minutes_enable_before_start):
+    def __init__(self, name, competition, sport, url, start_time, status, not_started, score, icon_name,
+                 minutes_enable_before_start):
         self.first_team, self.second_team, self.name = self.parse_name(name)
         self.competition = competition
         self.sport = sport
@@ -37,12 +36,9 @@ class Match:
         self.match_time = self.get_match_time()
 
     def get_match_time(self):
-        now = datetime.now()
+        datetime.now()
         match_time = datetime(*(time.strptime(self.start_time, '%H:%M')[0:6]))
-        match_time = datetime.now().replace(hour=match_time.hour,
-                                            minute=match_time.minute,
-                                            second=0,
-                                            microsecond=0)
+        match_time = datetime.now().replace(hour=match_time.hour, minute=match_time.minute, second=0, microsecond=0)
         return match_time
 
     def is_stream_enabled(self):
@@ -63,8 +59,7 @@ class Match:
             (first_team, second_team) = name.split('-')
             first_team = Match.get_full_name_if_possible(first_team)
             second_team = Match.get_full_name_if_possible(second_team)
-            match_name = u'{first_team} - {second_team}'.format(first_team=first_team,
-                                                                second_team=second_team)
+            match_name = u'{first_team} - {second_team}'.format(first_team=first_team, second_team=second_team)
             return (first_team, second_team, match_name)
         except ValueError:
             return '', '', name

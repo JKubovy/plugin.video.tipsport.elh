@@ -6,7 +6,7 @@ import xbmcplugin
 import traceback
 import requests
 from resources.lib.tipsport_stream_generator import Tipsport
-from resources.lib.tipsport_exceptions import *
+import resources.lib.tipsport_exceptions as Exceptions
 from resources.lib.kodi_helper import KodiHelper
 from resources.lib.mem_storage import MemStorage
 from resources.lib.utils import log
@@ -53,8 +53,7 @@ def show_notification(heading_string, message_string, icon):
 
 def show_localized_notification(kodi_helper, heading_string_id, message_string_id, icon=xbmcgui.NOTIFICATION_ERROR):
     """Show Kodi notification with given string ids"""
-    show_notification(kodi_helper.get_local_string(heading_string_id),
-                      kodi_helper.get_local_string(message_string_id),
+    show_notification(kodi_helper.get_local_string(heading_string_id), kodi_helper.get_local_string(message_string_id),
                       icon)
 
 
@@ -174,32 +173,32 @@ def main():
         elif mode == 'check_login':
             tipsport = get_new_tipsport(kodi_helper)
             if not tipsport.is_logged_in():
-                raise LoginFailedException()
+                raise Exceptions.LoginFailedException()
             storage[tipsport_storage_id] = tipsport
             show_localized_notification(kodi_helper, 30000, 30001, xbmcgui.NOTIFICATION_INFO)
 
-    except (NoInternetConnectionsException, requests.ConnectionError, requests.ConnectTimeout,
+    except (Exceptions.NoInternetConnectionsException, requests.ConnectionError, requests.ConnectTimeout,
             requests.exceptions.ChunkedEncodingError):
         show_localized_notification(kodi_helper, 32000, 32001)
-    except LoginFailedException:
+    except Exceptions.LoginFailedException:
         show_localized_notification(kodi_helper, 32000, 32002)
-    except UnableGetStreamMetadataException:
+    except Exceptions.UnableGetStreamMetadataException:
         show_localized_notification(kodi_helper, 32000, 32003)
-    except UnableParseStreamMetadataException:
+    except Exceptions.UnableParseStreamMetadataException:
         show_localized_notification(kodi_helper, 32000, 32004)
-    except UnsupportedFormatStreamMetadataException:
+    except Exceptions.UnsupportedFormatStreamMetadataException:
         show_localized_notification(kodi_helper, 32000, 32005)
-    except UnableDetectScriptSessionIdException:
+    except Exceptions.UnableDetectScriptSessionIdException:
         show_localized_notification(kodi_helper, 32000, 32006)
-    except UnableGetStreamNumberException:
+    except Exceptions.UnableGetStreamNumberException:
         show_localized_notification(kodi_helper, 32000, 32007)
-    except UnableGetStreamListException:
+    except Exceptions.UnableGetStreamListException:
         show_localized_notification(kodi_helper, 32000, 32010)
-    except StrangeXBMCException:
+    except Exceptions.StrangeXBMCException:
         show_localized_notification(kodi_helper, 32000, 32011)
-    except StreamHasNotStarted:
+    except Exceptions.StreamHasNotStarted:
         show_localized_notification(kodi_helper, 30004, 30008, xbmcgui.NOTIFICATION_INFO)
-    except TipsportMsg as e:
+    except Exceptions.TipsportMsg as e:
         xbmcgui.Dialog().ok(kodi_helper.get_local_string(32000), str(e))
     except Exception as e:
         if send_crash_report(kodi_helper, e):

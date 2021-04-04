@@ -1,7 +1,7 @@
 import json
 from .utils import log
-from .tipsport_exceptions import UnableGetStreamNumberException, TipsportMsg, StreamHasNotStarted
-from .stream_strategy import *
+from .tipsport_exceptions import UnableGetStreamNumberException, TipsportMsg, StreamHasNotStarted, UnableGetStreamMetadataException
+from . import stream_strategy as Strategies
 
 
 class StreamStrategyFactory:
@@ -24,14 +24,12 @@ class StreamStrategyFactory:
         stream_strategy = self._try_rtmp_with_hls_strategy(base_url)
         if stream_strategy:
             return stream_strategy
-        return NoneStrategy(relative_url)
-
-
+        return Strategies.NoneStrategy(relative_url)
 
         # stream_source, stream_type, url = self._get_stream_source_type_and_data(relative_url)
         # if stream_type == 'RTMP':
         #     return RTMPStreamStrategy(url)
-        
+
         # if stream_source in ['LIVEBOX_ELH', 'LIVEBOX_SK']:
         #     if stream_type == 'RTMP':
         #         return self._decode_rtmp_url(url)
@@ -54,7 +52,7 @@ class StreamStrategyFactory:
         try:
             stream_source, stream_type, data = self._parse_stream_info_response(response)
             if stream_type == 'RTMP' and data is not None:
-                return RTMPStreamStrategy(data)
+                return Strategies.RTMPStreamStrategy(data)
             log('Unknown RTMP stream_type: ' + stream_type + ', stream_source: ' + stream_source)
         except:
             pass
@@ -66,11 +64,11 @@ class StreamStrategyFactory:
         try:
             stream_source, stream_type, data = self._parse_stream_info_response(response)
             if stream_type == 'HLS':
-                return HLSStreamStrategy(self._session, data)
+                return Strategies.HLSStreamStrategy(self._session, data)
             if stream_type == 'URL_IMG':
-                return UrlImgStreamStrategy(self._session, data)
+                return Strategies.UrlImgStreamStrategy(self._session, data)
             if stream_type == 'URL_AGURA':
-                return UrlAguraStrategy(self._session, data)
+                return Strategies.UrlAguraStrategy(self._session, data)
             log('Unknown HLS stream_type: ' + stream_type + ', stream_source: ' + stream_source)
         except:
             pass
@@ -83,7 +81,7 @@ class StreamStrategyFactory:
             stream_source, stream_type, data = self._parse_stream_info_response(response)
             if stream_type == 'RTMP_WITH_HLS':
                 url = data.split('###')[1]
-                return HLSStreamStrategy(self._session, url)
+                return Strategies.HLSStreamStrategy(self._session, url)
             log('Unknown RTMP_WITH_HLS stream_type: ' + stream_type + ', stream_source: ' + stream_source)
         except:
             pass
@@ -95,9 +93,9 @@ class StreamStrategyFactory:
         try:
             stream_source, stream_type, data = self._parse_stream_info_response(response)
             if stream_type == 'URL_PERFORM':
-                return UrlPerformeStreamStrategy(self._session, data)
+                return Strategies.UrlPerformeStreamStrategy(self._session, data)
             if stream_type == 'URL_TVCOM':
-                return TvComStreamStrategy(self._session, data)
+                return Strategies.TvComStreamStrategy(self._session, data)
             log('Unknown OTHER stream_type: ' + stream_type + ', stream_source: ' + stream_source)
         except:
             pass

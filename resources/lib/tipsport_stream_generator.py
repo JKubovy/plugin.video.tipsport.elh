@@ -3,20 +3,15 @@ import re
 import random
 import json
 import requests
-import urllib
-import time
-import xml.etree.ElementTree
-from .tipsport_exceptions import *
-from .site import Site
+from . import tipsport_exceptions as Exceptions
 from .match import Match
-from .stream import PlainStream, RTMPStream
 from .utils import log, get_session_id_from_page
 from .stream_strategy_factory import StreamStrategyFactory
 
-
 COMPETITIONS = {
     'CZ_TIPSPORT': [u'Česká Tipsport extraliga', u'Tipsport extraliga', u'CZ Tipsport extraliga'],
-    'SK_TIPSPORT': [u'Slovenská Tipsport liga', u'Slovensk\u00E1 Tipsport liga', u'Tipsport Liga', u'Slovenská extraliga'],
+    'SK_TIPSPORT':
+    [u'Slovenská Tipsport liga', u'Slovensk\u00E1 Tipsport liga', u'Tipsport Liga', u'Slovenská extraliga'],
     'CZ_CHANCE': [u'Česká Chance liga', u'CZ Chance liga']
 }
 COMPETITION_LOGO = {
@@ -40,7 +35,7 @@ class Tipsport:
 
     def login(self):
         """Login to mobile tipsport site with given credentials"""
-        _ = self.session.get(self.user_data.site)  # load cookies
+        self.session.get(self.user_data.site)  # load cookies
         payload = {
             'agent': AGENT,
             'requestURI': '/',
@@ -55,7 +50,7 @@ class Tipsport:
             raise e.__class__  # remove tipsport account credentials from traceback
         # self._try_update_session_XAuthToken()
         if not self.is_logged_in():
-            raise LoginFailedException()
+            raise Exceptions.LoginFailedException()
 
     def is_logged_in(self):
         """Check if login was successful"""
@@ -72,23 +67,28 @@ class Tipsport:
         data = json.loads(response.text)
         icon_name = COMPETITION_LOGO.get(competition_name)
         if competition_name in COMPETITIONS:
-            matches_data = [match for sports in data['program'] if sports['id'] == 23
-                            for matchesInTimespan in sports['matchesByTimespans']
-                            for match in matchesInTimespan if match['competition'] in COMPETITIONS[competition_name]]
+            matches_data = [
+                match for sports in data['program'] if sports['id'] == 23
+                for matchesInTimespan in sports['matchesByTimespans'] for match in matchesInTimespan
+                if match['competition'] in COMPETITIONS[competition_name]
+            ]
         else:
-            matches_data = [match for sports in data['program']
-                            for matchesInTimespan in sports['matchesByTimespans']
-                            for match in matchesInTimespan]
-        matches = [Match(name=match['name'],
-                         competition=match['competition'],
-                         sport=match['sport'],
-                         url=match['url'],
-                         start_time=match['matchStartTime'],
-                         status=match['score']['statusOffer'],
-                         not_started=not match['live'],
-                         score=match['score']['scoreOffer'],
-                         icon_name=icon_name,
-                         minutes_enable_before_start=15) for match in matches_data]
+            matches_data = [
+                match for sports in data['program'] for matchesInTimespan in sports['matchesByTimespans']
+                for match in matchesInTimespan
+            ]
+        matches = [
+            Match(name=match['name'],
+                  competition=match['competition'],
+                  sport=match['sport'],
+                  url=match['url'],
+                  start_time=match['matchStartTime'],
+                  status=match['score']['statusOffer'],
+                  not_started=not match['live'],
+                  score=match['score']['scoreOffer'],
+                  icon_name=icon_name,
+                  minutes_enable_before_start=15) for match in matches_data
+        ]
         matches.sort(key=lambda match: match.match_time)
         log('Matches {0} loaded'.format(competition_name))
         return matches
@@ -101,9 +101,9 @@ class Tipsport:
         try:
             stream = strategy.get_stream()
         except:
-            raise UnableParseStreamMetadataException()
+            raise Exceptions.UnableParseStreamMetadataException()
         if not stream:
-            raise UnsupportedFormatStreamMetadataException()
+            raise Exceptions.UnsupportedFormatStreamMetadataException()
         return stream
 
     def _relogin_if_needed(self):
@@ -126,7 +126,7 @@ class Tipsport:
         response.encoding = 'utf-8'
         if 'program' not in response.text:
             log(response.text)
-            raise UnableGetStreamListException()
+            raise Exceptions.UnableGetStreamListException()
         return response
 
     def _check_alert_message_and_throw_exception(self):
@@ -139,14 +139,14 @@ class Tipsport:
         try:
             data = json.loads(page.text)
             if name not in data:
-                raise TipsportMsg()
+                raise Exceptions.TipsportMsg()
             text = data[name]
             if text is None:
                 return None
-            raise TipsportMsg(text.split('.')[0] + '.')
+            raise Exceptions.TipsportMsg(text.split('.')[0] + '.')
         except TypeError:
             log('Unable to get Tipsport alert message')
-            raise UnableGetStreamMetadataException()
+            raise Exceptions.UnableGetStreamMetadataException()
 
 
 def _generate_random_number():
@@ -160,7 +160,7 @@ def get_token(page):
     """Get scriptSessionId from page for proper DWRScript call"""
     token = re.search('JAWR.dwr_scriptSessionId=\'([0-9A-Z]+)\'', page)
     if token is None:
-        raise UnableDetectScriptSessionIdException()
+        raise Exceptions.UnableDetectScriptSessionIdException()
     token = token.group(1)
     return token
 
@@ -177,5 +177,5 @@ def get_stream_number(relative_url):
     try:
         int(number)
     except ValueError:
-        raise UnableGetStreamNumberException()
+        raise Exceptions.UnableGetStreamNumberException()
     return number
