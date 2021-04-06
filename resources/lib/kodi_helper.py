@@ -86,6 +86,7 @@ class KodiHelper:
         self.user_data = UserData(addon.getSetting('username'), addon.getSetting('password'), self.__get_site(addon))
         self.send_crash_reports = addon.getSetting('send_crash_reports') == 'true'
         self.show_all_matches = addon.getSetting('show_all_matches') == 'true'
+        self.put_all_matches_in_folders = addon.getSetting('folder_structure_all_matches') == 'true'
         self.icon = addon.getAddonInfo('icon')
         self.can_generate_logos_settings = addon.getSetting('generate_logos') == 'true'
 

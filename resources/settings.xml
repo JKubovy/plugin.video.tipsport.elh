@@ -76,6 +76,11 @@
                     <default>false</default>
                     <control type="toggle"/>
                 </setting>
+                <setting id="folder_structure_all_matches" type="boolean" label="31016" help="">
+                    <level>0</level>
+                    <default>false</default>
+                    <control type="toggle"/>
+                </setting>
             </group>
         </category>
     </section>

@@ -167,8 +167,6 @@ def show_available_competitions(kodi_helper):
     url = kodi_helper.build_url({'mode': 'folder', 'foldername': 'SK_TIPSPORT'})
     xbmcplugin.addDirectoryItem(handle=kodi_helper.plugin_handle, url=url, listitem=list_item, isFolder=True)
 
-    # TODO: delete
-
     if kodi_helper.show_all_matches:
         list_item = xbmcgui.ListItem('All')
         list_item.setInfo(type='Video', infoLabels={'Plot': ''})
@@ -201,7 +199,7 @@ def main():
             tipsport = storage[tipsport_storage_id]
             folder_url = kodi_helper.get_arg('foldername')
             log(f'Folder url: "{folder_url}"')
-            if folder_url.startswith('_ALL'):
+            if folder_url.startswith('_ALL') and kodi_helper.put_all_matches_in_folders:
                 show_all_matches(kodi_helper, tipsport, folder_url)
             else:
                 show_available_elh_matches(kodi_helper, tipsport, folder_url)

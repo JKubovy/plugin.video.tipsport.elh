@@ -37,7 +37,7 @@ msgid ""
 "The Czech Extraliga is the highest-level ice hockey league in the Czech "
 "Republic."
 msgstr ""
-"Extraliga ledního hokeje je najvyššia súťaž v ľadovom hokeji, 
+"Extraliga ledního hokeje je najvyššia súťaž v ľadovom hokeji,
 "ktorá je usporiadaná na území Českej republiky."
 
 msgctxt "#30007"
@@ -106,6 +106,10 @@ msgstr "Ukázať všetky prenosy (nemusí fungovať!)"
 msgctxt "#31015"
 msgid "Set preferred quality"
 msgstr "Nastaviť preferovanú kvalitu "
+
+msgctxt "#31016"
+msgid "Put all streams to folder structure"
+msgstr "Zobraziť všetky prenosy v zložkách"
 
 msgctxt "#32000"
 msgid "Error"

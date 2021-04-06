@@ -104,6 +104,10 @@ msgctxt "#31015"
 msgid "Set preferred quality"
 msgstr "Set preferred quality"
 
+msgctxt "#31016"
+msgid "Put all streams to folder structure"
+msgstr "Put all streams to folder structure"
+
 msgctxt "#32000"
 msgid "Error"
 msgstr "Error"

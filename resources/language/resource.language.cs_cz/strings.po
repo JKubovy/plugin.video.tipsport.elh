@@ -107,6 +107,10 @@ msgctxt "#31015"
 msgid "Set preferred quality"
 msgstr "Nastavit preferovanou kvalitu"
 
+msgctxt "#31016"
+msgid "Put all streams to folder structure"
+msgstr "Zobrazit všechny přenosy ve složkách"
+
 msgctxt "#32000"
 msgid "Error"
 msgstr "Chyba"
