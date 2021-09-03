@@ -20,7 +20,7 @@ def send_crash_report(kodi_helper, exception):
         session = requests.session()
         addon = kodi_helper.plugin_name
         version = kodi_helper.version
-        data = traceback.format_exc(exception)
+        data = traceback.format_exc()
         params = {'addon': addon, 'version': version, 'data': data}
         url = 'https://script.google.com/macros/s/AKfycbyEXPShEN6O7Eounxf932MyzOHrsaRAcksU0LvEMcYRgXDRhqu-/exec'
         response = session.get(url, params=params, headers={"Content-type": "application/x-www-form-urlencoded"})
@@ -226,6 +226,7 @@ def main():
 
     except (Exceptions.NoInternetConnectionsException, requests.ConnectionError, requests.ConnectTimeout,
             requests.exceptions.ChunkedEncodingError):
+        log(traceback.format_exc())
         show_localized_notification(kodi_helper, 32000, 32001)
     except Exceptions.LoginFailedException:
         show_localized_notification(kodi_helper, 32000, 32002)
@@ -251,7 +252,7 @@ def main():
         if send_crash_report(kodi_helper, e):
             show_localized_notification(kodi_helper, 32000, 32009)
         else:
-            log(traceback.format_exc(e))
+            log(traceback.format_exc())
             show_localized_notification(kodi_helper, 32000, 32008)
 
 

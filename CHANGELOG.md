@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.8.5] - 2021-9-3
+### Change
+  - Try to fix login (Tipsport start using captcha)
+
 ## [0.8.4] - 2021-4-6
 ### Add
   - Settings to put all streams to folder structure

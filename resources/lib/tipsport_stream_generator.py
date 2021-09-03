@@ -1,8 +1,10 @@
 # coding=utf-8
 import re
+import time
 import random
 import json
 import requests
+from urllib import parse
 from . import tipsport_exceptions as Exceptions
 from .match import Match
 from .utils import log, get_session_id_from_page
@@ -27,6 +29,7 @@ class Tipsport:
     """Class providing communication with Tipsport site"""
     def __init__(self, user_data, clean_function=None):
         self.session = requests.session()
+        self.session.headers['User-Agent'] = AGENT
         self.logged_in = False
         self.user_data = user_data
         self.stream_strategy_factory = StreamStrategyFactory(self.session, self.user_data)
@@ -35,17 +38,21 @@ class Tipsport:
 
     def login(self):
         """Login to mobile tipsport site with given credentials"""
+        url = self.user_data.site + \
+              '/LoginAction.do' + \
+              '?' + parse.urlencode({
+                  'agent': AGENT,
+                  'userName': self.user_data.username,
+                  'redirectUrl': '/',
+                  'password': self.user_data.password})
         self.session.get(self.user_data.site)  # load cookies
-        payload = {
-            'agent': AGENT,
-            'requestURI': '/',
-            'fPrint': _generate_random_number(),
-            'originalBrowserUri': '/',
-            'userName': self.user_data.username,
-            'password': self.user_data.password
-        }
+        time.sleep(1.3)  # Wait some tome to next request to prevent suspicion that it is automated
         try:
-            self.session.post(self.user_data.site + '/LoginAction.do', payload)  # actual login
+            log(url)
+            response = self.session.post(url)  # actual login
+            log(response.status_code)
+            log(f'New login: {"logged: true," in response.text}')
+            log(response.request.headers)
         except Exception as e:
             raise e.__class__  # remove tipsport account credentials from traceback
         # self._try_update_session_XAuthToken()
