@@ -48,8 +48,7 @@ class Tipsport:
         self.session.get(self.user_data.site)  # load cookies
         time.sleep(1.3)  # Wait some tome to next request to prevent suspicion that it is automated
         try:
-            log(url)
-            response = self.session.post(url)  # actual login
+            self.session.post(url)  # actual login
         except Exception as e:
             raise e.__class__  # remove tipsport account credentials from traceback
         # self._try_update_session_XAuthToken()
