@@ -50,9 +50,6 @@ class Tipsport:
         try:
             log(url)
             response = self.session.post(url)  # actual login
-            log(response.status_code)
-            log(f'New login: {"logged: true," in response.text}')
-            log(response.request.headers)
         except Exception as e:
             raise e.__class__  # remove tipsport account credentials from traceback
         # self._try_update_session_XAuthToken()
