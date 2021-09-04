@@ -13,10 +13,10 @@ from .stream import PlainStream, RTMPStream
 from .utils import log, get_session_id_from_page
 from .stream_strategy_factory import StreamStrategyFactory
 
-
 COMPETITIONS = {
     'CZ_TIPSPORT': [u'Česká Tipsport extraliga', u'Tipsport extraliga', u'CZ Tipsport extraliga'],
-    'SK_TIPSPORT': [u'Slovenská Tipsport liga', u'Slovensk\u00E1 Tipsport liga', u'Tipsport Liga', u'Slovenská extraliga'],
+    'SK_TIPSPORT':
+    [u'Slovenská Tipsport liga', u'Slovensk\u00E1 Tipsport liga', u'Tipsport Liga', u'Slovenská extraliga'],
     'CZ_CHANCE': [u'Česká Chance liga', u'CZ Chance liga']
 }
 COMPETITION_LOGO = {
@@ -32,6 +32,7 @@ class Tipsport:
     """Class providing communication with Tipsport site"""
     def __init__(self, user_data, clean_function=None):
         self.session = requests.session()
+        self.session.headers['User-Agent'] = AGENT
         self.logged_in = False
         self.user_data = user_data
         self.stream_strategy_factory = StreamStrategyFactory(self.session, self.user_data)
@@ -40,17 +41,20 @@ class Tipsport:
 
     def login(self):
         """Login to mobile tipsport site with given credentials"""
-        _ = self.session.get(self.user_data.site)  # load cookies
-        payload = {
-            'agent': AGENT,
-            'requestURI': '/',
-            'fPrint': 'unknown', # _generate_random_number(),
-            'originalBrowserUri': '/',
-            'userName': self.user_data.username,
-            'password': self.user_data.password
-        }
+        url = self.user_data.site + \
+                '/LoginAction.do' + \
+                '?' + \
+                urllib.urlencode({
+                    'agent': AGENT,
+                    'redirectUrl': '/',
+                    'userName': self.user_data.username,
+                    'password': self.user_data.password})
+
+        self.session.get(self.user_data.site)  # load cookies
+        time.sleep(1.3)  # Wait some tome to next request to prevent suspicion that it is automated
+
         try:
-            self.session.post(self.user_data.site + '/LoginAction.do', payload)  # actual login
+            self.session.post(url)  # actual login
         except Exception as e:
             raise e.__class__  # remove tipsport account credentials from traceback
         # self._try_update_session_XAuthToken()
@@ -72,23 +76,28 @@ class Tipsport:
         data = json.loads(response.text)
         icon_name = COMPETITION_LOGO.get(competition_name)
         if competition_name in COMPETITIONS:
-            matches_data = [match for sports in data['program'] if sports['id'] == 23
-                            for matchesInTimespan in sports['matchesByTimespans']
-                            for match in matchesInTimespan if match['competition'] in COMPETITIONS[competition_name]]
+            matches_data = [
+                match for sports in data['program'] if sports['id'] == 23
+                for matchesInTimespan in sports['matchesByTimespans'] for match in matchesInTimespan
+                if match['competition'] in COMPETITIONS[competition_name]
+            ]
         else:
-            matches_data = [match for sports in data['program']
-                            for matchesInTimespan in sports['matchesByTimespans']
-                            for match in matchesInTimespan]
-        matches = [Match(name=match['name'],
-                         competition=match['competition'],
-                         sport=match['sport'],
-                         url=match['url'],
-                         start_time=match['matchStartTime'],
-                         status=match['score']['statusOffer'],
-                         not_started=not match['live'],
-                         score=match['score']['scoreOffer'],
-                         icon_name=icon_name,
-                         minutes_enable_before_start=15) for match in matches_data]
+            matches_data = [
+                match for sports in data['program'] for matchesInTimespan in sports['matchesByTimespans']
+                for match in matchesInTimespan
+            ]
+        matches = [
+            Match(name=match['name'],
+                  competition=match['competition'],
+                  sport=match['sport'],
+                  url=match['url'],
+                  start_time=match['matchStartTime'],
+                  status=match['score']['statusOffer'],
+                  not_started=not match['live'],
+                  score=match['score']['scoreOffer'],
+                  icon_name=icon_name,
+                  minutes_enable_before_start=15) for match in matches_data
+        ]
         matches.sort(key=lambda match: match.match_time)
         log('Matches {0} loaded'.format(competition_name))
         return matches

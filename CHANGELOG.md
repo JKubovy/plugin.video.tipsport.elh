@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.7.5] - 2021-9-4
+### Change
+  - Login request
+
 ## [0.7.4] - 2021-1-26
 ### Improve
   - Stream starting (InputStream Adaptive)
@@ -105,7 +109,7 @@ All notable changes to this project will be documented in this file.
   - Full name for K.Vary
 ### Change
   - Login to mobile web version
-  
+
 ## [0.5.0] - 2018-11-29
 ### Fix
   - New login system
@@ -155,15 +159,15 @@ All notable changes to this project will be documented in this file.
 ## [0.3.7] - 2018-2-2
 ### Fix
   - Minor bugs
-  
+
 ## [0.3.6] - 2017-12-26
 ### Fix
   - Minor bugs
-  
+
 ## [0.3.5] - 2017-12-8
 ### Fix
   - Minor bugs
-  
+
 ## [0.3.4] - 2017-12-3
 ### Fix
   - Minor bugs
@@ -220,6 +224,6 @@ All notable changes to this project will be documented in this file.
 
 ## [0.1.0] - 2017-9-14
   - First public release
-  
+
 ## [0.0.5] - 2017-9-13
   - Project start
