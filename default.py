@@ -114,7 +114,7 @@ def add_match_item(match, kodi_helper):
     if match.started:
         plot = '\n{text}: {score:<20}{status}'.format(
             text=kodi_helper.get_local_string(30003),
-            score=match.score,
+            score=match.score or '',  # If score is None TypeError is thrown
             status=match.status if xbmc.getLanguage(xbmc.ISO_639_1) == 'cs' else '')
     else:
         plot = '{text} {time}'.format(text=kodi_helper.get_local_string(30002), time=match.start_time)

@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.8.6] - 2021-9-11
+### Fix
+  - Prevent unhandled TypeError on match loading
+
 ## [0.8.5] - 2021-9-3
 ### Change
   - Try to fix login (Tipsport start using captcha)
