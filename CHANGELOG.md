@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.7.6] - 2021-9-11
+### Fix
+ - Match text loading
+
 ## [0.7.5] - 2021-9-4
 ### Change
   - Login request

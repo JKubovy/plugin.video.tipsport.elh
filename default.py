@@ -53,8 +53,7 @@ def show_notification(heading_string, message_string, icon):
 
 def show_localized_notification(kodi_helper, heading_string_id, message_string_id, icon=xbmcgui.NOTIFICATION_ERROR):
     """Show Kodi notification with given string ids"""
-    show_notification(kodi_helper.get_local_string(heading_string_id),
-                      kodi_helper.get_local_string(message_string_id),
+    show_notification(kodi_helper.get_local_string(heading_string_id), kodi_helper.get_local_string(message_string_id),
                       icon)
 
 
@@ -82,10 +81,9 @@ def show_available_elh_matches(kodi_helper, tipsport, competitions):
             status = ''
             if match.status is not None:
                 status = match.status.encode('utf-8') if xbmc.getLanguage(xbmc.ISO_639_1) == 'cs' else ''
-            plot = '\n{text}: {score:<20}{status}'.format(
-                text=kodi_helper.get_local_string(30003),
-                score=match.score,
-                status=status)
+            plot = '\n{text}: {score:<20}{status}'.format(text=kodi_helper.get_local_string(30003),
+                                                          score=match.score or '',
+                                                          status=status)
         else:
             plot = '{text} {time}'.format(text=kodi_helper.get_local_string(30002), time=match.start_time)
         possible_match_icon = kodi_helper.get_match_icon(match.first_team, match.second_team)
