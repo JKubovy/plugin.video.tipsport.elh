@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.7.7] - 2021-11-26
+### Change
+  - Use Azure Function to collect crash logs
+
 ## [0.7.6] - 2021-9-11
 ### Fix
  - Match text loading

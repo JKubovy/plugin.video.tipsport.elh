@@ -21,11 +21,11 @@ def send_crash_report(kodi_helper, exception):
         addon = kodi_helper.plugin_name
         version = kodi_helper.version
         data = traceback.format_exc(exception)
-        params = {'addon': addon, 'version': version, 'data': data}
-        url = 'https://script.google.com/macros/s/AKfycbyEXPShEN6O7Eounxf932MyzOHrsaRAcksU0LvEMcYRgXDRhqu-/exec'
-        response = session.get(url, params=params, headers={"Content-type": "application/x-www-form-urlencoded"})
-        response_text = re.search(r'userHtml\\x22:\\x22(.*?)\\x22', response.text)
-        if response_text and response_text.group(1) == 'OK':
+        exception_name = type(exception).__name__ + ": " + str(exception)
+        params = {'Addon': addon, 'Version': version, 'Error': exception_name, 'Traceback': data}
+        url = 'https://kodiaddonlogcollector20211126141510.azurewebsites.net/api/KodiAddonLogCollector?code=CriVfaPeh2olyCo9X9yqh5F548Ns4DTPgH5Dz8NMDTP9GOp768BwQA=='
+        response = session.post(url, json=params)
+        if response.ok:
             return True
         else:
             return False
