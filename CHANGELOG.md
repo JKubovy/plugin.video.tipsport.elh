@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.8.7] - 2021-11-26
+### Change
+  - Use Azure Function to collect crash logs
+
 ## [0.8.6] - 2021-9-11
 ### Fix
   - Prevent unhandled TypeError on match loading

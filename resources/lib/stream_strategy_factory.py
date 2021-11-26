@@ -54,7 +54,7 @@ class StreamStrategyFactory:
             if stream_type == 'RTMP' and data is not None:
                 return Strategies.RTMPStreamStrategy(data)
             log('Unknown RTMP stream_type: ' + stream_type + ', stream_source: ' + stream_source)
-        except:
+        except Exception:
             pass
         return None
 
@@ -70,7 +70,7 @@ class StreamStrategyFactory:
             if stream_type == 'URL_AGURA':
                 return Strategies.UrlAguraStrategy(self._session, data)
             log('Unknown HLS stream_type: ' + stream_type + ', stream_source: ' + stream_source)
-        except:
+        except Exception:
             pass
         return None
 
@@ -83,7 +83,7 @@ class StreamStrategyFactory:
                 url = data.split('###')[1]
                 return Strategies.HLSStreamStrategy(self._session, url)
             log('Unknown RTMP_WITH_HLS stream_type: ' + stream_type + ', stream_source: ' + stream_source)
-        except:
+        except Exception:
             pass
         return None
 
@@ -97,7 +97,7 @@ class StreamStrategyFactory:
             if stream_type == 'URL_TVCOM':
                 return Strategies.TvComStreamStrategy(self._session, data)
             log('Unknown OTHER stream_type: ' + stream_type + ', stream_source: ' + stream_source)
-        except:
+        except Exception:
             pass
         return None
 

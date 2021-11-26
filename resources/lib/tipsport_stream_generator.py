@@ -58,7 +58,7 @@ class Tipsport:
     def is_logged_in(self):
         """Check if login was successful"""
         response = self.session.put(self.user_data.site_mobile + '/rest/ver1/client/restrictions/login/duration')
-        if response.status_code == requests.status_codes.codes['OK']:
+        if response.ok:
             log('Is logged in')
             return True
         log('Is logged out')
@@ -103,7 +103,7 @@ class Tipsport:
         strategy = self.stream_strategy_factory.get_stream_strategy(relative_url)
         try:
             stream = strategy.get_stream()
-        except:
+        except Exception:
             raise Exceptions.UnableParseStreamMetadataException()
         if not stream:
             raise Exceptions.UnsupportedFormatStreamMetadataException()

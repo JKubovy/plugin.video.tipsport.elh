@@ -12,7 +12,7 @@ from .utils import log
 try:
     from PIL import Image
     CAN_GENERATE_LOGOS = True
-except:
+except Exception:
     CAN_GENERATE_LOGOS = False
 
 LOGO_BASEPATH = 'LOGOS'
@@ -102,7 +102,7 @@ class KodiHelper:
     def get_addon():
         try:
             return xbmcaddon.Addon()
-        except:
+        except Exception:
             raise StrangeXBMCException()
 
     def build_url(self, query):
@@ -168,7 +168,7 @@ class KodiHelper:
             new_img.save(path)
             log('Saved ({0})'.format(path))
             return True
-        except:
+        except Exception:
             return False
 
     def remove_tmp_logos(self):
