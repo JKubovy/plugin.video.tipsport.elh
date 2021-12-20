@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.8.8] - 2021-12-20
+### Fix
+  - Generating icon just for ice hockey
+
 ## [0.8.7] - 2021-11-26
 ### Change
   - Use Azure Function to collect crash logs

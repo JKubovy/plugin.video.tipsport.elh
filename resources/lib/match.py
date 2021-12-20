@@ -21,10 +21,11 @@ FULL_NAMES = {
 
 class Match:
     """Class represents one match with additional information"""
-    def __init__(self, name, competition, sport, url, start_time, status, not_started, score, icon_name,
-                 minutes_enable_before_start):
+    def __init__(self, name, competition, is_competition_with_logo, sport, url, start_time, status, not_started, score,
+                 icon_name, minutes_enable_before_start):
         self.first_team, self.second_team, self.name = self.parse_name(name)
         self.competition = competition
+        self.is_competition_with_logo = is_competition_with_logo
         self.sport = sport
         self.url = url
         self.start_time = start_time

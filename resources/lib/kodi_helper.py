@@ -140,7 +140,9 @@ class KodiHelper:
             CAN_GENERATE_LOGOS = False
             return None
 
-    def get_match_icon(self, name_1, name_2):
+    def get_match_icon(self, name_1, name_2, is_competition_with_logo):
+        if not is_competition_with_logo:
+            return None
         if not self.can_generate_logos or name_1 not in LOGOS or name_2 not in LOGOS:
             return None
         filename = '_' + LOGOS[name_1] + '_VS_' + LOGOS[name_2] + ".png"

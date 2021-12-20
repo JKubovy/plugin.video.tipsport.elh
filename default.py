@@ -20,7 +20,12 @@ def send_crash_report(kodi_helper, exception):
         addon = kodi_helper.plugin_name
         version = kodi_helper.version
         data = traceback.format_exc()
-        params = {'Addon': addon, 'Version': version, 'Error': f'{type(exception).__name__}: {str(exception)}', 'Traceback': data}
+        params = {
+            'Addon': addon,
+            'Version': version,
+            'Error': f'{type(exception).__name__}: {str(exception)}',
+            'Traceback': data
+        }
         url = 'https://kodiaddonlogcollector20211126141510.azurewebsites.net/api/KodiAddonLogCollector?code=CriVfaPeh2olyCo9X9yqh5F548Ns4DTPgH5Dz8NMDTP9GOp768BwQA=='
         response = session.post(url, json=params)
         if response.ok:
@@ -116,7 +121,8 @@ def add_match_item(match, kodi_helper):
             status=match.status if xbmc.getLanguage(xbmc.ISO_639_1) == 'cs' else '')
     else:
         plot = '{text} {time}'.format(text=kodi_helper.get_local_string(30002), time=match.start_time)
-    possible_match_icon = kodi_helper.get_match_icon(match.first_team, match.second_team)
+    possible_match_icon = kodi_helper.get_match_icon(match.first_team, match.second_team,
+                                                     match.is_competition_with_logo)
     if possible_match_icon:
         icon = possible_match_icon
     else:

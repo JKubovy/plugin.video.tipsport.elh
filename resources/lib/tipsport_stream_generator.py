@@ -16,6 +16,7 @@ COMPETITIONS = {
     [u'Slovenská Tipsport liga', u'Slovensk\u00E1 Tipsport liga', u'Tipsport Liga', u'Slovenská extraliga'],
     'CZ_CHANCE': [u'Česká Chance liga', u'CZ Chance liga']
 }
+COMPETITIONS_WITH_LOGOS = [item for sublist in COMPETITIONS.values() for item in sublist]
 COMPETITION_LOGO = {
     'CZ_TIPSPORT': 'cz_tipsport_logo.png',
     'SK_TIPSPORT': 'sk_tipsport_logo.png',
@@ -83,6 +84,7 @@ class Tipsport:
         matches = [
             Match(name=match['name'],
                   competition=match['competition'],
+                  is_competition_with_logo=match['competition'] in COMPETITIONS_WITH_LOGOS,
                   sport=match['sport'],
                   url=match['url'],
                   start_time=match['matchStartTime'],
