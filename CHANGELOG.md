@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.8.9] - 2022-01-28
+### Fix
+  - New login request
+
 ## [0.8.8] - 2021-12-20
 ### Fix
   - Generating icon just for ice hockey
