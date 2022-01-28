@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.7.8] 2022-1-28
+### Fix
+  - New login request
+
 ## [0.7.7] - 2021-11-26
 ### Change
   - Use Azure Function to collect crash logs

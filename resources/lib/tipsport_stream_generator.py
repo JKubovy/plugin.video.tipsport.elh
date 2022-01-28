@@ -41,20 +41,12 @@ class Tipsport:
 
     def login(self):
         """Login to mobile tipsport site with given credentials"""
-        url = self.user_data.site + \
-                '/LoginAction.do' + \
-                '?' + \
-                urllib.urlencode({
-                    'agent': AGENT,
-                    'redirectUrl': '/',
-                    'userName': self.user_data.username,
-                    'password': self.user_data.password})
-
         self.session.get(self.user_data.site)  # load cookies
+        url = self.user_data.site_mobile + '/rest/client/v4/session'
+        payload = {'password': self.user_data.password, 'username': self.user_data.username}
         time.sleep(1.3)  # Wait some tome to next request to prevent suspicion that it is automated
-
         try:
-            self.session.post(url)  # actual login
+            self.session.post(url, json=payload)  # actual login
         except Exception as e:
             raise e.__class__  # remove tipsport account credentials from traceback
         # self._try_update_session_XAuthToken()
@@ -63,7 +55,7 @@ class Tipsport:
 
     def is_logged_in(self):
         """Check if login was successful"""
-        response = self.session.put(self.user_data.site_mobile + '/rest/ver1/client/restrictions/login/duration')
+        response = self.session.put(self.user_data.site + '/rest/ver1/client/restrictions/login/duration')
         if response.status_code == requests.status_codes.codes['OK']:
             log('Is logged in')
             return True
