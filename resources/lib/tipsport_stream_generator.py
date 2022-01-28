@@ -42,10 +42,9 @@ class Tipsport:
         self.session.get(self.user_data.site)  # load cookies
         url = self.user_data.site_mobile + '/rest/client/v4/session'
         payload = {'password': self.user_data.password, 'username': self.user_data.username}
-        self.session.post(url, json=payload)
         time.sleep(1.3)  # Wait some tome to next request to prevent suspicion that it is automated
         try:
-            self.session.post(url)  # actual login
+            self.session.post(url, json=payload)  # actual login
         except Exception as e:
             raise e.__class__  # remove tipsport account credentials from traceback
         # self._try_update_session_XAuthToken()
