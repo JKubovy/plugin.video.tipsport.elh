@@ -4,7 +4,7 @@
 # Author: Roman Miroshnychenko aka Roman V.M.
 # Licence: GPL v.3 <https://www.gnu.org/copyleft/gpl.html>
 
-from collections import MutableMapping
+from collections.abc import MutableMapping
 import xbmcgui
 try:
     import cPickle as pickle
