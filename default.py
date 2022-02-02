@@ -75,7 +75,7 @@ def show_all_matches(kodi_helper, tipsport, folder_url):
             list_item = xbmcgui.ListItem(sport)
             list_item.setInfo(type='Video', infoLabels={'Plot': sport})
             xbmcplugin.addDirectoryItem(handle=kodi_helper.plugin_handle, url=url, listitem=list_item, isFolder=True)
-        xbmcplugin.endOfDirectory(kodi_helper.plugin_handle)
+        xbmcplugin.endOfDirectory(kodi_helper.plugin_handle, updateListing=True, cacheToDisc=False)
     elif url_mode == 2:  # competition folders
         xbmcplugin.setContent(kodi_helper.plugin_handle, 'movies')
         matches = tipsport.get_list_matches(url_tokens[0])
@@ -88,7 +88,7 @@ def show_all_matches(kodi_helper, tipsport, folder_url):
             list_item = xbmcgui.ListItem(competition)
             list_item.setInfo(type='Video', infoLabels={'Plot': competition})
             xbmcplugin.addDirectoryItem(handle=kodi_helper.plugin_handle, url=url, listitem=list_item, isFolder=True)
-        xbmcplugin.endOfDirectory(kodi_helper.plugin_handle)
+        xbmcplugin.endOfDirectory(kodi_helper.plugin_handle, updateListing=True, cacheToDisc=False)
     else:  # match folders
         xbmcplugin.setContent(kodi_helper.plugin_handle, 'movies')
         matches = tipsport.get_list_matches(url_tokens[0])
@@ -97,7 +97,7 @@ def show_all_matches(kodi_helper, tipsport, folder_url):
             show_localized_notification(kodi_helper, 30004, 30005, xbmcgui.NOTIFICATION_INFO)
         for match in matches:
             add_match_item(match, kodi_helper)
-        xbmcplugin.endOfDirectory(kodi_helper.plugin_handle)
+        xbmcplugin.endOfDirectory(kodi_helper.plugin_handle, updateListing=True, cacheToDisc=False)
 
 
 def add_match_item(match, kodi_helper):
@@ -142,7 +142,7 @@ def show_available_elh_matches(kodi_helper, tipsport, competitions):
         show_localized_notification(kodi_helper, 30004, 30005, xbmcgui.NOTIFICATION_INFO)
     for match in matches:
         add_match_item(match, kodi_helper)
-    xbmcplugin.endOfDirectory(kodi_helper.plugin_handle)
+    xbmcplugin.endOfDirectory(kodi_helper.plugin_handle, updateListing=True, cacheToDisc=False)
 
 
 def show_available_competitions(kodi_helper):

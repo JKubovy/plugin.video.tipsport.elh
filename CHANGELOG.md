@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.8.11] 2022-02-02
+### Fix
+  - Disable folder cache
+
 ## [0.8.10] 2022-01-30
 ### Fix
   - Python 3.10 MutableMapping import path
