@@ -57,7 +57,7 @@ class Tipsport:
         payload = {'password': self.user_data.password, 'username': self.user_data.username}
         time.sleep(1.3)  # Wait some tome to next request to prevent suspicion that it is automated
         try:
-            self.session.post(url, json=payload)  # actual login
+            response = self.session.post(url, json=payload)  # actual login
         except Exception as e:
             raise e.__class__  # remove tipsport account credentials from traceback
         # self._try_update_session_XAuthToken()
