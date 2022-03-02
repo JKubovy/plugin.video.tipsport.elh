@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.7.9] 2022-03-02
+### Fix
+  - New login (Thanks to @WyskyNet)
+
 ## [0.7.8] 2022-1-28
 ### Fix
   - New login request

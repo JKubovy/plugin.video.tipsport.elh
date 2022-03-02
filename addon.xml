@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<addon id="plugin.video.tipsport.elh" name="Tipsport ELH" provider-name="Jan Kubový" version="0.7.8">
+<addon id="plugin.video.tipsport.elh" name="Tipsport ELH" provider-name="Jan Kubový" version="0.7.9">
     <requires>
         <import addon="xbmc.python" version="2.14.0"/>
         <import addon="script.module.requests" version="2.12.4"/>
@@ -28,6 +28,8 @@
             <screenshot>resources\screenshot-03.jpg</screenshot>
         </assets>
         <news>
+v0.7.9(02.03.2022)
+  - Fix new login (Thanks to @WyskyNet)
 v0.7.8(28.1.2022)
   - Fix new login request
 v0.7.7(26.11.2021)
