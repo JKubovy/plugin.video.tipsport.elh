@@ -155,3 +155,7 @@ msgstr "Unable to get list of streams. Please repeate request"
 msgctxt "#32011"
 msgid "Unexpected addon error. Reinstall addon if this message reappearing"
 msgstr "Unexpected addon error. Reinstall addon if this message reappearing"
+
+msgctxt "#32012"
+msgid "This plugin need update to keep working"
+msgstr "This plugin need update to keep working"

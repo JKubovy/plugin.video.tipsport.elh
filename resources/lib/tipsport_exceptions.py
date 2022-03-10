@@ -60,3 +60,8 @@ class TipsportMsg(TpgException):
 class StrangeXBMCException(TpgException):
     def __init__(self, message="Unexpected addon error. Reinstall addon if this message reappearing"):
         super(StrangeXBMCException, self).__init__(message)
+
+
+class NeedPluginUpdateException(TpgException):
+    def __init__(self, message="This plugin need update to keep working"):
+        super(NeedPluginUpdateException, self).__init__(message)

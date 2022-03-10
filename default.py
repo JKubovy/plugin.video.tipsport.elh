@@ -248,6 +248,8 @@ def main():
         show_localized_notification(kodi_helper, 32000, 32010)
     except Exceptions.StrangeXBMCException:
         show_localized_notification(kodi_helper, 32000, 32011)
+    except Exceptions.NeedPluginUpdateException:
+        show_localized_notification(kodi_helper, 32000, 32012)
     except Exceptions.StreamHasNotStarted:
         show_localized_notification(kodi_helper, 30004, 30008, xbmcgui.NOTIFICATION_INFO)
     except Exceptions.TipsportMsg as e:

@@ -30,33 +30,45 @@ class Tipsport:
     """Class providing communication with Tipsport site"""
     def __init__(self, kodi_helper, clean_function=None):
         self.session = requests.session()
-        self._set_session_headers(kodi_helper.lib_path)
+        self._set_session_headers()
         self.logged_in = False
         self.user_data = kodi_helper.user_data
+        self.lib_path = kodi_helper.lib_path
         self.stream_strategy_factory = StreamStrategyFactory(self.session, self.user_data)
         if clean_function is not None:
             clean_function()
 
-    def _set_session_headers(self, lib_path):
+    def _set_session_headers(self):
         self.session.headers['User-Agent'] = AGENT
         self.session.headers['DNT'] = '1'
 
-        header_filename = path.join(lib_path, 'headers.json')
-        if path.exists(header_filename):
-            log(f'file \'{header_filename}\' exists')
-            with open(header_filename, 'r') as f:
-                data = json.load(f)
-            for (key, value) in data.items():
-                self.session.headers[key] = value
+    def _get_login_request(self):
+        login_request_filename = path.join(self.lib_path, 'login_request.json')
+        if not path.exists(login_request_filename):
+            raise Exceptions.LoginFailedException()
+
+        with open(login_request_filename, 'r') as f:
+            data = json.load(f)
+        if data['version'] != 1:
+            raise Exceptions.NeedPluginUpdateException()
+
+        post_data = json.loads(data['post_data'].replace(data['username_keyword'], self.user_data.username).replace(
+            data['password_keyword'], self.user_data.password))
+        headers = dict(data['headers'])
+        preparedRequest = requests.Request("POST",
+                                           data['url'],
+                                           json=post_data,
+                                           headers=headers,
+                                           cookies=self.session.cookies)
+        return preparedRequest.prepare()
 
     def login(self):
         """Login to mobile tipsport site with given credentials"""
         self.session.get(self.user_data.site)  # load cookies
-        url = self.user_data.site + '/rest/client/v4/session'
-        payload = {'password': self.user_data.password, 'username': self.user_data.username}
-        time.sleep(1.3)  # Wait some tome to next request to prevent suspicion that it is automated
+        time.sleep(1.1)  # Wait some tome to next request to prevent suspicion that it is automated
+        login_request = self._get_login_request()
         try:
-            response = self.session.post(url, json=payload)  # actual login
+            _ = self.session.send(login_request)
         except Exception as e:
             raise e.__class__  # remove tipsport account credentials from traceback
         # self._try_update_session_XAuthToken()

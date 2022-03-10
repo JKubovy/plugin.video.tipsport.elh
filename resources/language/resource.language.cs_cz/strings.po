@@ -158,3 +158,7 @@ msgstr "Nepodařilo se získat seznam přenosů. Opakujte akci"
 msgctxt "#32011"
 msgid "Unexpected addon error. Reinstall addon if this message reappearing"
 msgstr "Neočekávaná chyba doplňku. Přeinstaluje addon, pokud se zpráva objevuje opakovaně"
+
+msgctxt "#32012"
+msgid "This plugin need update to keep working"
+msgstr "Je třeba aktualizovat tento doplněk pro správné fungování"
