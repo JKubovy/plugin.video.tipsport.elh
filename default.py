@@ -181,7 +181,7 @@ def show_available_competitions(kodi_helper):
 
 
 def get_new_tipsport(kodi_helper):
-    tipsport = Tipsport(kodi_helper.user_data, None)
+    tipsport = Tipsport(kodi_helper, None)
     tipsport.login()
     return tipsport
 
