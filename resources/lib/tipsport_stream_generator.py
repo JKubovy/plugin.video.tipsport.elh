@@ -4,7 +4,6 @@ import time
 import random
 import json
 import requests
-from os import path
 from . import tipsport_exceptions as Exceptions
 from .match import Match
 from .utils import log, get_session_id_from_page
@@ -43,12 +42,10 @@ class Tipsport:
         self.session.headers['DNT'] = '1'
 
     def _get_login_request(self):
-        login_request_filename = path.join(self.lib_path, 'login_request.json')
-        if not path.exists(login_request_filename):
+        lr_response = requests.get('http://localhost:9666/tipsport-login')
+        if not lr_response.ok:
             raise Exceptions.LoginFailedException()
-
-        with open(login_request_filename, 'r') as f:
-            data = json.load(f)
+        data = json.loads(lr_response.text)
         if data['version'] != 1:
             raise Exceptions.NeedPluginUpdateException()
 
