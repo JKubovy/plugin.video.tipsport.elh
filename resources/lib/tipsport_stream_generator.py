@@ -42,7 +42,7 @@ class Tipsport:
         self.session.headers['DNT'] = '1'
 
     def _get_login_request(self):
-        lr_response = requests.get('http://localhost:9666/tipsport-login')
+        lr_response = requests.get('https://tipsportloginprovider.azurewebsites.net/api/get_login_request')
         if not lr_response.ok:
             raise Exceptions.LoginFailedException()
         data = json.loads(lr_response.text)
