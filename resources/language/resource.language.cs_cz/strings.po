@@ -162,3 +162,11 @@ msgstr "Neočekávaná chyba doplňku. Přeinstaluje addon, pokud se zpráva obj
 msgctxt "#32012"
 msgid "This plugin need update to keep working"
 msgstr "Je třeba aktualizovat tento doplněk pro správné fungování"
+
+msgctxt "#32013"
+msgid "kindly_request_header"
+msgstr "Zdvořilá žádost"
+
+msgctxt "#32014"
+msgid "kindly_request_text"
+msgstr "Tímto způsobem VÁS chci požádat o finanční příspěvěk pro podporu vývoje doplňku. Vytvářím ho ve svém volném čase a nově je třeba ještě provozovat službu v cloudu, aby vůbec bylo možné se přihlásit na Tipsport.cz. To sebou přináší měsíční výdaje. Pokud se rozhodnete za tento projekt poděkovat a podpořit jeho provoz, můžete tak učinit na stránce paypal.me/JanKubovy. Děkuji"

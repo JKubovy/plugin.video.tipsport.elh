@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from datetime import datetime, timedelta
 import os
 import fnmatch
 from urllib.parse import parse_qs, urlencode
@@ -15,6 +16,9 @@ try:
 except Exception:
     CAN_GENERATE_LOGOS = False
 
+LAST_SHOW_DIALOG_FILENAME = 'DIALOG_SHOWN.time'
+DATE_FORMAT = '%Y-%m-%dT%H:%M:%S'
+DIALOG_INTERVAL = timedelta(days=60)
 LOGO_BASEPATH = 'LOGOS'
 LOGOS = {  # CZ Tipsport
     u'České Budějovice': u'ceske_budejovice',
@@ -80,6 +84,7 @@ class KodiHelper:
         self.plugin_name = 'plugin.video.tipsport.elh'
         self.media_path = xbmcvfs.translatePath('special://home/addons/{0}/resources/media'.format(self.plugin_name))
         self.lib_path = xbmcvfs.translatePath('special://home/addons/{0}/resources/lib'.format(self.plugin_name))
+        self.addon_data_path = xbmcvfs.translatePath('special://home/userdata/addon_data/{0}/'.format(self.plugin_name))
         self.tmp_path = xbmcvfs.translatePath('special://temp/{0}/'.format(self.plugin_name))
         if not xbmcvfs.exists(self.tmp_path):
             xbmcvfs.mkdirs(self.tmp_path)
@@ -105,6 +110,22 @@ class KodiHelper:
             return xbmcaddon.Addon()
         except Exception:
             raise StrangeXBMCException()
+
+    def is_time_to_show_support_dialog(self):
+        file_path = os.path.join(self.addon_data_path, LAST_SHOW_DIALOG_FILENAME)
+        if not os.path.exists(file_path):
+            old_time = datetime.today() - timedelta(days=365)
+            with open(file_path, 'w') as f:
+                f.write(old_time.strftime(DATE_FORMAT))
+        with open(file_path, 'r') as f:
+            last_time = datetime.strptime(f.read(), DATE_FORMAT)
+
+        if last_time > datetime.today() or last_time < (datetime.today() - DIALOG_INTERVAL):
+            with open(file_path, 'w') as f:
+                f.write(datetime.today().strftime(DATE_FORMAT))
+            return True
+        else:
+            return False
 
     def build_url(self, query):
         return self.base_url + '?' + urlencode(query)

@@ -186,6 +186,10 @@ def get_new_tipsport(kodi_helper):
     return tipsport
 
 
+def show_support_dialog(kodi_helper):
+    xbmcgui.Dialog().textviewer(kodi_helper.get_local_string(32013), kodi_helper.get_local_string(32014))
+
+
 def main():
     kodi_helper = KodiHelper(plugin_handle=int(sys.argv[1]), args=sys.argv[2][1:], base_url=sys.argv[0])
     storage = MemStorage('plugin.video.tipsport.elh_' + kodi_helper.version)
@@ -196,6 +200,8 @@ def main():
             if tipsport_storage_id not in storage:
                 storage[tipsport_storage_id] = get_new_tipsport(kodi_helper)
             show_available_competitions(kodi_helper)
+            if kodi_helper.is_time_to_show_support_dialog():
+                show_support_dialog(kodi_helper)
 
         elif mode == 'folder':
             if tipsport_storage_id not in storage:
