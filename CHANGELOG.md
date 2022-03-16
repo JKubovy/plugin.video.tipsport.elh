@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.8.13] 2022-03-16
+### Change
+  - Rewrite login system and use Azure function to get newest requests
+
 ## [0.8.12] 2022-03-02
 ### Fix
   - New login (Thanks to @WyskyNet)
