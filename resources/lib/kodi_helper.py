@@ -81,7 +81,7 @@ class KodiHelper:
         self.plugin_handle = plugin_handle
         self.args = parse_qs(args)
         self.base_url = base_url
-        self.plugin_name = 'plugin.video.tipsport.elh'
+        self.plugin_name = addon.getAddonInfo('id')
         self.media_path = xbmcvfs.translatePath('special://home/addons/{0}/resources/media'.format(self.plugin_name))
         self.lib_path = xbmcvfs.translatePath('special://home/addons/{0}/resources/lib'.format(self.plugin_name))
         self.addon_data_path = xbmcvfs.translatePath('special://home/userdata/addon_data/{0}/'.format(self.plugin_name))
