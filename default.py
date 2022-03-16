@@ -71,7 +71,7 @@ def show_all_matches(kodi_helper, tipsport, folder_url):
             show_localized_notification(kodi_helper, 30004, 30005, xbmcgui.NOTIFICATION_INFO)
         sports = list(set([m.sport for m in matches]))
         for sport in sports:
-            url = kodi_helper.build_url({'mode': 'folder', 'foldername': '/'.join([folder_url, sport])})
+            url = kodi_helper.build_folder_url(sport, {'mode': 'folder'})
             list_item = xbmcgui.ListItem(sport)
             list_item.setInfo(type='Video', infoLabels={'Plot': sport})
             xbmcplugin.addDirectoryItem(handle=kodi_helper.plugin_handle, url=url, listitem=list_item, isFolder=True)
@@ -84,7 +84,7 @@ def show_all_matches(kodi_helper, tipsport, folder_url):
             show_localized_notification(kodi_helper, 30004, 30005, xbmcgui.NOTIFICATION_INFO)
         competitions = list(set([m.competition for m in matches]))
         for competition in competitions:
-            url = kodi_helper.build_url({'mode': 'folder', 'foldername': '/'.join([folder_url, competition])})
+            url = kodi_helper.build_folder_url(competition, {'mode': 'folder'})
             list_item = xbmcgui.ListItem(competition)
             list_item.setInfo(type='Video', infoLabels={'Plot': competition})
             xbmcplugin.addDirectoryItem(handle=kodi_helper.plugin_handle, url=url, listitem=list_item, isFolder=True)
@@ -152,7 +152,7 @@ def show_available_competitions(kodi_helper):
     list_item = xbmcgui.ListItem('CZ Tipsport Extraliga')
     list_item.setArt({'icon': icon})
     list_item.setInfo(type='Video', infoLabels={'Plot': kodi_helper.get_local_string(30006)})
-    url = kodi_helper.build_url({'mode': 'folder', 'foldername': 'CZ_TIPSPORT'})
+    url = kodi_helper.build_folder_url('CZ_TIPSPORT', {'mode': 'folder'})
     xbmcplugin.addDirectoryItem(handle=kodi_helper.plugin_handle, url=url, listitem=list_item, isFolder=True)
 
     # CZ Chance Liga
@@ -160,7 +160,7 @@ def show_available_competitions(kodi_helper):
     list_item = xbmcgui.ListItem('CZ Chance Liga')
     list_item.setArt({'icon': icon})
     list_item.setInfo(type='Video', infoLabels={'Plot': kodi_helper.get_local_string(30009)})
-    url = kodi_helper.build_url({'mode': 'folder', 'foldername': 'CZ_CHANCE'})
+    url = kodi_helper.build_folder_url('CZ_CHANCE', {'mode': 'folder'})
     xbmcplugin.addDirectoryItem(handle=kodi_helper.plugin_handle, url=url, listitem=list_item, isFolder=True)
 
     # SK Tipsport Liga
@@ -168,13 +168,13 @@ def show_available_competitions(kodi_helper):
     list_item = xbmcgui.ListItem('SK Tipsport Liga')
     list_item.setArt({'icon': icon})
     list_item.setInfo(type='Video', infoLabels={'Plot': kodi_helper.get_local_string(30007)})
-    url = kodi_helper.build_url({'mode': 'folder', 'foldername': 'SK_TIPSPORT'})
+    url = kodi_helper.build_folder_url('SK_TIPSPORT', {'mode': 'folder'})
     xbmcplugin.addDirectoryItem(handle=kodi_helper.plugin_handle, url=url, listitem=list_item, isFolder=True)
 
     if kodi_helper.show_all_matches:
         list_item = xbmcgui.ListItem('All')
         list_item.setInfo(type='Video', infoLabels={'Plot': ''})
-        url = kodi_helper.build_url({'mode': 'folder', 'foldername': '_ALL'})
+        url = kodi_helper.build_folder_url('_ALL', {'mode': 'folder'})
         xbmcplugin.addDirectoryItem(handle=kodi_helper.plugin_handle, url=url, listitem=list_item, isFolder=True)
 
     xbmcplugin.endOfDirectory(kodi_helper.plugin_handle)
@@ -207,7 +207,7 @@ def main():
             if tipsport_storage_id not in storage:
                 storage[tipsport_storage_id] = get_new_tipsport(kodi_helper)
             tipsport = storage[tipsport_storage_id]
-            folder_url = kodi_helper.get_arg('foldername')
+            folder_url = kodi_helper.get_folder()
             log(f'Folder url: "{folder_url}"')
             if folder_url.startswith('_ALL') and kodi_helper.put_all_matches_in_folders:
                 show_all_matches(kodi_helper, tipsport, folder_url)

@@ -130,6 +130,12 @@ class KodiHelper:
     def build_url(self, query):
         return self.base_url + '?' + urlencode(query)
 
+    def build_folder_url(self, folder, query):
+        return self.base_url + folder + '/?' + urlencode(query)
+
+    def get_folder(self):
+        return self.base_url.lstrip(f'plugin://{self.plugin_name}/').rstrip('/')
+
     def get_arg(self, key):
         value = self.args.get(key, None)
         return value if value is None else value[0]
