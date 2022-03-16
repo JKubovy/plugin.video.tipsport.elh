@@ -28,8 +28,7 @@ AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, li
 class Tipsport:
     """Class providing communication with Tipsport site"""
     def __init__(self, kodi_helper, clean_function=None):
-        self.session = requests.session()
-        self._set_session_headers()
+        self.session = self._get_session()
         self.logged_in = False
         self.kodi_helper = kodi_helper
         self.user_data = kodi_helper.user_data
@@ -38,9 +37,16 @@ class Tipsport:
         if clean_function is not None:
             clean_function()
 
-    def _set_session_headers(self):
-        self.session.headers['User-Agent'] = AGENT
-        self.session.headers['DNT'] = '1'
+    @staticmethod
+    def _get_session():
+        session = requests.session()
+        Tipsport._set_session_headers(session)
+        return session
+
+    @staticmethod
+    def _set_session_headers(session):
+        session.headers['User-Agent'] = AGENT
+        session.headers['DNT'] = '1'
 
     def _get_login_request(self):
         params = {'Addon': self.kodi_helper.plugin_name, 'AddonVersion': self.kodi_helper.version, 'RequestVersion': 1}
