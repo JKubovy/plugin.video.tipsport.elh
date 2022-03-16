@@ -31,6 +31,7 @@ class Tipsport:
         self.session = requests.session()
         self._set_session_headers()
         self.logged_in = False
+        self.kodi_helper = kodi_helper
         self.user_data = kodi_helper.user_data
         self.lib_path = kodi_helper.lib_path
         self.stream_strategy_factory = StreamStrategyFactory(self.session, self.user_data)
@@ -42,7 +43,9 @@ class Tipsport:
         self.session.headers['DNT'] = '1'
 
     def _get_login_request(self):
-        lr_response = requests.get('https://tipsportloginprovider.azurewebsites.net/api/get_login_request')
+        params = {'Addon': self.kodi_helper.plugin_name, 'AddonVersion': self.kodi_helper.version, 'RequestVersion': 1}
+        lr_response = requests.post('https://tipsportloginprovider.azurewebsites.net/api/get_login_request',
+                                    json=params)
         if not lr_response.ok:
             raise Exceptions.LoginFailedException()
         data = json.loads(lr_response.text)
@@ -67,13 +70,11 @@ class Tipsport:
     def login(self):
         """Login to mobile tipsport site with given credentials"""
         self.session.get(self.user_data.site)  # load cookies
-        time.sleep(1.1)  # Wait some tome to next request to prevent suspicion that it is automated
-        login_request = self._get_login_request()
         try:
+            login_request = self._get_login_request()
             _ = self.session.send(login_request)
         except Exception as e:
             raise e.__class__  # remove tipsport account credentials from traceback
-        # self._try_update_session_XAuthToken()
         if not self.is_logged_in():
             raise Exceptions.LoginFailedException()
 
@@ -136,18 +137,9 @@ class Tipsport:
         if not self.is_logged_in():
             self.login()
 
-    def _try_update_session_XAuthToken(self):
-        page = self.session.get(self.user_data.site_mobile)
-        token = get_session_id_from_page(page.text)
-        if token:
-            self.session.headers.update({'X-Auth-Token': token})
-        else:
-            log('try_update_session_XAuthToken: token not found')
-
     def _get_matches_both_menu_response(self):
         """Get dwr respond with all matches today"""
         self._relogin_if_needed()
-        # response = self.session.get(self.user_data.site_mobile + '/rest/articles/v1/tv/program?columnId=23&day=0&countPerPage=1')
         response = self.session.get(self.user_data.site_mobile + '/rest/articles/v1/tv/program?day=0&articleId=')
         response.encoding = 'utf-8'
         if 'program' not in response.text:
@@ -173,22 +165,6 @@ class Tipsport:
         except TypeError:
             log('Unable to get Tipsport alert message')
             raise Exceptions.UnableGetStreamMetadataException()
-
-
-def _generate_random_number():
-    """Generate string with given length that contains random numbers"""
-    result = ''.join(random.SystemRandom().choice('0123456789') for _ in range(10))
-    result = result + '-' + ''.join(random.SystemRandom().choice('0123456789abcdef') for _ in range(32))
-    return result
-
-
-def get_token(page):
-    """Get scriptSessionId from page for proper DWRScript call"""
-    token = re.search('JAWR.dwr_scriptSessionId=\'([0-9A-Z]+)\'', page)
-    if token is None:
-        raise Exceptions.UnableDetectScriptSessionIdException()
-    token = token.group(1)
-    return token
 
 
 def get_stream_number(relative_url):
