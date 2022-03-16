@@ -4,10 +4,14 @@ import time
 import random
 import json
 import requests
+import pickle
+from os import path
 from . import tipsport_exceptions as Exceptions
 from .match import Match
 from .utils import log, get_session_id_from_page
 from .stream_strategy_factory import StreamStrategyFactory
+
+COOKIES_FILENAME = 'session.cookies'
 
 COMPETITIONS = {
     'CZ_TIPSPORT': [u'Česká Tipsport extraliga', u'Tipsport extraliga', u'CZ Tipsport extraliga'],
@@ -28,7 +32,7 @@ AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, li
 class Tipsport:
     """Class providing communication with Tipsport site"""
     def __init__(self, kodi_helper, clean_function=None):
-        self.session = self._get_session()
+        self.session = self._get_session(kodi_helper)
         self.logged_in = False
         self.kodi_helper = kodi_helper
         self.user_data = kodi_helper.user_data
@@ -38,9 +42,13 @@ class Tipsport:
             clean_function()
 
     @staticmethod
-    def _get_session():
+    def _get_session(kodi_helper):
         session = requests.session()
         Tipsport._set_session_headers(session)
+        cookie_path = path.join(kodi_helper.addon_data_path, COOKIES_FILENAME)
+        if path.exists(cookie_path):
+            with open(cookie_path, 'rb') as f:
+                session.cookies.update(pickle.load(f))
         return session
 
     @staticmethod
@@ -83,6 +91,10 @@ class Tipsport:
             raise e.__class__  # remove tipsport account credentials from traceback
         if not self.is_logged_in():
             raise Exceptions.LoginFailedException()
+        cookie_path = path.join(self.kodi_helper.addon_data_path, COOKIES_FILENAME)
+        with open(cookie_path, 'wb') as f:
+            log(f'cookie_path: {cookie_path}')
+            pickle.dump(self.session.cookies, f)
 
     def is_logged_in(self):
         """Check if login was successful"""
