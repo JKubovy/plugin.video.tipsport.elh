@@ -169,4 +169,4 @@ msgstr "Zdvořilá žádost"
 
 msgctxt "#32014"
 msgid "kindly_request_text"
-msgstr "Tímto způsobem VÁS chci požádat o finanční příspěvěk pro podporu vývoje doplňku. Vytvářím ho ve svém volném čase a nově je třeba ještě provozovat službu v cloudu, aby vůbec bylo možné se přihlásit na Tipsport.cz. To sebou přináší měsíční výdaje. Pokud se rozhodnete za tento projekt poděkovat a podpořit jeho provoz, můžete tak učinit na stránce paypal.me/JanKubovy. Děkuji"
+msgstr "Tímto způsobem VÁS chci požádat o finanční příspěvěk pro podporu vývoje doplňku. Vytvářím ho ve svém volném čase a nově je třeba ještě provozovat službu v cloudu, aby vůbec bylo možné se přihlásit na Tipsport.cz. To sebou přináší měsíční výdaje. Pokud se rozhodnete za tento projekt poděkovat a podpořit jeho provoz, můžete tak učinit na stránce paypal.me/JanKubovy nebo ko-fi.com/JanKubovy. Děkuji"
