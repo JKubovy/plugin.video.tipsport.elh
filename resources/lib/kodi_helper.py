@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime, timedelta
+import time
 import os
 import fnmatch
 from urllib.parse import parse_qs, urlencode
@@ -118,7 +119,8 @@ class KodiHelper:
             with open(file_path, 'w') as f:
                 f.write(old_time.strftime(DATE_FORMAT))
         with open(file_path, 'r') as f:
-            last_time = datetime.strptime(f.read(), DATE_FORMAT)
+            content = f.read()
+            last_time = datetime.fromtimestamp(time.mktime(time.strptime(content, DATE_FORMAT)))
 
         if last_time > datetime.today() or last_time < (datetime.today() - DIALOG_INTERVAL):
             with open(file_path, 'w') as f:
