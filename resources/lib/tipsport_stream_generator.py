@@ -46,6 +46,11 @@ class Tipsport:
         if not lr_response.ok:
             raise Exceptions.LoginFailedException()
         data = json.loads(lr_response.text)
+        if (any([
+                key not in data
+                for key in ['version', 'url', 'post_data', 'username_keyword', 'password_keyword', 'headers']
+        ])):
+            raise Exceptions.LoginFailedException()
         if data['version'] != 1:
             raise Exceptions.NeedPluginUpdateException()
 
