@@ -8,7 +8,7 @@ from resources.lib.tipsport_stream_generator import Tipsport
 import resources.lib.tipsport_exceptions as Exceptions
 from resources.lib.kodi_helper import KodiHelper
 from resources.lib.mem_storage import MemStorage
-from resources.lib.utils import log
+from resources.lib.utils import log, get_host_info
 
 
 def send_crash_report(kodi_helper, exception):
@@ -24,6 +24,7 @@ def send_crash_report(kodi_helper, exception):
             'Addon': addon,
             'Version': version,
             'Error': f'{type(exception).__name__}: {str(exception)}',
+            'HostInfo': get_host_info(),
             'Traceback': data
         }
         url = 'https://kodiaddonlogcollector20211126141510.azurewebsites.net/api/KodiAddonLogCollector?code=CriVfaPeh2olyCo9X9yqh5F548Ns4DTPgH5Dz8NMDTP9GOp768BwQA=='

@@ -5,7 +5,7 @@ import pickle
 from os import path, makedirs
 from . import tipsport_exceptions as Exceptions
 from .match import Match
-from .utils import log
+from .utils import log, get_host_info
 from .stream_strategy_factory import StreamStrategyFactory
 
 COOKIES_FILENAME = 'session.cookies'
@@ -64,7 +64,12 @@ class Tipsport:
         session.headers['DNT'] = '1'
 
     def _get_login_request(self):
-        params = {'Addon': self.kodi_helper.plugin_name, 'AddonVersion': self.kodi_helper.version, 'RequestVersion': 1}
+        params = {
+            'Addon': self.kodi_helper.plugin_name,
+            'AddonVersion': self.kodi_helper.version,
+            'RequestVersion': 1,
+            'HostInfo': get_host_info()
+        }
         lr_response = requests.post('https://tipsportloginprovider.azurewebsites.net/api/get_login_request',
                                     json=params)
         if not lr_response.ok:
