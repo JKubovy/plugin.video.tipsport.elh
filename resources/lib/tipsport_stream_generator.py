@@ -1,14 +1,11 @@
 # coding=utf-8
-import re
-import time
-import random
 import json
 import requests
 import pickle
-from os import path
+from os import path, makedirs
 from . import tipsport_exceptions as Exceptions
 from .match import Match
-from .utils import log, get_session_id_from_page
+from .utils import log
 from .stream_strategy_factory import StreamStrategyFactory
 
 COOKIES_FILENAME = 'session.cookies'
@@ -51,6 +48,16 @@ class Tipsport:
                 session.cookies.update(pickle.load(f))
         return session
 
+    def save_session(self):
+        try:
+            cookie_path = path.join(self.kodi_helper.addon_data_path, COOKIES_FILENAME)
+            makedirs(self.kodi_helper.addon_data_path, exist_ok=True)
+            with open(cookie_path, 'wb') as f:
+                log(f'cookie_path: {cookie_path}')
+                pickle.dump(self.session.cookies, f)
+        except FileNotFoundError:
+            pass
+
     @staticmethod
     def _set_session_headers(session):
         session.headers['User-Agent'] = AGENT
@@ -91,10 +98,7 @@ class Tipsport:
             raise e.__class__  # remove tipsport account credentials from traceback
         if not self.is_logged_in():
             raise Exceptions.LoginFailedException()
-        cookie_path = path.join(self.kodi_helper.addon_data_path, COOKIES_FILENAME)
-        with open(cookie_path, 'wb') as f:
-            log(f'cookie_path: {cookie_path}')
-            pickle.dump(self.session.cookies, f)
+        self.save_session()
 
     def is_logged_in(self):
         """Check if login was successful"""
