@@ -192,6 +192,19 @@ def show_support_dialog(kodi_helper):
     xbmcgui.Dialog().textviewer(kodi_helper.get_local_string(32013), kodi_helper.get_local_string(32014))
 
 
+def get_tipsport_from_storage_add_save_it(storage, id, kodi_helper):
+    if id not in storage:
+        tipsport = get_new_tipsport(kodi_helper)
+        storage[id] = tipsport
+        return tipsport
+    try:
+        return storage[id]
+    except UnicodeEncodeError:
+        tipsport = get_new_tipsport(kodi_helper)
+        storage[id] = tipsport
+        return tipsport
+
+
 def main():
     kodi_helper = KodiHelper(plugin_handle=int(sys.argv[1]), args=sys.argv[2][1:], base_url=sys.argv[0])
     storage = MemStorage('plugin.video.tipsport.elh_' + kodi_helper.version)
@@ -206,9 +219,7 @@ def main():
                 show_support_dialog(kodi_helper)
 
         elif mode == 'folder':
-            if tipsport_storage_id not in storage:
-                storage[tipsport_storage_id] = get_new_tipsport(kodi_helper)
-            tipsport = storage[tipsport_storage_id]
+            tipsport = get_tipsport_from_storage_add_save_it(storage, tipsport_storage_id, kodi_helper)
             folder_url = kodi_helper.get_folder()
             log(f'Folder url: "{folder_url}"')
             if folder_url.startswith('_ALL') and kodi_helper.put_all_matches_in_folders:
@@ -218,9 +229,7 @@ def main():
             storage[tipsport_storage_id] = tipsport
 
         elif mode == 'play':
-            if tipsport_storage_id not in storage:
-                storage[tipsport_storage_id] = get_new_tipsport(kodi_helper)
-            tipsport = storage[tipsport_storage_id]
+            tipsport = get_tipsport_from_storage_add_save_it(storage, tipsport_storage_id, kodi_helper)
             stream = tipsport.get_stream(kodi_helper.get_arg('url'))
             title = '{name} ({time})'.format(name=kodi_helper.get_arg('name'), time=kodi_helper.get_arg('start_time'))
             play_video(kodi_helper.plugin_handle, title, kodi_helper.icon, stream)
