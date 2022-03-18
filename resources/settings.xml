@@ -82,6 +82,15 @@
                     <control type="toggle"/>
                 </setting>
             </group>
+            <group id="2" label="">
+                <setting id="update_git_latest" type="action" label="31006" help="">
+                    <level>0</level>
+                    <data>RunPlugin(plugin://plugin.video.tipsport.elh/?mode=update_git_latest)</data>
+                    <control type="button" format="action">
+                        <close>true</close>
+                    </control>
+                </setting>
+            </group>
         </category>
     </section>
 </settings>

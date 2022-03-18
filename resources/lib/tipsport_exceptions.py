@@ -65,3 +65,8 @@ class StrangeXBMCException(TpgException):
 class NeedPluginUpdateException(TpgException):
     def __init__(self, message="This plugin need update to keep working"):
         super(NeedPluginUpdateException, self).__init__(message)
+
+
+class UnableToUpdateCodeFromGit(TpgException):
+    def __init__(self, message="Updating addon from github.com failed"):
+        super(UnableToUpdateCodeFromGit, self).__init__(message)

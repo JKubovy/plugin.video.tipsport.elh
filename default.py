@@ -8,7 +8,7 @@ from resources.lib.tipsport_stream_generator import Tipsport
 import resources.lib.tipsport_exceptions as Exceptions
 from resources.lib.kodi_helper import KodiHelper
 from resources.lib.mem_storage import MemStorage
-from resources.lib.utils import log, get_host_info
+from resources.lib.utils import log, get_host_info, update_code_from_git
 
 
 def send_crash_report(kodi_helper, exception):
@@ -244,6 +244,9 @@ def main():
                 raise Exceptions.LoginFailedException()
             storage[tipsport_storage_id] = tipsport
             show_localized_notification(kodi_helper, 30000, 30001, xbmcgui.NOTIFICATION_INFO)
+        elif mode == 'update_git_latest':
+            update_code_from_git(kodi_helper)
+            show_localized_notification(kodi_helper, 30004, 32016, xbmcgui.NOTIFICATION_INFO)
 
     except (Exceptions.NoInternetConnectionsException, requests.ConnectionError, requests.ConnectTimeout,
             requests.exceptions.ChunkedEncodingError):
@@ -269,6 +272,8 @@ def main():
         show_localized_notification(kodi_helper, 32000, 32012)
     except Exceptions.StreamHasNotStarted:
         show_localized_notification(kodi_helper, 30004, 30008, xbmcgui.NOTIFICATION_INFO)
+    except Exceptions.UnableToUpdateCodeFromGit:
+        show_localized_notification(kodi_helper, 32000, 32015)
     except Exceptions.TipsportMsg as e:
         xbmcgui.Dialog().ok(kodi_helper.get_local_string(32000), str(e))
     except Exception as e:

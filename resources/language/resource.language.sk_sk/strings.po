@@ -83,6 +83,10 @@ msgctxt "#31005"
 msgid "Send anonymous crash logs"
 msgstr "Odosielať anonymné chybové hlásenie"
 
+msgctxt "#31006"
+msgid "update_git_latest"
+msgstr "Aktualizovať kód doplnku z github.com"
+
 msgctxt "#31010"
 msgid "Generate match logos"
 msgstr "Generovať loga zápasov"
@@ -170,3 +174,11 @@ msgstr "Zdvorilá žiadosť"
 msgctxt "#32014"
 msgid "kindly_request_text"
 msgstr "Týmto VÁS chcem požiadať o finančný príspevok na podporu vývoja tohto doplnku. Vytváram ho vo voľnom čase a teraz potrebujem spustiť službu v cloude, aby sme sa mohli prihlásiť na Tipsport.cz. To so sebou prináša mesačné výdavky. Ak sa rozhodnete poďakovať za tento projekt a podporiť jeho fungovanie, môžete tak urobiť na paypal.me/JanKubovy alebo ko-fi.com/JanKubovy. Ďakujem!"
+
+msgctxt "#32015"
+msgid "update_failed"
+msgstr "Aktualizácia doplnku zlyhala"
+
+msgctxt "#32016"
+msgid "update_success"
+msgstr "Doplnok bol úspešne aktualizovaný"
