@@ -87,7 +87,7 @@ class Tipsport:
             data['password_keyword'], self.user_data.password))
         headers = dict(data['headers'])
         preparedRequest = requests.Request("POST",
-                                           data['url'],
+                                           data['url'].replace('tipsport.cz', self.user_data.site_base),
                                            json=post_data,
                                            headers=headers,
                                            cookies=self.session.cookies)
