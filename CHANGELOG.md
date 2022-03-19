@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.8.15] 2022-03-19
+### Add
+  - Update button
+### Fix
+  - SK login
+  - Some minor bugs
+
 ## [0.8.14] 2022-03-17
 ### Improve
   - Saving session to file
