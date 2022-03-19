@@ -120,7 +120,10 @@ class KodiHelper:
                 f.write(old_time.strftime(DATE_FORMAT))
         with open(file_path, 'r') as f:
             content = f.read()
-            last_time = datetime.fromtimestamp(time.mktime(time.strptime(content, DATE_FORMAT)))
+            try:
+                last_time = datetime.fromtimestamp(time.mktime(time.strptime(content, DATE_FORMAT)))
+            except ValueError:
+                last_time = old_time
 
         if last_time > datetime.today() or last_time < (datetime.today() - DIALOG_INTERVAL):
             with open(file_path, 'w') as f:
