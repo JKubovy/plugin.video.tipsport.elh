@@ -29,7 +29,7 @@ AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, li
 class Tipsport:
     """Class providing communication with Tipsport site"""
     def __init__(self, kodi_helper, clean_function=None):
-        self.session = self._get_session(kodi_helper)
+        self.session = Tipsport._get_session(kodi_helper.addon_data_path)
         self.logged_in = False
         self.kodi_helper = kodi_helper
         self.user_data = kodi_helper.user_data
@@ -39,10 +39,10 @@ class Tipsport:
             clean_function()
 
     @staticmethod
-    def _get_session(kodi_helper):
+    def _get_session(addon_data_path):
         session = requests.session()
         Tipsport._set_session_headers(session)
-        cookie_path = path.join(kodi_helper.addon_data_path, COOKIES_FILENAME)
+        cookie_path = path.join(addon_data_path, COOKIES_FILENAME)
         if path.exists(cookie_path):
             with open(cookie_path, 'rb') as f:
                 session.cookies.update(pickle.load(f))
