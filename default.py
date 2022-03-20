@@ -76,7 +76,7 @@ def show_all_matches(kodi_helper, tipsport, folder_url):
             list_item = xbmcgui.ListItem(sport)
             list_item.setInfo(type='Video', infoLabels={'Plot': sport})
             xbmcplugin.addDirectoryItem(handle=kodi_helper.plugin_handle, url=url, listitem=list_item, isFolder=True)
-        xbmcplugin.endOfDirectory(kodi_helper.plugin_handle, updateListing=True, cacheToDisc=False)
+        xbmcplugin.endOfDirectory(kodi_helper.plugin_handle, cacheToDisc=False)
     elif url_mode == 2:  # competition folders
         xbmcplugin.setContent(kodi_helper.plugin_handle, 'movies')
         matches = tipsport.get_list_matches(url_tokens[0])
@@ -89,7 +89,7 @@ def show_all_matches(kodi_helper, tipsport, folder_url):
             list_item = xbmcgui.ListItem(competition)
             list_item.setInfo(type='Video', infoLabels={'Plot': competition})
             xbmcplugin.addDirectoryItem(handle=kodi_helper.plugin_handle, url=url, listitem=list_item, isFolder=True)
-        xbmcplugin.endOfDirectory(kodi_helper.plugin_handle, updateListing=True, cacheToDisc=False)
+        xbmcplugin.endOfDirectory(kodi_helper.plugin_handle, cacheToDisc=False)
     else:  # match folders
         xbmcplugin.setContent(kodi_helper.plugin_handle, 'movies')
         matches = tipsport.get_list_matches(url_tokens[0])
@@ -98,7 +98,7 @@ def show_all_matches(kodi_helper, tipsport, folder_url):
             show_localized_notification(kodi_helper, 30004, 30005, xbmcgui.NOTIFICATION_INFO)
         for match in matches:
             add_match_item(match, kodi_helper)
-        xbmcplugin.endOfDirectory(kodi_helper.plugin_handle, updateListing=True, cacheToDisc=False)
+        xbmcplugin.endOfDirectory(kodi_helper.plugin_handle, cacheToDisc=False)
 
 
 def add_match_item(match, kodi_helper):
@@ -143,7 +143,7 @@ def show_available_elh_matches(kodi_helper, tipsport, competitions):
         show_localized_notification(kodi_helper, 30004, 30005, xbmcgui.NOTIFICATION_INFO)
     for match in matches:
         add_match_item(match, kodi_helper)
-    xbmcplugin.endOfDirectory(kodi_helper.plugin_handle, updateListing=True, cacheToDisc=False)
+    xbmcplugin.endOfDirectory(kodi_helper.plugin_handle, cacheToDisc=False)
 
 
 def show_available_competitions(kodi_helper):
@@ -221,7 +221,6 @@ def main():
         elif mode == 'folder':
             tipsport = get_tipsport_from_storage_add_save_it(storage, tipsport_storage_id, kodi_helper)
             folder_url = kodi_helper.get_folder()
-            log(f'Folder url: "{folder_url}"')
             if folder_url.startswith('_ALL') and kodi_helper.put_all_matches_in_folders:
                 show_all_matches(kodi_helper, tipsport, folder_url)
             else:
