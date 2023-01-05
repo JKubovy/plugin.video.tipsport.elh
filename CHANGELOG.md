@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+
+## [0.8.17] 2023-01-05
+### Fix
+  - Wrong header name (Login is still not stable)
+  - 
 ## [0.8.16] 2022-03-20
 ### Fix
   - Going back in folders

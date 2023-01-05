@@ -86,6 +86,10 @@ class Tipsport:
         post_data = json.loads(data['post_data'].replace(data['username_keyword'], self.user_data.username).replace(
             data['password_keyword'], self.user_data.password))
         headers = dict(data['headers'])
+        fix_headers = {}
+        for key, value in headers.items():
+            fix_headers[key.replace(':', '')] = value
+        headers = fix_headers
         preparedRequest = requests.Request("POST",
                                            data['url'].replace('tipsport.cz', self.user_data.site_base),
                                            json=post_data,
